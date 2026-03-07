@@ -1,9 +1,16 @@
 import { useMemo } from "react";
 
-const configuredApiBase = (import.meta.env.VITE_API_URL || "nemsuee-a3cxc3fgejhxapfb.southeastasia-01.azurewebsites.net/api").trim();
+function normalizeApiBase(raw: string) {
+  const value = (raw || "").trim().replace(/\/+$/, "");
+  if (!value) return "";
+  if (value.startsWith("http://") || value.startsWith("https://")) return value;
+  if (value.startsWith("/")) return value;
+  return `https://${value}`;
+}
 
+const configuredApiBase = normalizeApiBase(import.meta.env.VITE_API_URL || "");
 const API_BASE =
-  configuredApiBase || (import.meta.env.DEV ? "nemsuee-a3cxc3fgejhxapfb.southeastasia-01.azurewebsites.net/api" : "/api");
+  configuredApiBase || (import.meta.env.DEV ? "http://localhost:5000/api" : "/api");
 
 type ApiError = Error & { status?: number; path?: string };
 
