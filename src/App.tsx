@@ -1,6 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useApi } from "./hooks/useApi";
-import type { Attempt, Course, User, ViewKey } from "./types/lms";
+import type {
+  Attempt,
+  Course,
+  TeachingBlock,
+  User,
+  ViewKey,
+} from "./types/lms";
+import logo from "./assets/logo.png";
+import { AdminBlocksHub } from "./components/admin/AdminBlocksHub";
 import { AuthScreen } from "./components/auth/AuthScreen";
 import { CoursesHub } from "./components/course/CoursesHub";
 import {
@@ -13,38 +22,90 @@ import { Scores } from "./components/Scores";
 import { Storage } from "./components/Storage";
 
 export default function App() {
-  const [token, setToken] = useState<string | null>(
-    localStorage.getItem("token"),
+  const [theme, setTheme] = useState<"light" | "dark">(
+    () => (localStorage.getItem("theme") as "light" | "dark") || "light",
   );
   const [user, setUser] = useState<User | null>(
     JSON.parse(localStorage.getItem("user") || "null"),
   );
   const [view, setView] = useState<ViewKey>("dashboard");
   const [courses, setCourses] = useState<Course[]>([]);
+  const [teachingBlocks, setTeachingBlocks] = useState<TeachingBlock[]>([]);
+  const [archivedCourses, setArchivedCourses] = useState<Course[]>([]);
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [message, setMessage] = useState("");
   const [lastSync, setLastSync] = useState<Date | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { api, headers } = useApi(token);
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => window.innerWidth >= 1024,
+  );
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const { api, headers } = useApi();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const selectedCourseIdRef = useRef<number | null>(selectedCourseId);
+
+  useEffect(() => {
+    const appTheme = user ? "light" : theme;
+    document.documentElement.setAttribute("data-theme", appTheme);
+    localStorage.setItem("theme", theme);
+  }, [theme, user]);
+
+  useEffect(() => {
+    selectedCourseIdRef.current = selectedCourseId;
+  }, [selectedCourseId]);
+
+  function navigateToView(nextView: ViewKey) {
+    setView(nextView);
+    if (nextView === "dashboard") navigate("/dashboard");
+    if (nextView === "courses") navigate("/courses");
+    if (nextView === "admin_blocks") navigate("/admin/blocks");
+    if (nextView === "archives") navigate("/archives");
+    if (nextView === "storage") navigate("/files");
+  }
+
+  function openCourse(courseId: number) {
+    setView("courses");
+    setSelectedCourseId(courseId);
+    navigate(`/courses/${courseId}`);
+  }
 
   async function refreshCore() {
-    if (!token || !user) return;
+    if (!user) return;
     setIsSyncing(true);
     try {
-      const [c, a] = await Promise.all([
+      const [c, a, archived] = await Promise.all([
         api("/courses", { headers }),
-        api(
-          user.role === "INSTRUCTOR"
-            ? "/quizzes/scores/instructor"
-            : "/quizzes/scores/me",
-          { headers },
-        ),
+        user.role === "INSTRUCTOR"
+          ? api("/quizzes/scores/instructor", { headers })
+          : user.role === "STUDENT"
+            ? api("/quizzes/scores/me", { headers })
+            : Promise.resolve([]),
+        user.role === "INSTRUCTOR"
+          ? api("/courses/archived", { headers })
+          : Promise.resolve([]),
       ]);
+      const blocks =
+        user.role === "INSTRUCTOR"
+          ? await api("/courses/teaching-blocks", { headers })
+          : [];
       setCourses(c);
       setAttempts(a);
-      if (!selectedCourseId && c[0]) setSelectedCourseId(c[0].id);
+      setArchivedCourses(archived);
+      setTeachingBlocks(blocks);
+      const currentSelected = selectedCourseIdRef.current;
+      if (!currentSelected && c[0]) {
+        setSelectedCourseId(c[0].id);
+      } else if (
+        currentSelected &&
+        !c.some((course: Course) => course.id === currentSelected)
+      ) {
+        setSelectedCourseId(c[0]?.id ?? null);
+        if (location.pathname.startsWith("/courses/")) {
+          navigate(c[0] ? `/courses/${c[0].id}` : "/courses");
+        }
+      }
       setLastSync(new Date());
     } finally {
       setIsSyncing(false);
@@ -52,107 +113,254 @@ export default function App() {
   }
 
   useEffect(() => {
-    refreshCore().catch((e) => setMessage((e as Error).message));
-  }, [token, user?.role]);
+    (async () => {
+      try {
+        const me = await api("/auth/me", { headers });
+        setUser(me);
+        localStorage.setItem("user", JSON.stringify(me));
+      } catch (e) {
+        const status = (e as { status?: number })?.status;
+        if (status === 401) {
+          localStorage.removeItem("user");
+          setUser(null);
+          return;
+        }
+        setMessage((e as Error).message);
+        if (!user) return;
+      }
+      await refreshCore().catch((e) => setMessage((e as Error).message));
+    })();
+  }, [user?.role]);
+
+  // Auto background sync disabled by design to minimize server requests and hosting costs.
 
   useEffect(() => {
-    if (!token || !user) return;
+    const path = location.pathname;
+    if (path === "/dashboard" || path === "/") {
+      setView("dashboard");
+      return;
+    }
+    if (path === "/files") {
+      setView("storage");
+      return;
+    }
+    if (path === "/admin/blocks") {
+      setView("admin_blocks");
+      return;
+    }
+    if (path === "/archives") {
+      setView("archives");
+      return;
+    }
+    if (path === "/courses") {
+      setView("courses");
+      return;
+    }
+    const courseMatch = path.match(/^\/courses\/(\d+)$/);
+    if (courseMatch) {
+      setView("courses");
+      setSelectedCourseId(Number(courseMatch[1]));
+    }
+  }, [location.pathname]);
 
-    const intervalId = window.setInterval(() => {
-      refreshCore().catch(() => {});
-    }, 15000);
-
-    const onFocus = () => {
-      refreshCore().catch(() => {});
-    };
-
-    const onVisible = () => {
-      if (document.visibilityState === "visible") {
-        refreshCore().catch(() => {});
-      }
-    };
-
-    window.addEventListener("focus", onFocus);
-    document.addEventListener("visibilitychange", onVisible);
-
-    return () => {
-      window.clearInterval(intervalId);
-      window.removeEventListener("focus", onFocus);
-      document.removeEventListener("visibilitychange", onVisible);
-    };
-  }, [token, user?.id, user?.role]);
-
-  if (!token || !user) {
+  if (!user) {
     return (
       <AuthScreen
         api={api}
+        message={message}
         setMessage={setMessage}
-        onAuth={(t, u) => {
-          localStorage.setItem("token", t);
+        theme={theme}
+        onToggleTheme={() =>
+          setTheme((t) => (t === "light" ? "dark" : "light"))
+        }
+        onAuth={(u) => {
           localStorage.setItem("user", JSON.stringify(u));
-          setToken(t);
           setUser(u);
         }}
       />
     );
   }
 
-  const selectedCourse =
-    courses.find((x) => x.id === selectedCourseId) || courses[0] || null;
+  const selectedCourse = courses.find((x) => x.id === selectedCourseId) || null;
 
   return (
     <div className="min-h-screen bg-[var(--bg-main)] text-slate-800">
-      <div className="mx-auto max-w-7xl px-4 py-4 lg:hidden">
-        <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-          <button
-            onClick={() => setMobileMenuOpen((v) => !v)}
-            className="rounded border border-slate-300 px-3 py-2 text-sm"
-            aria-label="Toggle menu"
-          >
-            Menu
-          </button>
-          <p className="text-sm font-semibold">NEMSU E-Learning</p>
-        </div>
-      </div>
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen((v) => !v)}
+              className="rounded p-2 text-sm text-slate-700 hover:bg-slate-100"
+              aria-label="Toggle sidebar"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <div className="flex items-center gap-2">
+              <img
+                src={logo}
+                alt="University logo"
+                className="h-9 w-9 rounded-full"
+              />
+              <p className="text-sm font-semibold md:text-base">
+                North Eastern Mindanao State University
+              </p>
+            </div>
+          </div>
 
-      {mobileMenuOpen && (
+          <div className="relative flex items-center gap-2">
+            <button
+              className="rounded p-2 text-slate-700 hover:bg-slate-100"
+              aria-label="Notifications"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              >
+                <path d="M15 17h5l-1.4-1.4a2 2 0 0 1-.6-1.4V10a6 6 0 1 0-12 0v4.2a2 2 0 0 1-.6 1.4L4 17h5" />
+                <path d="M10 17a2 2 0 0 0 4 0" />
+              </svg>
+            </button>
+            <button
+              className="rounded p-2 text-slate-700 hover:bg-slate-100"
+              aria-label="Open profile menu"
+              onClick={() => setProfileMenuOpen((v) => !v)}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              >
+                <circle cx="12" cy="8" r="3.5" />
+                <path d="M4 20a8 8 0 0 1 16 0" />
+              </svg>
+            </button>
+            {profileMenuOpen && (
+              <div className="absolute right-0 top-12 w-44 rounded-md border border-slate-200 bg-white p-1 shadow-md">
+                <button
+                  onClick={() => {
+                    setMessage("Settings panel is not available yet.");
+                    setProfileMenuOpen(false);
+                  }}
+                  className="w-full rounded px-3 py-2 text-left text-sm hover:bg-slate-100"
+                >
+                  Settings
+                </button>
+                <button
+                  onClick={() => {
+                    setView("profile");
+                    setProfileMenuOpen(false);
+                  }}
+                  className="w-full rounded px-3 py-2 text-left text-sm hover:bg-slate-100"
+                >
+                  Profile
+                </button>
+                <button
+                  onClick={() => {
+                    setView("scores");
+                    setProfileMenuOpen(false);
+                  }}
+                  className="w-full rounded px-3 py-2 text-left text-sm hover:bg-slate-100"
+                >
+                  Grades
+                </button>
+                <button
+                  onClick={() => {
+                    api("/auth/logout", { method: "POST", headers }).catch(() => null);
+                    localStorage.removeItem("user");
+                    setUser(null);
+                  }}
+                  className="w-full rounded px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {sidebarOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 lg:hidden">
           <div className="h-full w-[280px] p-3">
             <Sidebar
               user={user}
               view={view}
-              setView={(v) => {
-                setView(v);
-                setMobileMenuOpen(false);
+              courses={courses}
+              archivedCourses={archivedCourses}
+              selectedCourseId={selectedCourseId}
+              onOpenCourse={(id) => {
+                openCourse(id);
+                setSidebarOpen(false);
               }}
-              onLogout={() => {
-                localStorage.clear();
-                setToken(null);
-                setUser(null);
+              teachingBlocks={teachingBlocks}
+              onOpenTeachingBlock={(courseId, sectionId) => {
+                setView("courses");
+                setSelectedCourseId(courseId);
+                navigate(`/courses/${courseId}#section-${sectionId}`);
+                setSidebarOpen(false);
+              }}
+              onOpenArchivedCourse={(id) => {
+                setView("archives");
+                setSelectedCourseId(id);
+                setSidebarOpen(false);
+              }}
+              setView={(v) => {
+                navigateToView(v);
+                setSidebarOpen(false);
               }}
             />
           </div>
           <button
             className="absolute inset-0 -z-10"
-            onClick={() => setMobileMenuOpen(false)}
-            aria-label="Close menu overlay"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close sidebar overlay"
           />
         </div>
       )}
 
-      <div className="mx-auto grid min-h-screen max-w-7xl grid-cols-1 gap-4 px-4 py-4 lg:grid-cols-[250px_1fr]">
-        <div className="hidden lg:block">
-          <Sidebar
-            user={user}
-            view={view}
-            setView={setView}
-            onLogout={() => {
-              localStorage.clear();
-              setToken(null);
-              setUser(null);
-            }}
-          />
-        </div>
+      <div
+        className={`mx-auto grid min-h-screen max-w-7xl grid-cols-1 gap-4 px-4 py-4 ${
+          sidebarOpen ? "lg:grid-cols-[250px_1fr]" : "lg:grid-cols-1"
+        }`}
+      >
+        {sidebarOpen && (
+          <div className="hidden lg:block">
+            <Sidebar
+              user={user}
+              view={view}
+              courses={courses}
+              archivedCourses={archivedCourses}
+              selectedCourseId={selectedCourseId}
+              onOpenCourse={openCourse}
+              teachingBlocks={teachingBlocks}
+              onOpenTeachingBlock={(courseId, sectionId) => {
+                setView("courses");
+                setSelectedCourseId(courseId);
+                navigate(`/courses/${courseId}#section-${sectionId}`);
+              }}
+              onOpenArchivedCourse={(id) => {
+                setView("archives");
+                setSelectedCourseId(id);
+              }}
+              setView={(v) => {
+                navigateToView(v);
+              }}
+            />
+          </div>
+        )}
 
         <main className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
           {view === "dashboard" && (
@@ -183,7 +391,9 @@ export default function App() {
               <Metric label="Courses" value={String(courses.length)} />
               <Metric
                 label="Sections"
-                value={String(courses.reduce((a, c) => a + c.sections.length, 0))}
+                value={String(
+                  courses.reduce((a, c) => a + c.sections.length, 0),
+                )}
               />
               <Metric
                 label="Lessons"
@@ -207,9 +417,11 @@ export default function App() {
               user={user}
               role={user.role}
               courses={courses}
+              archivedCourses={archivedCourses}
+              teachingBlocks={teachingBlocks}
               attempts={attempts}
               lastSync={lastSync}
-              onNavigate={setView}
+              onNavigate={navigateToView}
               onRefresh={() =>
                 refreshCore().catch((e) => setMessage((e as Error).message))
               }
@@ -223,7 +435,6 @@ export default function App() {
               courses={courses}
               attempts={attempts}
               selectedCourse={selectedCourse}
-              setSelectedCourseId={setSelectedCourseId}
               refreshCore={refreshCore}
               setMessage={setMessage}
               studentViewMode={user.role === "STUDENT" ? "my" : "all"}
@@ -237,7 +448,6 @@ export default function App() {
               courses={courses}
               attempts={attempts}
               selectedCourse={selectedCourse}
-              setSelectedCourseId={setSelectedCourseId}
               refreshCore={refreshCore}
               setMessage={setMessage}
               studentViewMode="search"
@@ -248,6 +458,52 @@ export default function App() {
             <Storage api={api} headers={headers} setMessage={setMessage} />
           )}
           {view === "profile" && <Profile user={user} />}
+          {view === "admin_blocks" && user.role === "ADMIN" && (
+            <AdminBlocksHub
+              api={api}
+              headers={headers}
+              courses={courses}
+              refreshCore={refreshCore}
+              setMessage={setMessage}
+            />
+          )}
+          {view === "archives" && user.role === "INSTRUCTOR" && (
+            <section className="space-y-3">
+              <h3 className="text-lg font-semibold">Archived Courses</h3>
+              {archivedCourses.map((course) => (
+                <article
+                  key={course.id}
+                  className="rounded-md border border-slate-200 p-3"
+                >
+                  <p className="font-semibold">{course.title}</p>
+                  <p className="text-sm text-slate-600">{course.description}</p>
+                  <div className="mt-2">
+                    <button
+                      onClick={async () => {
+                        try {
+                          await api(`/courses/${course.id}/archive`, {
+                            method: "PATCH",
+                            headers,
+                            body: JSON.stringify({ archived: false }),
+                          });
+                          await refreshCore();
+                          setMessage("Course unarchived.");
+                        } catch (e) {
+                          setMessage((e as Error).message);
+                        }
+                      }}
+                      className="rounded bg-emerald-600 px-3 py-2 text-sm text-white"
+                    >
+                      Unarchive
+                    </button>
+                  </div>
+                </article>
+              ))}
+              {!archivedCourses.length && (
+                <p className="text-sm text-slate-500">No archived courses.</p>
+              )}
+            </section>
+          )}
         </main>
       </div>
     </div>

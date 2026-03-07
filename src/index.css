@@ -9,6 +9,14 @@
   --muted: #475569;
 }
 
+[data-theme="dark"] {
+  --bg-main: linear-gradient(180deg, #020617 0%, #0f172a 100%);
+  --panel: #0b1220;
+  --brand: #3b82f6;
+  --ink: #e2e8f0;
+  --muted: #94a3b8;
+}
+
 * { box-sizing: border-box; }
 
 body {
@@ -16,5 +24,6 @@ body {
   min-height: 100vh;
   background: var(--bg-main);
   color: var(--ink);
+  transition: background-color 180ms ease, color 180ms ease;
 }
 
