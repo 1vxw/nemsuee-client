@@ -3,7 +3,7 @@ import { useMemo } from "react";
 const configuredApiBase = (import.meta.env.VITE_API_URL || "").trim();
 
 const API_BASE =
-  configuredApiBase || (import.meta.env.DEV ? "http://localhost:5000/api" : "/api");
+  configuredApiBase || (import.meta.env.DEV ? "nemsuee-a3cxc3fgejhxapfb.southeastasia-01.azurewebsites.net/api" : "/api");
 
 type ApiError = Error & { status?: number; path?: string };
 
