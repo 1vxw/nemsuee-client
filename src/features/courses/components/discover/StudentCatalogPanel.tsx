@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { CatalogCourse } from "../../../types/lms";
+import type { CatalogCourse } from "../../../../shared/types/lms";
 
 export function StudentCatalogPanel(props: {
   studentViewMode: "all" | "my" | "search";

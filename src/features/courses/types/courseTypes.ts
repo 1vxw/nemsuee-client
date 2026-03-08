@@ -1,2 +1,3 @@
-export type Course = import("../../../types/lms").Course;
-export type Lesson = import("../../../types/lms").Lesson;
+export type Course = import("../../../shared/types/lms").Course;
+export type Lesson = import("../../../shared/types/lms").Lesson;
+

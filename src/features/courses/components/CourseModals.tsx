@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { Course, Lesson, User } from "../../../types/lms";
+import type { Course, Lesson, User } from "../../../shared/types/lms";
 
 type StudentLite = { id: number; fullName: string };
 
@@ -106,14 +106,16 @@ export function CourseInfoModal(props: CourseInfoModalProps) {
                     {filteredStudents.length
                       ? (safeStudentPage - 1) * studentPageSize + 1
                       : 0}
-                    -{Math.min(safeStudentPage * studentPageSize, filteredStudents.length)} of{" "}
-                    {filteredStudents.length}
+                    -
+                    {Math.min(
+                      safeStudentPage * studentPageSize,
+                      filteredStudents.length,
+                    )}{" "}
+                    of {filteredStudents.length}
                   </p>
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() =>
-                        setStudentPage((p) => Math.max(1, p - 1))
-                      }
+                      onClick={() => setStudentPage((p) => Math.max(1, p - 1))}
                       disabled={safeStudentPage <= 1}
                       className="rounded border border-slate-300 px-2 py-1 disabled:opacity-50"
                     >
@@ -124,7 +126,9 @@ export function CourseInfoModal(props: CourseInfoModalProps) {
                     </span>
                     <button
                       onClick={() =>
-                        setStudentPage((p) => Math.min(studentTotalPages, p + 1))
+                        setStudentPage((p) =>
+                          Math.min(studentTotalPages, p + 1),
+                        )
                       }
                       disabled={safeStudentPage >= studentTotalPages}
                       className="rounded border border-slate-300 px-2 py-1 disabled:opacity-50"
@@ -825,7 +829,9 @@ export function LessonComposerModal(props: LessonComposerModalProps) {
             </label>
             <select
               value={composerSection.id}
-              onChange={(e) => setLessonComposerSectionId(Number(e.target.value))}
+              onChange={(e) =>
+                setLessonComposerSectionId(Number(e.target.value))
+              }
               className="mb-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
             >
               {selectedCourse.sections.map((section) => (
@@ -935,3 +941,4 @@ export function LessonComposerModal(props: LessonComposerModalProps) {
     </div>
   );
 }
+

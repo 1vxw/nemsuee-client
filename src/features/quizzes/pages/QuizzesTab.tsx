@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Attempt, Course, User } from "../../../types/lms";
+import type { Attempt, Course, User } from "../../../shared/types/lms";
 
 type QuizzesTabProps = {
   selectedCourse: Course;
@@ -1289,4 +1289,5 @@ export function QuizzesTab({
     </div>
   );
 }
+
 

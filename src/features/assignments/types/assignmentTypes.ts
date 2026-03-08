@@ -1,1 +1,2 @@
-export type CourseTask = import("../../../types/lms").CourseTask;
+export type CourseTask = import("../../../shared/types/lms").CourseTask;
+

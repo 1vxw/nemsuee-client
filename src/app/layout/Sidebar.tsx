@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Course, TeachingBlock, User, ViewKey } from "../../types/lms";
+import type { Course, TeachingBlock, User, ViewKey } from "../../shared/types/lms";
 import { menu } from "./menu";
 
 export function Sidebar({
@@ -165,3 +165,4 @@ export function Sidebar({
     </aside>
   );
 }
+

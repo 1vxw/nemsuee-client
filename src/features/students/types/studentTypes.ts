@@ -1,1 +1,2 @@
-export type RosterRow = import("../../../types/lms").RosterRow;
+export type RosterRow = import("../../../shared/types/lms").RosterRow;
+

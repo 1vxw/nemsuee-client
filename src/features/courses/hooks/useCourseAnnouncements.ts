@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Section } from "../types/lms";
+import type { Section } from "../../../shared/types/lms";
 
 export type CourseAnnouncement = {
   id: string;

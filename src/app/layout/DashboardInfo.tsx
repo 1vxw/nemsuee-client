@@ -6,7 +6,7 @@ import type {
   TeachingBlock,
   User,
   ViewKey,
-} from "../../types/lms";
+} from "../../shared/types/lms";
 
 export function DashboardInfo({
   user,
@@ -486,3 +486,4 @@ export function DashboardInfo({
     </section>
   );
 }
+

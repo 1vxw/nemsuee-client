@@ -1,27 +1,27 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useApi } from "./hooks/useApi";
-import { useActionIconizer } from "./hooks/useActionIconizer";
-import { useNotifications } from "./hooks/useNotifications";
+import { useApi } from "./shared/hooks/useApi";
+import { useActionIconizer } from "./shared/hooks/useActionIconizer";
+import { useNotifications } from "./shared/hooks/useNotifications";
 import type {
   Attempt,
   Course,
   TeachingBlock,
   User,
   ViewKey,
-} from "./types/lms";
+} from "./shared/types/lms";
 import logo from "./assets/logo.png";
-import { AdminBlocksHub } from "./components/admin/AdminBlocksHub";
-import { AuthScreen } from "./components/auth/AuthScreen";
-import { CoursesHub } from "./components/course/CoursesHub";
+import { AdminBlocksHub } from "./features/admin/components/AdminBlocksHub";
+import { AuthScreen } from "./features/auth/components/AuthScreen";
+import { CoursesHub } from "./features/courses/pages/CoursesHub";
 import {
   DashboardInfo,
   Metric,
   Profile,
   Sidebar,
-} from "./components/layout/Ui";
-import { Scores } from "./components/Scores";
-import { Storage } from "./components/Storage";
+} from "./app/layout/Ui";
+import { Scores } from "./features/scores/components/Scores";
+import { Storage } from "./features/storage/components/Storage";
 
 export default function App() {
   const [theme, setTheme] = useState<"light" | "dark">(

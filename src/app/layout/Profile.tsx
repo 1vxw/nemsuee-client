@@ -1,4 +1,4 @@
-import type { User } from "../../types/lms";
+import type { User } from "../../shared/types/lms";
 
 export function Profile({ user }: { user: User }) {
   return (
@@ -9,3 +9,4 @@ export function Profile({ user }: { user: User }) {
     </article>
   );
 }
+

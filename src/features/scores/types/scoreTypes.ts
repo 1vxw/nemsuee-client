@@ -1,1 +1,2 @@
-export type Attempt = import("../../../types/lms").Attempt;
+export type Attempt = import("../../../shared/types/lms").Attempt;
+

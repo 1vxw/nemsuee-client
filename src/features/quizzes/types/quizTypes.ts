@@ -1,2 +1,3 @@
-export type Quiz = import("../../../types/lms").Quiz;
-export type Attempt = import("../../../types/lms").Attempt;
+export type Quiz = import("../../../shared/types/lms").Quiz;
+export type Attempt = import("../../../shared/types/lms").Attempt;
+

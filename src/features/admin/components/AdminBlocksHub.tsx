@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Course } from "../../types/lms";
+import type { Course } from "../../../shared/types/lms";
 
 type Instructor = { id: number; fullName: string; email: string };
 type SectionInstructor = {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import type { Attempt, Course, Lesson, User } from "../../types/lms";
-import { useCourseAnnouncements } from "../../hooks/useCourseAnnouncements";
-import { useRosterPagination } from "../../hooks/useRosterPagination";
+import type { Attempt, Course, Lesson, User } from "../../../shared/types/lms";
+import { useCourseAnnouncements } from "../hooks/useCourseAnnouncements";
+import { useRosterPagination } from "../hooks/useRosterPagination";
 import {
   ConfirmRemoveAllModal,
   CourseInfoModal,
@@ -9,14 +9,14 @@ import {
   EditLessonModal,
   EnrollmentManagerModal,
   LessonComposerModal,
-} from "../../features/courses/components/CourseModals";
+} from "../components/CourseModals";
 import {
   CourseAnnouncementsPanel,
   CourseHeaderPanel,
   CourseTabs,
   InstructorOverviewPanels,
   PendingRequestsPanel,
-} from "../../features/courses/components/CourseOverviewPanels";
+} from "../components/CourseOverviewPanels";
 import {
   InstructorContentTab,
   QuizzesTab,

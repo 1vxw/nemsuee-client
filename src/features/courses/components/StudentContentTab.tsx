@@ -1,4 +1,4 @@
-import type { Course, Lesson } from "../../../types/lms";
+import type { Course, Lesson } from "../../../shared/types/lms";
 
 type StudentContentTabProps = {
   selectedCourse: Course;

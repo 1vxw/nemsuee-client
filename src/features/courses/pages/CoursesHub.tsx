@@ -6,9 +6,9 @@ import type {
   Lesson,
   RosterRow,
   User,
-} from "../../types/lms";
+} from "../../../shared/types/lms";
 import { SelectedCoursePanel } from "./SelectedCoursePanel";
-import { StudentCatalogPanel } from "./discover/StudentCatalogPanel";
+import { StudentCatalogPanel } from "../components/discover/StudentCatalogPanel";
 import {
   fetchCatalogCourses,
   fetchCourseRoster,
@@ -17,7 +17,7 @@ import {
   removeSelfEnrollment,
   removeStudentEnrollment,
   sendEnrollRequest,
-} from "../../services/course.service";
+} from "../services/course.service";
 
 export function CoursesHub(props: {
   user: User;

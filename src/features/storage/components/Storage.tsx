@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { DriveFile } from "../types/lms";
+import type { DriveFile } from "../../../shared/types/lms";
 
 export function Storage({
   api,

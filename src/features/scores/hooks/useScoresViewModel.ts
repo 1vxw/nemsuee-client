@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { Attempt, Course, User } from "../../../types/lms";
+import type { Attempt, Course, User } from "../../../shared/types/lms";
 
 type ScoresStatus = "ALL" | "PASSED" | "FAILED" | "HIDDEN";
 type ScoresSort =
@@ -181,3 +181,4 @@ export function useScoresViewModel(
     ...computed,
   };
 }
+

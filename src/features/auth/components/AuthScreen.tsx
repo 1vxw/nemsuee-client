@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
-import type { User } from "../../types/lms";
-import logo from "../../assets/logo.png";
-import cover from "../../assets/cover.png";
+import type { User } from "../../../shared/types/lms";
+import logo from "../../../assets/logo.png";
+import cover from "../../../assets/cover.png";
 
 export function AuthScreen({
   api,

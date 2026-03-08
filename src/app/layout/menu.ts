@@ -1,4 +1,4 @@
-import type { Role, ViewKey } from "../../types/lms";
+import type { Role, ViewKey } from "../../shared/types/lms";
 
 export function menu(role: Role): { key: ViewKey; label: string }[] {
   if (role === "STUDENT") {
@@ -26,3 +26,4 @@ export function menu(role: Role): { key: ViewKey; label: string }[] {
     { key: "archives", label: "Archives" },
   ];
 }
+

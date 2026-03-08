@@ -1,5 +1,5 @@
-import type { Course, User } from "../../../types/lms";
-import type { CourseAnnouncement } from "../../../hooks/useCourseAnnouncements";
+import type { Course, User } from "../../../shared/types/lms";
+import type { CourseAnnouncement } from "../hooks/useCourseAnnouncements";
 
 type CourseAnnouncementsPanelProps = {
   announcements: CourseAnnouncement[];
@@ -48,14 +48,21 @@ export function CourseAnnouncementsPanel({
           </p>
         </>
       ) : (
-        <p>No announcements yet. Important instructor updates will appear here.</p>
+        <p>
+          No announcements yet. Important instructor updates will appear here.
+        </p>
       )}
       {showAnnouncementHistory && (
         <div className="mt-2 max-h-40 space-y-1 overflow-auto rounded-md border border-slate-200 bg-white p-2">
-          <p className="text-xs font-semibold text-slate-600">Recent Announcements</p>
+          <p className="text-xs font-semibold text-slate-600">
+            Recent Announcements
+          </p>
           {announcements.length > 1 ? (
             announcements.slice(1, 11).map((announcement) => (
-              <div key={announcement.id} className="rounded border border-slate-200 bg-slate-50 p-2">
+              <div
+                key={announcement.id}
+                className="rounded border border-slate-200 bg-slate-50 p-2"
+              >
                 <p className="text-xs text-slate-800">{announcement.text}</p>
                 <p className="mt-1 text-[11px] text-slate-500">
                   {announcement.sectionName
@@ -92,16 +99,24 @@ export function CourseHeaderPanel({
   return (
     <>
       <div className="mb-3 rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Course</p>
-        <p className="text-xl font-semibold text-slate-900">{selectedCourse.title}</p>
-        <p className="mt-1 text-sm text-slate-600">{selectedCourse.description}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Course
+        </p>
+        <p className="text-xl font-semibold text-slate-900">
+          {selectedCourse.title}
+        </p>
+        <p className="mt-1 text-sm text-slate-600">
+          {selectedCourse.description}
+        </p>
       </div>
 
       <div className="mb-2 flex items-start justify-between gap-3">
         <div>
           {user.role === "INSTRUCTOR" && (
             <div className="mt-1 flex flex-wrap items-center gap-2">
-              <p className="text-sm text-blue-700">Enrollment Key: {selectedCourse.enrollmentKey}</p>
+              <p className="text-sm text-blue-700">
+                Enrollment Key: {selectedCourse.enrollmentKey}
+              </p>
               <button
                 onClick={() => regenerateEnrollmentKey(selectedCourse.id)}
                 className="rounded border border-transparent bg-white px-2 py-1 text-xs hover:bg-slate-50"
@@ -118,7 +133,13 @@ export function CourseHeaderPanel({
             title="Refresh student list"
             aria-label="Refresh student list"
           >
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M21 12a9 9 0 1 1-2.64-6.36" />
               <polyline points="21 3 21 9 15 9" />
             </svg>
@@ -166,13 +187,17 @@ export function InstructorOverviewPanels({
         <div className="mb-3 flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold">Course Content</p>
-            <p className="text-xs text-slate-500">Manage blocks and resources only.</p>
+            <p className="text-xs text-slate-500">
+              Manage blocks and resources only.
+            </p>
           </div>
           <div className="relative">
             <button
               onClick={() => {
                 setActiveCourseTab("content");
-                setLessonComposerSectionId(selectedCourse.sections[0]?.id || null);
+                setLessonComposerSectionId(
+                  selectedCourse.sections[0]?.id || null,
+                );
               }}
               className="rounded-md bg-blue-700 p-2 text-white hover:bg-blue-800"
               aria-label="Upload resource"
@@ -196,18 +221,25 @@ export function InstructorOverviewPanels({
             </button>
           </div>
         </div>
-        <div className="text-xs text-slate-500">Blocks: {selectedCourse.sections.length}</div>
+        <div className="text-xs text-slate-500">
+          Blocks: {selectedCourse.sections.length}
+        </div>
       </article>
 
       <article className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
         <div className="mb-2 flex items-center justify-between">
           <p className="text-sm font-semibold">Enrollment / Students</p>
-          <span className="rounded bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-700">By Block</span>
+          <span className="rounded bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-700">
+            By Block
+          </span>
         </div>
         <div className="space-y-3">
           <div className="grid gap-3 rounded-md border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[1fr_auto] sm:items-center">
             <p className="text-sm text-slate-700">
-              <span className="font-semibold text-slate-900">{filteredRosterCount}</span> students in selected block
+              <span className="font-semibold text-slate-900">
+                {filteredRosterCount}
+              </span>{" "}
+              students in selected block
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -257,7 +289,9 @@ export function PendingRequestsPanel({
       <div className="mb-3 flex items-center justify-between">
         <div>
           <p className="text-sm font-semibold">Pending Requests</p>
-          <p className="text-xs text-slate-500">Review enrollment applications by assigning a block.</p>
+          <p className="text-xs text-slate-500">
+            Review enrollment applications by assigning a block.
+          </p>
         </div>
         <button
           onClick={() => loadPending(selectedCourse.id)}
@@ -284,11 +318,15 @@ export function PendingRequestsPanel({
             className="grid gap-2 rounded-md border border-slate-200 bg-white p-3 md:grid-cols-[1.2fr_1fr_auto] md:items-center"
           >
             <div>
-              <p className="text-sm font-medium text-slate-900">{p.student.fullName}</p>
+              <p className="text-sm font-medium text-slate-900">
+                {p.student.fullName}
+              </p>
               <p className="text-xs text-slate-500">{p.student.email}</p>
             </div>
             <select
-              value={approveSection[p.id] || selectedCourse.sections[0]?.id || ""}
+              value={
+                approveSection[p.id] || selectedCourse.sections[0]?.id || ""
+              }
               onChange={(e) =>
                 setApproveSection((x: any) => ({
                   ...x,
@@ -325,13 +363,21 @@ export function PendingRequestsPanel({
 }
 
 type CourseTabsProps = {
-  activeCourseTab: "content" | "quizzes" | "assignments" | "activities" | "scores";
+  activeCourseTab:
+    | "content"
+    | "quizzes"
+    | "assignments"
+    | "activities"
+    | "scores";
   setActiveCourseTab: (
     tab: "content" | "quizzes" | "assignments" | "activities" | "scores",
   ) => void;
 };
 
-export function CourseTabs({ activeCourseTab, setActiveCourseTab }: CourseTabsProps) {
+export function CourseTabs({
+  activeCourseTab,
+  setActiveCourseTab,
+}: CourseTabsProps) {
   return (
     <div className="mb-4 flex flex-wrap gap-2 rounded-md border border-slate-200 bg-slate-50 p-1">
       <button
@@ -367,3 +413,4 @@ export function CourseTabs({ activeCourseTab, setActiveCourseTab }: CourseTabsPr
     </div>
   );
 }
+

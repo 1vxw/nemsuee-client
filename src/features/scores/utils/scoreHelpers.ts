@@ -1,4 +1,4 @@
-import type { Attempt } from "../../../types/lms";
+import type { Attempt } from "../../../shared/types/lms";
 
 export const calculatePercentage = (score: number, total: number) =>
   total > 0 ? (score * 100) / total : 0;
@@ -19,3 +19,4 @@ export const getLatestAttempts = (attempts: Attempt[]) => {
   }
   return Array.from(latestMap.values());
 };
+

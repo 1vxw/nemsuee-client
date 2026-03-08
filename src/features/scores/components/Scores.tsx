@@ -1,5 +1,5 @@
-import type { Attempt } from "../types/lms";
-import { Empty } from "./layout/Ui";
+import type { Attempt } from "../../../shared/types/lms";
+import { Empty } from "../../../app/layout/Ui";
 
 export function Scores({ attempts }: { attempts: Attempt[] }) {
   return (

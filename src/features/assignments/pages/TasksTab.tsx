@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Course, CourseTask, User } from "../../../types/lms";
+import type { Course, CourseTask, User } from "../../../shared/types/lms";
 
 type TasksTabProps = {
   kind: "ASSIGNMENT" | "ACTIVITY";
@@ -395,3 +395,4 @@ export function TasksTab({
     </section>
   );
 }
+
