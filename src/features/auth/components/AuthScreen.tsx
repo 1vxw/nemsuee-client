@@ -427,7 +427,7 @@ export function AuthScreen({
                     <p><span className="font-semibold">Instructor:</span> 23-1-00761@vsu.edu.ph</p>
                     <p><span className="font-semibold">Student:</span> jipre@nemsu.edu</p>
                     <p className={`${isDark ? "text-slate-400" : "text-slate-500"} pt-1`}>
-                      Password for all test accounts: <span className="font-semibold">Password@123</span>
+                      Password for all test accounts: <span className="font-semibold">vince691 or Kuyaloy1.</span>
                     </p>
                   </div>
                 </div>
