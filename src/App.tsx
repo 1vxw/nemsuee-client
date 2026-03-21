@@ -15,6 +15,7 @@ import { AdminBlocksHub } from "./features/admin/components/AdminBlocksHub";
 import { AuthScreen } from "./features/auth/components/AuthScreen";
 import { CourseCatalogPage } from "./features/courses/pages/CourseCatalogPage";
 import { CoursesHub } from "./features/courses/pages/CoursesHub";
+import { GuestCatalogPage } from "./features/courses/pages/GuestCatalogPage";
 import { Profile, SettingsPanel, Sidebar } from "./app/layout/Ui";
 import type { UserPreferences } from "./app/layout/Ui";
 import { ScoresHub } from "./features/scores/pages/ScoresHub";
@@ -29,7 +30,7 @@ export default function App() {
     compactTables: false,
     showQuickTips: true,
   };
-  const [theme, setTheme] = useState<"light" | "dark">(
+  const [theme] = useState<"light" | "dark">(
     () => (localStorage.getItem("theme") as "light" | "dark") || "light",
   );
   const [user, setUser] = useState<User | null>(
@@ -140,7 +141,7 @@ export default function App() {
   }
 
   async function refreshCore() {
-    if (!user) return;
+    if (!user || user.role === "GUEST") return;
     try {
       const [c, a, archived, publicSettingsPayload] = await Promise.all([
         api("/courses", { headers }),
@@ -286,14 +287,70 @@ export default function App() {
         message={message}
         setMessage={setMessage}
         theme={theme}
-        onToggleTheme={() =>
-          setTheme((t) => (t === "light" ? "dark" : "light"))
-        }
         onAuth={(u) => {
           localStorage.setItem("user", JSON.stringify(u));
           setUser(u);
+          if (u.role === "GUEST") navigate("/catalog");
+          else navigate("/dashboard");
         }}
       />
+    );
+  }
+
+  if (user.role === "GUEST") {
+    return (
+      <div className="min-h-screen bg-surface text-on-surface">
+        <header className="fixed top-0 z-40 flex h-14 w-full justify-center border-b border-outline-variant/20 bg-surface-container-lowest/95 px-3 backdrop-blur-md transition-colors duration-200">
+          <div className="mx-auto flex max-w-[92rem] w-full items-center justify-between px-2 py-2 md:px-3">
+            <div className="flex items-center gap-2">
+              <img
+                src={logo}
+                alt="University logo"
+                className="h-6 w-6 rounded-sm object-contain sm:h-7 sm:w-7"
+              />
+              <p className="font-headline text-sm font-bold text-primary sm:text-base">
+                NEMSUEE
+              </p>
+              <span className="ml-2 hidden rounded-lg border border-outline-variant/30 bg-surface-container px-2 py-1 text-[11px] font-label text-on-surface-variant sm:inline-block">
+                Guest Access
+              </span>
+            </div>
+
+            <button
+              className="rounded-lg bg-primary px-3 py-2 text-xs font-label font-bold text-on-primary hover:bg-primary/90 transition-colors"
+              onClick={async () => {
+                try {
+                  await api("/auth/logout", { method: "POST", headers });
+                } catch {
+                  // best-effort
+                }
+                localStorage.removeItem("user");
+                setUser(null);
+                setMessage("");
+                navigate("/");
+              }}
+            >
+              Sign In
+            </button>
+          </div>
+        </header>
+        <main className="mx-auto w-full max-w-[92rem] px-4 pt-20 pb-10">
+          <GuestCatalogPage
+            api={api}
+            setMessage={setMessage}
+            onRequestLogin={async () => {
+              try {
+                await api("/auth/logout", { method: "POST", headers });
+              } catch {
+                // best-effort
+              }
+              localStorage.removeItem("user");
+              setUser(null);
+              navigate("/");
+            }}
+          />
+        </main>
+      </div>
     );
   }
 

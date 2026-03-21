@@ -9,14 +9,12 @@ export function AuthScreen({
   message,
   setMessage,
   theme,
-  onToggleTheme,
 }: {
   api: any;
   onAuth: (user: User) => void;
   message: string;
   setMessage: (m: string) => void;
   theme: "light" | "dark";
-  onToggleTheme: () => void;
 }) {
   const isDark = theme === "dark";
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -29,6 +27,7 @@ export function AuthScreen({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [studentId, setStudentId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [guestSubmitting, setGuestSubmitting] = useState(false);
   const [showTestAccounts, setShowTestAccounts] = useState(false);
   const [showCampusNotice, setShowCampusNotice] = useState(true);
 
@@ -98,6 +97,19 @@ export function AuthScreen({
     }
   }
 
+  async function onGuestAccess() {
+    setMessage("");
+    try {
+      setGuestSubmitting(true);
+      const r = await api("/auth/guest", { method: "POST" });
+      onAuth(r.user);
+    } catch (err) {
+      setMessage((err as Error).message);
+    } finally {
+      setGuestSubmitting(false);
+    }
+  }
+
   return (
     <main className="min-h-screen flex flex-col bg-surface text-on-surface overflow-x-hidden">
       <nav
@@ -135,10 +147,12 @@ export function AuthScreen({
             Support
           </a>
           <button
-            onClick={onToggleTheme}
+            type="button"
+            onClick={onGuestAccess}
+            disabled={guestSubmitting}
             className={`px-5 py-2 rounded-md font-label text-sm font-semibold tracking-wide hover:opacity-90 transition-opacity ${isDark ? "bg-white text-slate-950" : "bg-primary text-on-primary"}`}
           >
-            {isDark ? "Light" : "Dark"}
+            {guestSubmitting ? "Please wait..." : "Guest Access"}
           </button>
         </div>
         <div className={`md:hidden ${isDark ? "text-white" : "text-primary"}`}>

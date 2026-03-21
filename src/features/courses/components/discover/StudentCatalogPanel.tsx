@@ -50,6 +50,7 @@ export function StudentCatalogPanel(props: {
   requestEnroll: (courseId: number) => Promise<void>;
   onOpenCourse?: (id: number) => void;
   progressByCourseId?: Record<number, number>;
+  onRequestLogin?: () => void;
 }) {
   const {
     studentViewMode,
@@ -67,6 +68,7 @@ export function StudentCatalogPanel(props: {
     requestEnroll,
     onOpenCourse,
     progressByCourseId = {},
+    onRequestLogin,
   } = props;
   const [filter, setFilter] = useState<CatalogFilter>("all");
   const [showSearchOptions, setShowSearchOptions] = useState(false);
@@ -113,7 +115,7 @@ export function StudentCatalogPanel(props: {
   }, [catalog, catalogQuery, filter]);
 
   if (
-    (userRole !== "STUDENT" && userRole !== "INSTRUCTOR") ||
+    (userRole !== "STUDENT" && userRole !== "INSTRUCTOR" && userRole !== "GUEST") ||
     studentViewMode === "my"
   )
     return null;
@@ -338,6 +340,10 @@ export function StudentCatalogPanel(props: {
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (userRole === "GUEST") {
+                          onRequestLogin?.();
+                          return;
+                        }
                         if (
                           (course.enrollmentStatus === "APPROVED" ||
                             userRole === "INSTRUCTOR") &&
@@ -363,7 +369,9 @@ export function StudentCatalogPanel(props: {
                       }`}
                     >
                       <span>
-                        {userRole === "INSTRUCTOR"
+                        {userRole === "GUEST"
+                          ? "Sign in to Enroll"
+                          : userRole === "INSTRUCTOR"
                           ? "Open Course"
                           : course.enrollmentStatus === "APPROVED"
                             ? progress >= 90
@@ -385,7 +393,8 @@ export function StudentCatalogPanel(props: {
               </div>
 
               {/* Enrollment Form - full width when toggled */}
-              {showEnrollRequest[course.id] &&
+              {userRole !== "GUEST" &&
+                showEnrollRequest[course.id] &&
                 course.enrollmentStatus !== "APPROVED" &&
                 course.enrollmentStatus !== "PENDING" && (
                   <div

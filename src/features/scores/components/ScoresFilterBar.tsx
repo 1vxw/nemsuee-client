@@ -3,9 +3,10 @@ import type {
   ScoreSortBy,
   ScoreStatusFilter,
 } from "../types/scoreTypes";
+import type { Role } from "../../../shared/types/lms";
 
 type ScoresFilterBarProps = {
-  role: "INSTRUCTOR" | "STUDENT" | "ADMIN" | "REGISTRAR" | "DEAN";
+  role: Role;
   scoreQuery: string;
   scoreLessonFilter: string;
   scoreBlockFilter: string;

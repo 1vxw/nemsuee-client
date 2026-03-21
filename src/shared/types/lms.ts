@@ -1,6 +1,7 @@
 export type Role =
   | "STUDENT"
   | "INSTRUCTOR"
+  | "GUEST"
   | "ADMIN"
   | "REGISTRAR"
   | "DEAN";

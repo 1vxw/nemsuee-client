@@ -13,6 +13,10 @@ export async function fetchCatalogCourses(
   return api(`/courses/catalog?query=${encodeURIComponent(query)}`, { headers });
 }
 
+export async function fetchPublicCatalogCourses(api: ApiClient, query: string) {
+  return api(`/public/courses/catalog?query=${encodeURIComponent(query)}`);
+}
+
 export async function sendEnrollRequest(
   api: ApiClient,
   headers: AuthHeaders,
@@ -76,4 +80,3 @@ export async function removeAllStudentsInSection(
     headers,
   });
 }
-
