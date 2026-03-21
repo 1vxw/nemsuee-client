@@ -7,6 +7,7 @@ export type Role =
 export type ViewKey =
   | "dashboard"
   | "courses"
+  | "course_catalog"
   | "admin_blocks"
   | "archives"
   | "course_search"

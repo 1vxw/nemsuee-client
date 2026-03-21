@@ -13,6 +13,7 @@ import type {
 import logo from "./assets/logo.png";
 import { AdminBlocksHub } from "./features/admin/components/AdminBlocksHub";
 import { AuthScreen } from "./features/auth/components/AuthScreen";
+import { CourseCatalogPage } from "./features/courses/pages/CourseCatalogPage";
 import { CoursesHub } from "./features/courses/pages/CoursesHub";
 import { Profile, SettingsPanel, Sidebar } from "./app/layout/Ui";
 import type { UserPreferences } from "./app/layout/Ui";
@@ -42,7 +43,6 @@ export default function App() {
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [message, setMessage] = useState("");
   const [lastSync, setLastSync] = useState<Date | null>(null);
-  const [isSyncing, setIsSyncing] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(
     () => window.innerWidth >= 1024,
   );
@@ -54,7 +54,8 @@ export default function App() {
       const parsed = JSON.parse(raw) as Partial<UserPreferences>;
       return {
         notificationsEnabled:
-          parsed.notificationsEnabled ?? defaultPreferences.notificationsEnabled,
+          parsed.notificationsEnabled ??
+          defaultPreferences.notificationsEnabled,
         emailDigestEnabled:
           parsed.emailDigestEnabled ?? defaultPreferences.emailDigestEnabled,
         compactTables: parsed.compactTables ?? defaultPreferences.compactTables,
@@ -105,15 +106,24 @@ export default function App() {
   }, [selectedCourseId]);
 
   function navigateToView(nextView: ViewKey) {
-    if (gradesHiddenForUi && (nextView === "scores" || nextView === "grade_computation")) {
+    if (
+      gradesHiddenForUi &&
+      (nextView === "scores" || nextView === "grade_computation")
+    ) {
       setView("dashboard");
       navigate("/dashboard");
+      return;
+    }
+    if (nextView === "course_search") {
+      setView("course_catalog");
+      navigate("/catalog");
       return;
     }
     setView(nextView);
     if (nextView !== "courses") setForcedCourseTab(null);
     if (nextView === "dashboard") navigate("/dashboard");
     if (nextView === "courses") navigate("/courses");
+    if (nextView === "course_catalog") navigate("/catalog");
     if (nextView === "scores") navigate("/scores");
     if (nextView === "grade_computation") navigate("/grade-computation");
     if (nextView === "admin_blocks") navigate("/admin/blocks");
@@ -131,7 +141,6 @@ export default function App() {
 
   async function refreshCore() {
     if (!user) return;
-    setIsSyncing(true);
     try {
       const [c, a, archived, publicSettingsPayload] = await Promise.all([
         api("/courses", { headers }),
@@ -190,8 +199,8 @@ export default function App() {
       }
       setLastSync(new Date());
       await loadNotifications();
-    } finally {
-      setIsSyncing(false);
+    } catch (err) {
+      // Handle error silently or log if needed
     }
   }
 
@@ -235,6 +244,10 @@ export default function App() {
     }
     if (path === "/archives") {
       setView("archives");
+      return;
+    }
+    if (path === "/catalog") {
+      setView("course_catalog");
       return;
     }
     if (path === "/courses") {
@@ -287,82 +300,67 @@ export default function App() {
   const selectedCourse = courses.find((x) => x.id === selectedCourseId) || null;
 
   return (
-    <div className="min-h-screen bg-[var(--bg-main)] text-slate-800">
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-surface text-on-surface">
+      <header className="fixed top-0 z-40 flex h-14 w-full justify-center border-b border-outline-variant/20 bg-surface-container-lowest/95 px-3 backdrop-blur-md transition-colors duration-200">
+        <div className="mx-auto flex max-w-[92rem] w-full items-center justify-between px-2 py-2 md:px-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => setSidebarOpen((v) => !v)}
-              className="rounded p-2 text-sm text-slate-700 hover:bg-slate-100"
+              className="rounded-lg p-2 text-on-surface transition-colors hover:bg-surface-container"
               aria-label="Toggle sidebar"
             >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              <span className="material-symbols-outlined text-[1.25rem] sm:text-[1.375rem]">menu</span>
             </button>
             <div className="flex items-center gap-2">
               <img
                 src={logo}
                 alt="University logo"
-                className="h-9 w-9 rounded-full"
+                className="h-6 w-6 rounded-sm object-contain sm:h-7 sm:w-7"
               />
-              <p className="text-sm font-semibold md:text-base">
-                North Eastern Mindanao State University
+              <p className="font-headline text-sm font-bold text-primary sm:text-base">
+                NEMSUEE
               </p>
             </div>
           </div>
 
-          <div className="relative flex items-center gap-2">
-            <span className="hidden rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] text-slate-600 md:inline-block">
+          <div className="relative flex items-center gap-1.5 sm:gap-2">
+            <span className="hidden rounded-lg border border-outline-variant/30 bg-surface-container px-2 py-1 text-[11px] font-label text-on-surface-variant md:inline-block">
               {currentTermLabel}
             </span>
             {preferences.notificationsEnabled && (
               <>
                 <button
-                  className="relative rounded p-2 text-slate-700 hover:bg-slate-100"
+                  className="relative rounded-lg p-2 text-on-surface transition-colors hover:bg-surface-container"
                   aria-label="Notifications"
                   onClick={() => {
                     setNotificationsOpen((v) => !v);
                     loadNotifications();
                   }}
                 >
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                  >
-                    <path d="M15 17h5l-1.4-1.4a2 2 0 0 1-.6-1.4V10a6 6 0 1 0-12 0v4.2a2 2 0 0 1-.6 1.4L4 17h5" />
-                    <path d="M10 17a2 2 0 0 0 4 0" />
-                  </svg>
+                  <span className="material-symbols-outlined text-[1.25rem] sm:text-[1.375rem]">notifications</span>
                   {!!notifications.filter((n) => !Boolean(n.isRead)).length && (
-                    <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-500" />
+                    <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-error" />
                   )}
                 </button>
                 {notificationsOpen && (
-                  <div className="absolute right-12 top-12 z-50 w-80 rounded-md border border-slate-200 bg-white p-2 shadow-md">
+                  <div className="absolute right-0 top-12 z-50 w-80 rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-2 shadow-lg sm:right-12">
                     <div className="mb-1 flex items-center justify-between px-2">
-                      <p className="text-xs font-semibold text-slate-600">
+                      <p className="text-xs font-semibold text-on-surface-variant font-label">
                         Notifications
                       </p>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => markAllAsRead()}
-                          className="text-[11px] font-medium text-blue-700 hover:text-blue-800 disabled:cursor-not-allowed disabled:text-slate-400"
-                          disabled={!notifications.some((n) => !Boolean(n.isRead))}
+                          className="text-[11px] font-medium text-primary hover:text-primary/80 disabled:cursor-not-allowed disabled:text-on-surface-variant font-label"
+                          disabled={
+                            !notifications.some((n) => !Boolean(n.isRead))
+                          }
                         >
                           Mark all as read
                         </button>
                         <button
                           onClick={() => clearNotifications()}
-                          className="text-[11px] font-medium text-slate-600 hover:text-slate-800 disabled:cursor-not-allowed disabled:text-slate-400"
+                          className="text-[11px] font-medium text-on-surface-variant hover:text-on-surface font-label disabled:cursor-not-allowed disabled:text-outline"
                           disabled={!notifications.length}
                         >
                           Clear
@@ -381,30 +379,34 @@ export default function App() {
                               }
                               if (notification.courseId) {
                                 setView("courses");
-                                setSelectedCourseId(Number(notification.courseId));
+                                setSelectedCourseId(
+                                  Number(notification.courseId),
+                                );
                                 setForcedCourseTab("content");
                                 navigate(`/courses/${notification.courseId}`);
                               }
                               setNotificationsOpen(false);
                             }}
-                            className={`w-full rounded px-2 py-2 text-left hover:bg-slate-50 ${
+                            className={`w-full rounded px-2 py-2 text-left hover:bg-surface-container transition-colors ${
                               Boolean(notification.isRead)
-                                ? "bg-white"
-                                : "bg-blue-50/40"
+                                ? "bg-surface"
+                                : "bg-primary-fixed/40"
                             }`}
                           >
-                            <p className="line-clamp-2 text-xs text-slate-800">
+                            <p className="line-clamp-2 text-xs text-on-surface font-body">
                               {notification.message}
                             </p>
-                            <p className="mt-1 text-[11px] text-slate-500">
+                            <p className="mt-1 text-[11px] text-on-surface-variant font-label">
                               {notification.createdAt
-                                ? new Date(notification.createdAt).toLocaleString()
+                                ? new Date(
+                                    notification.createdAt,
+                                  ).toLocaleString()
                                 : ""}
                             </p>
                           </button>
                         ))
                       ) : (
-                        <p className="px-2 py-3 text-xs text-slate-500">
+                        <p className="px-2 py-3 text-xs text-on-surface-variant font-label">
                           No notifications yet.
                         </p>
                       )}
@@ -414,38 +416,20 @@ export default function App() {
               </>
             )}
             <button
-              className="rounded p-2 text-slate-700 hover:bg-slate-100"
+              className="rounded-lg p-2 text-on-surface transition-colors hover:bg-surface-container"
               aria-label="Open profile menu"
               onClick={() => setProfileMenuOpen((v) => !v)}
             >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-              >
-                <circle cx="12" cy="8" r="3.5" />
-                <path d="M4 20a8 8 0 0 1 16 0" />
-              </svg>
+              <span className="material-symbols-outlined text-[1.25rem] sm:text-[1.375rem]">account_circle</span>
             </button>
             {profileMenuOpen && (
-              <div className="absolute right-0 top-12 w-44 rounded-md border border-slate-200 bg-white p-1 shadow-md">
-                <button
-                  onClick={() => {
-                    navigateToView("settings");
-                    setProfileMenuOpen(false);
-                  }}
-                  className="w-full rounded px-3 py-2 text-left text-sm hover:bg-slate-100"
-                >
-                  Settings
-                </button>
+              <div className="absolute right-0 top-12 z-50 w-44 rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-1 shadow-lg">
                 <button
                   onClick={() => {
                     setView("profile");
                     setProfileMenuOpen(false);
                   }}
-                  className="w-full rounded px-3 py-2 text-left text-sm hover:bg-slate-100"
+                  className="w-full rounded-md px-3 py-2 text-left text-sm font-label text-on-surface transition-colors hover:bg-surface-container"
                 >
                   Profile
                 </button>
@@ -455,7 +439,7 @@ export default function App() {
                       navigateToView("scores");
                       setProfileMenuOpen(false);
                     }}
-                    className="w-full rounded px-3 py-2 text-left text-sm hover:bg-slate-100"
+                    className="w-full rounded-md px-3 py-2 text-left text-sm font-label text-on-surface transition-colors hover:bg-surface-container"
                   >
                     Grades
                   </button>
@@ -469,7 +453,7 @@ export default function App() {
                     setUser(null);
                   }}
                   data-keep-action-text="true"
-                  className="w-full rounded px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                  className="w-full rounded-md px-3 py-2 text-left text-sm font-label text-error transition-colors hover:bg-error-container/30"
                 >
                   Logout
                 </button>
@@ -520,7 +504,7 @@ export default function App() {
       )}
 
       <div
-        className={`mx-auto grid min-h-screen max-w-7xl grid-cols-1 gap-4 px-4 py-4 ${
+        className={`mx-auto grid min-h-screen w-full max-w-[92rem] grid-cols-1 gap-4 px-4 py-4 pt-16 md:gap-5 md:px-5 md:py-5 md:pt-20 lg:gap-4 lg:px-6 lg:py-4 lg:pt-16 ${
           sidebarOpen ? "lg:grid-cols-[250px_1fr]" : "lg:grid-cols-1"
         }`}
       >
@@ -551,24 +535,7 @@ export default function App() {
           </div>
         )}
 
-        <main className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          {view === "dashboard" && (
-            <div className="mb-3 flex items-center justify-between text-xs text-slate-500">
-              <p>
-                {isSyncing
-                  ? "Syncing data..."
-                  : `Last sync: ${lastSync ? lastSync.toLocaleTimeString() : "not yet"}`}
-              </p>
-              <button
-                onClick={() =>
-                  refreshCore().catch((e) => setMessage((e as Error).message))
-                }
-                className="rounded border border-slate-300 px-2 py-1"
-              >
-                Refresh Now
-              </button>
-            </div>
-          )}
+        <main className="min-w-0 overflow-x-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:p-5">
           {message && (
             <p className="mb-3 rounded border border-slate-300 bg-slate-100 p-2 text-sm">
               {message}
@@ -588,9 +555,24 @@ export default function App() {
               onRefresh={() =>
                 refreshCore().catch((e) => setMessage((e as Error).message))
               }
+              onOpenCourse={openCourse}
+              api={api}
+              headers={headers}
             />
           )}
-          {view === "courses" && (
+          {view === "course_catalog" && (
+            <CourseCatalogPage
+              user={user}
+              api={api}
+              headers={headers}
+              courses={courses}
+              attempts={attempts}
+              onOpenCourse={openCourse}
+              refreshCore={refreshCore}
+              setMessage={setMessage}
+            />
+          )}
+          {view === "courses" && selectedCourse && (
             <CoursesHub
               user={user}
               api={api}
@@ -604,19 +586,25 @@ export default function App() {
               forcedCourseTab={forcedCourseTab}
             />
           )}
-          {view === "course_search" && user.role === "STUDENT" && (
-            <CoursesHub
-              user={user}
-              api={api}
-              headers={headers}
-              courses={courses}
-              attempts={attempts}
-              selectedCourse={selectedCourse}
-              refreshCore={refreshCore}
-              setMessage={setMessage}
-              studentViewMode="search"
-              forcedCourseTab={forcedCourseTab}
-            />
+          {view === "courses" && !selectedCourse && (
+            <section className="rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-12 text-center">
+              <span className="material-symbols-outlined text-5xl text-outline-variant/30 block mb-4">
+                menu_book
+              </span>
+              <h3 className="font-headline text-lg font-bold text-primary mb-2">
+                Select a Course
+              </h3>
+              <p className="text-on-surface-variant font-body text-sm max-w-sm mx-auto mb-4">
+                Choose a course from the sidebar or browse the catalog to get
+                started.
+              </p>
+              <button
+                onClick={() => navigateToView("course_catalog")}
+                className="px-6 py-3 bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity"
+              >
+                Browse Course Catalog
+              </button>
+            </section>
           )}
           {view === "scores" && !gradesHiddenForUi && (
             <ScoresHub
@@ -659,14 +647,14 @@ export default function App() {
           )}
           {view === "admin_blocks" &&
             (user.role === "ADMIN" || user.role === "REGISTRAR") && (
-            <AdminBlocksHub
-              api={api}
-              headers={headers}
-              courses={courses}
-              refreshCore={refreshCore}
-              setMessage={setMessage}
-            />
-          )}
+              <AdminBlocksHub
+                api={api}
+                headers={headers}
+                courses={courses}
+                refreshCore={refreshCore}
+                setMessage={setMessage}
+              />
+            )}
           {view === "archives" && user.role === "INSTRUCTOR" && (
             <section className="space-y-3">
               <h3 className="text-lg font-semibold">Archived Courses</h3>

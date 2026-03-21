@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import type { Course } from "../../../shared/types/lms";
 import { AdminSettingsPanel } from "./AdminSettingsPanel";
 import { AddBlockModal, ManageBlockModal } from "./management/BlockModals";
-import { CollapsibleSection } from "./management/CollapsibleSection";
 import {
   EditCourseModal,
   CourseConfigurationSection,
@@ -30,7 +29,8 @@ import type {
   TermOffering,
 } from "./management/types";
 
-type SectionKey =
+type AdminTabKey =
+  | "overview"
   | "terms"
   | "offerings"
   | "instructors"
@@ -38,7 +38,8 @@ type SectionKey =
   | "courseConfig"
   | "blocks"
   | "assignments"
-  | "enrollments";
+  | "enrollments"
+  | "admin_settings";
 
 export function AdminBlocksHub(props: {
   api: any;
@@ -49,19 +50,7 @@ export function AdminBlocksHub(props: {
 }) {
   const { api, headers, courses, refreshCore, setMessage } = props;
 
-  const [activeTab, setActiveTab] = useState<"management" | "admin_settings">(
-    "management",
-  );
-  const [openSections, setOpenSections] = useState<Record<SectionKey, boolean>>({
-    terms: true,
-    offerings: true,
-    instructors: true,
-    catalog: true,
-    courseConfig: true,
-    blocks: true,
-    assignments: true,
-    enrollments: true,
-  });
+  const [activeTab, setActiveTab] = useState<AdminTabKey>("overview");
 
   const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [applications, setApplications] = useState<InstructorApplication[]>([]);
@@ -200,10 +189,6 @@ export function AdminBlocksHub(props: {
       activeTermLabel,
     );
   }, [activeTerm, courses, sectionInstructorLabels, studentCountBySection]);
-
-  function toggleSection(section: SectionKey) {
-    setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
-  }
 
   async function loadInstructors() {
     try {
@@ -610,34 +595,47 @@ export function AdminBlocksHub(props: {
 
   return (
     <section className="space-y-4">
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => setActiveTab("management")}
-          className={`rounded-md px-3 py-2 text-sm font-medium ${
-            activeTab === "management"
-              ? "bg-blue-700 text-white"
-              : "border border-slate-300 bg-white text-slate-700"
-          }`}
-        >
-          Academic Management
-        </button>
-        <button
-          onClick={() => setActiveTab("admin_settings")}
-          className={`rounded-md px-3 py-2 text-sm font-medium ${
-            activeTab === "admin_settings"
-              ? "bg-blue-700 text-white"
-              : "border border-slate-300 bg-white text-slate-700"
-          }`}
-        >
-          Admin Settings
-        </button>
+      <div className="overflow-hidden rounded-lg border border-outline-variant/20 bg-surface-container-lowest shadow-sm">
+        <div className="border-b border-outline-variant/20 px-4 py-3">
+          <p className="font-headline text-lg font-bold text-primary">Admin Panel</p>
+          <p className="mt-0.5 text-xs text-on-surface-variant">
+            Organized management workspace for academic operations.
+          </p>
+        </div>
+        <div className="flex gap-2 overflow-x-auto p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {[
+            { key: "overview", label: "Overview", icon: "dashboard" },
+            { key: "terms", label: "Terms", icon: "calendar_month" },
+            { key: "offerings", label: "Offerings", icon: "library_books" },
+            { key: "instructors", label: "Instructors", icon: "groups" },
+            { key: "catalog", label: "Catalog", icon: "menu_book" },
+            { key: "courseConfig", label: "Course Config", icon: "tune" },
+            { key: "blocks", label: "Blocks", icon: "view_module" },
+            { key: "assignments", label: "Assignments", icon: "account_tree" },
+            { key: "enrollments", label: "Enrollments", icon: "group" },
+            { key: "admin_settings", label: "Settings", icon: "admin_panel_settings" },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key as AdminTabKey)}
+              className={`inline-flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-left text-xs font-label transition-colors ${
+                activeTab === tab.key
+                  ? "border-primary bg-primary text-on-primary"
+                  : "border-outline-variant/30 bg-surface-container-lowest text-on-surface hover:bg-surface-container"
+              }`}
+            >
+              <span className="material-symbols-outlined text-[1rem]">{tab.icon}</span>
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {activeTab === "admin_settings" && (
         <AdminSettingsPanel api={api} headers={headers} setMessage={setMessage} />
       )}
 
-      {activeTab === "management" && (
+      {activeTab === "overview" && (
         <div className="space-y-4">
           <SummaryMetrics
             activeTerm={activeTerm}
@@ -646,149 +644,121 @@ export function AdminBlocksHub(props: {
             totalBlocks={summary.totalBlocks}
           />
           <AcademicWorkflowTreeCard tree={workflowTree} />
-
-          <CollapsibleSection
-            title="Academic Terms"
-            description="Manage term lifecycle and activation."
-            isOpen={openSections.terms}
-            onToggle={() => toggleSection("terms")}
-          >
-            <TermManagement
-              terms={terms}
-              onCreateTerm={() => setShowCreateTermModal(true)}
-              onEditTerm={(term) => {
-                setEditingTermId(term.id);
-                setEditingTermName(term.name);
-                setEditingTermYear(term.academicYear);
-              }}
-              onActivateTerm={handleActivateTerm}
-              onToggleArchiveTerm={handleToggleArchiveTerm}
-              onDeleteTerm={handleDeleteTerm}
-            />
-          </CollapsibleSection>
-
-          <CollapsibleSection
-            title="Course Offerings"
-            description="Table-based offerings with search and filters."
-            isOpen={openSections.offerings}
-            onToggle={() => toggleSection("offerings")}
-          >
-            <CourseOfferingManager
-              offerings={filteredOfferings}
-              courses={courses}
-              terms={terms}
-              instructors={instructors}
-              selectedTermId={selectedTermId}
-              offeringQuery={offeringQuery}
-              instructorFilter={offeringInstructorFilter}
-              onChangeOfferingQuery={setOfferingQuery}
-              onChangeInstructorFilter={setOfferingInstructorFilter}
-              onChangeTermId={setSelectedTermId}
-              onCreateOffering={() => setShowCreateOfferingModal(true)}
-              onManageOffering={(offering) => {
-                if (offering.courseId) setSelectedCourseId(Number(offering.courseId));
-                setOpenSections((prev) => ({
-                  ...prev,
-                  courseConfig: true,
-                  blocks: true,
-                }));
-              }}
-              onAssignInstructor={(offering) => {
-                setAssignOfferingTarget(offering);
-                const current = instructors.find(
-                  (i) => i.id === Number(offering.instructorId || 0),
-                );
-                setAssignOfferingInstructorQuery(
-                  current ? `${current.fullName} (${current.email})` : "",
-                );
-              }}
-            />
-          </CollapsibleSection>
-
-          <CollapsibleSection
-            title="Instructor Management"
-            description="Approve or reject instructor registration requests."
-            isOpen={openSections.instructors}
-            onToggle={() => toggleSection("instructors")}
-          >
-            <InstructorManagementSection
-              applications={applications}
-              onRefresh={loadApplications}
-              onApprove={(userId) => handleApplicationDecision(userId, "APPROVED")}
-              onReject={(userId) => handleApplicationDecision(userId, "REJECTED")}
-            />
-          </CollapsibleSection>
-
-          <CollapsibleSection
-            title="Course Catalog"
-            description="Centralized list of catalog courses."
-            isOpen={openSections.catalog}
-            onToggle={() => toggleSection("catalog")}
-          >
-            <CourseCatalogManager courses={courses} />
-          </CollapsibleSection>
-
-          <CollapsibleSection
-            title="Course Configuration"
-            description="Manage metadata and deletion for courses."
-            isOpen={openSections.courseConfig}
-            onToggle={() => toggleSection("courseConfig")}
-          >
-            <CourseConfigurationSection
-              courses={filteredConfigCourses}
-              selectedCourse={selectedCourse}
-              selectedCourseId={selectedCourseId}
-              courseFilter={courseConfigQuery}
-              onChangeCourseFilter={setCourseConfigQuery}
-              onSelectCourse={setSelectedCourseId}
-              onEditCourse={() => setShowEditCourseModal(true)}
-              onDeleteCourse={handleDeleteSelectedCourse}
-            />
-          </CollapsibleSection>
-
-          <CollapsibleSection
-            title="Blocks Management"
-            description="Manage blocks in a selected course context."
-            isOpen={openSections.blocks}
-            onToggle={() => toggleSection("blocks")}
-          >
-            <SectionManager
-              courses={courses}
-              selectedCourse={selectedCourse}
-              selectedCourseId={selectedCourseId}
-              sectionInstructors={sectionInstructors}
-              studentCountBySection={studentCountBySection}
-              onSelectCourse={setSelectedCourseId}
-              onAddBlock={() => setShowAddBlockModal(true)}
-              onManageBlock={setManagingSectionId}
-              onDeleteBlock={handleDeleteBlock}
-            />
-          </CollapsibleSection>
-
-          <CollapsibleSection
-            title="Instructor Assignment Matrix"
-            description="View instructor assignment by section."
-            isOpen={openSections.assignments}
-            onToggle={() => toggleSection("assignments")}
-          >
-            <InstructorAssignmentManager
-              selectedCourse={selectedCourse}
-              sectionInstructors={sectionInstructors}
-            />
-          </CollapsibleSection>
-
-          <CollapsibleSection
-            title="Enrollment Snapshot"
-            description="Section-level student enrollment counts."
-            isOpen={openSections.enrollments}
-            onToggle={() => toggleSection("enrollments")}
-          >
-            <EnrollmentManager
-              selectedCourse={selectedCourse}
-              studentCountBySection={studentCountBySection}
-            />
-          </CollapsibleSection>
         </div>
+      )}
+
+      {activeTab === "terms" && (
+        <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4">
+          <TermManagement
+            terms={terms}
+            onCreateTerm={() => setShowCreateTermModal(true)}
+            onEditTerm={(term) => {
+              setEditingTermId(term.id);
+              setEditingTermName(term.name);
+              setEditingTermYear(term.academicYear);
+            }}
+            onActivateTerm={handleActivateTerm}
+            onToggleArchiveTerm={handleToggleArchiveTerm}
+            onDeleteTerm={handleDeleteTerm}
+          />
+        </article>
+      )}
+
+      {activeTab === "offerings" && (
+        <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4">
+          <CourseOfferingManager
+            offerings={filteredOfferings}
+            courses={courses}
+            terms={terms}
+            instructors={instructors}
+            selectedTermId={selectedTermId}
+            offeringQuery={offeringQuery}
+            instructorFilter={offeringInstructorFilter}
+            onChangeOfferingQuery={setOfferingQuery}
+            onChangeInstructorFilter={setOfferingInstructorFilter}
+            onChangeTermId={setSelectedTermId}
+            onCreateOffering={() => setShowCreateOfferingModal(true)}
+            onManageOffering={(offering) => {
+              if (offering.courseId) setSelectedCourseId(Number(offering.courseId));
+              setActiveTab("courseConfig");
+            }}
+            onAssignInstructor={(offering) => {
+              setAssignOfferingTarget(offering);
+              const current = instructors.find(
+                (i) => i.id === Number(offering.instructorId || 0),
+              );
+              setAssignOfferingInstructorQuery(
+                current ? `${current.fullName} (${current.email})` : "",
+              );
+            }}
+          />
+        </article>
+      )}
+
+      {activeTab === "instructors" && (
+        <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4">
+          <InstructorManagementSection
+            applications={applications}
+            onRefresh={loadApplications}
+            onApprove={(userId) => handleApplicationDecision(userId, "APPROVED")}
+            onReject={(userId) => handleApplicationDecision(userId, "REJECTED")}
+          />
+        </article>
+      )}
+
+      {activeTab === "catalog" && (
+        <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4">
+          <CourseCatalogManager courses={courses} />
+        </article>
+      )}
+
+      {activeTab === "courseConfig" && (
+        <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4">
+          <CourseConfigurationSection
+            courses={filteredConfigCourses}
+            selectedCourse={selectedCourse}
+            selectedCourseId={selectedCourseId}
+            courseFilter={courseConfigQuery}
+            onChangeCourseFilter={setCourseConfigQuery}
+            onSelectCourse={setSelectedCourseId}
+            onEditCourse={() => setShowEditCourseModal(true)}
+            onDeleteCourse={handleDeleteSelectedCourse}
+          />
+        </article>
+      )}
+
+      {activeTab === "blocks" && (
+        <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4">
+          <SectionManager
+            courses={courses}
+            selectedCourse={selectedCourse}
+            selectedCourseId={selectedCourseId}
+            sectionInstructors={sectionInstructors}
+            studentCountBySection={studentCountBySection}
+            onSelectCourse={setSelectedCourseId}
+            onAddBlock={() => setShowAddBlockModal(true)}
+            onManageBlock={setManagingSectionId}
+            onDeleteBlock={handleDeleteBlock}
+          />
+        </article>
+      )}
+
+      {activeTab === "assignments" && (
+        <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4">
+          <InstructorAssignmentManager
+            selectedCourse={selectedCourse}
+            sectionInstructors={sectionInstructors}
+          />
+        </article>
+      )}
+
+      {activeTab === "enrollments" && (
+        <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4">
+          <EnrollmentManager
+            selectedCourse={selectedCourse}
+            studentCountBySection={studentCountBySection}
+          />
+        </article>
       )}
 
       <CreateTermModal

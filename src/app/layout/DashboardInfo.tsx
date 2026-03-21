@@ -128,63 +128,63 @@ export function DashboardInfo({
 
     return (
       <section className="space-y-4 text-sm">
-        <article className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-xl font-semibold text-slate-900">
+        <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-sm">
+          <p className="text-xl font-semibold text-primary">
             {greeting}, {user.fullName.split(" ")[0]}.
           </p>
-          <p className="mt-1 text-slate-600">
+          <p className="mt-1 text-on-surface">
             You have {submissionsToGrade} submission
             {submissionsToGrade === 1 ? "" : "s"} waiting for grading.
           </p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-on-surface-variant">
             Last sync: {lastSync ? lastSync.toLocaleString() : "Not synced yet"}
           </p>
         </article>
 
         <article className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-xs uppercase tracking-wide text-slate-500">
+          <div className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-sm">
+            <p className="text-xs uppercase tracking-wide text-on-surface-variant">
               Submissions to Grade
             </p>
-            <p className="mt-1 text-2xl font-semibold text-slate-900">
+            <p className="mt-1 text-2xl font-semibold text-primary">
               {submissionsToGrade}
             </p>
           </div>
-          <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-xs uppercase tracking-wide text-slate-500">
+          <div className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-sm">
+            <p className="text-xs uppercase tracking-wide text-on-surface-variant">
               Active Blocks
             </p>
-            <p className="mt-1 text-2xl font-semibold text-slate-900">
+            <p className="mt-1 text-2xl font-semibold text-primary">
               {teachingBlocks.length}
             </p>
           </div>
-          <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-xs uppercase tracking-wide text-slate-500">
+          <div className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-sm">
+            <p className="text-xs uppercase tracking-wide text-on-surface-variant">
               Students Under Me
             </p>
-            <p className="mt-1 text-2xl font-semibold text-slate-900">
+            <p className="mt-1 text-2xl font-semibold text-primary">
               {uniqueStudents.size}
             </p>
           </div>
-          <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-xs uppercase tracking-wide text-slate-500">
+          <div className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-sm">
+            <p className="text-xs uppercase tracking-wide text-on-surface-variant">
               New Student Activity
             </p>
-            <p className="mt-1 text-2xl font-semibold text-slate-900">
+            <p className="mt-1 text-2xl font-semibold text-primary">
               {recentStudentActivity.length}
             </p>
           </div>
         </article>
 
         <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
-          <article className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+          <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
-              <p className="font-semibold text-slate-900">
+              <p className="font-semibold text-primary">
                 Teaching Blocks Overview
               </p>
               <button
                 onClick={() => onNavigate("courses")}
-                className="rounded border border-slate-300 px-3 py-1.5 text-xs hover:bg-slate-50"
+                className="rounded border border-outline-variant/40 px-3 py-1.5 text-xs hover:bg-surface-container"
               >
                 Open Blocks
               </button>
@@ -194,12 +194,12 @@ export function DashboardInfo({
                 Object.entries(groupedBlocks).map(([courseId, group]) => (
                   <div
                     key={courseId}
-                    className="rounded-md border border-slate-200 bg-slate-50 p-3"
+                    className="rounded-lg border border-outline-variant/20 bg-surface-container p-3"
                   >
-                    <p className="font-medium text-slate-900">
+                    <p className="font-medium text-primary">
                       {group.courseTitle}
                     </p>
-                    <div className="mt-1 space-y-1 text-xs text-slate-600">
+                    <div className="mt-1 space-y-1 text-xs text-on-surface">
                       {group.blocks.map((block) => (
                         <p key={block.id}>
                           {block.name} - {block.students} student
@@ -210,20 +210,20 @@ export function DashboardInfo({
                   </div>
                 ))
               ) : (
-                <p className="text-slate-500">No assigned teaching blocks.</p>
+                <p className="text-on-surface-variant">No assigned teaching blocks.</p>
               )}
             </div>
           </article>
 
-          <article className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+          <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
-              <p className="font-semibold text-slate-900">
+              <p className="font-semibold text-primary">
                 Recent Student Activity
               </p>
               {!hideLmsSisFeatures && (
                 <button
                   onClick={() => onNavigate("scores")}
-                  className="rounded border border-slate-300 px-3 py-1.5 text-xs hover:bg-slate-50"
+                  className="rounded border border-outline-variant/40 px-3 py-1.5 text-xs hover:bg-surface-container"
                 >
                   Open Gradebook
                 </button>
@@ -235,7 +235,7 @@ export function DashboardInfo({
                 setActivityQuery(e.target.value);
                 setActivityPage(1);
               }}
-              className="mb-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="mb-2 w-full rounded-md border border-outline-variant/40 px-3 py-2 text-sm"
               placeholder="Search student or activity"
             />
             <div className="max-h-80 space-y-2 overflow-auto pr-1">
@@ -243,20 +243,20 @@ export function DashboardInfo({
                 recentStudentActivity.map((attempt) => (
                   <div
                     key={attempt.id}
-                    className="rounded-md border border-slate-200 p-2"
+                    className="rounded-lg border border-outline-variant/20 p-2"
                   >
-                    <p className="text-xs text-slate-800">
+                    <p className="text-xs text-on-surface">
                       {attempt.student?.fullName || "A student"} submitted{" "}
                       {attempt.quiz.lesson.title}
                     </p>
                     <div className="mt-1 flex items-center justify-between">
-                      <p className="text-[11px] text-slate-500">
+                      <p className="text-[11px] text-on-surface-variant">
                         Score: {attempt.score}/{attempt.total}
                       </p>
                       {!hideLmsSisFeatures && (
                         <button
                           onClick={() => onNavigate("scores")}
-                          className="rounded border border-slate-300 px-2 py-1 text-[11px] hover:bg-slate-50"
+                          className="rounded border border-outline-variant/40 px-2 py-1 text-[11px] hover:bg-surface-container"
                         >
                           Review
                         </button>
@@ -265,10 +265,10 @@ export function DashboardInfo({
                   </div>
                 ))
               ) : (
-                <p className="text-slate-500">No recent student activity.</p>
+                <p className="text-on-surface-variant">No recent student activity.</p>
               )}
             </div>
-            <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
+            <div className="mt-2 flex items-center justify-between text-xs text-on-surface-variant">
               <p>
                 Showing{" "}
                 {filteredActivity.length
@@ -285,7 +285,7 @@ export function DashboardInfo({
                 <button
                   onClick={() => setActivityPage((p) => Math.max(1, p - 1))}
                   disabled={safeActivityPage <= 1}
-                  className="rounded border border-slate-300 px-2 py-1 disabled:opacity-50"
+                  className="rounded border border-outline-variant/40 px-2 py-1 disabled:opacity-50"
                 >
                   Prev
                 </button>
@@ -297,7 +297,7 @@ export function DashboardInfo({
                     setActivityPage((p) => Math.min(activityTotalPages, p + 1))
                   }
                   disabled={safeActivityPage >= activityTotalPages}
-                  className="rounded border border-slate-300 px-2 py-1 disabled:opacity-50"
+                  className="rounded border border-outline-variant/40 px-2 py-1 disabled:opacity-50"
                 >
                   Next
                 </button>
@@ -306,27 +306,27 @@ export function DashboardInfo({
           </article>
         </div>
 
-        <article className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="mb-2 font-semibold text-slate-900">Quick Actions</p>
+        <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-sm">
+          <p className="mb-2 font-semibold text-primary">Quick Actions</p>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             <button
               data-keep-action-text="true"
               onClick={() => onNavigate("courses")}
-              className="flex h-10 w-full items-center rounded border border-slate-300 bg-white px-3 text-left hover:bg-slate-50"
+              className="flex h-10 w-full items-center rounded border border-outline-variant/40 bg-white px-3 text-left hover:bg-surface-container"
             >
               Upload Material
             </button>
             <button
               data-keep-action-text="true"
               onClick={() => onNavigate("courses")}
-              className="flex h-10 w-full items-center rounded border border-slate-300 bg-white px-3 text-left hover:bg-slate-50"
+              className="flex h-10 w-full items-center rounded border border-outline-variant/40 bg-white px-3 text-left hover:bg-surface-container"
             >
               View Students
             </button>
             <button
               data-keep-action-text="true"
               onClick={() => onNavigate("storage")}
-              className="flex h-10 w-full items-center rounded border border-slate-300 bg-white px-3 text-left hover:bg-slate-50"
+              className="flex h-10 w-full items-center rounded border border-outline-variant/40 bg-white px-3 text-left hover:bg-surface-container"
             >
               Files
             </button>
@@ -338,9 +338,9 @@ export function DashboardInfo({
 
   return (
     <section className="space-y-4 text-sm">
-      <article className="rounded-md border border-slate-200 bg-slate-50 p-4">
+      <article className="rounded-lg border border-outline-variant/20 bg-surface-container p-4">
         <p className="text-lg font-semibold">Welcome back, {user.fullName}</p>
-        <p className="text-slate-600">
+        <p className="text-on-surface">
           {isAdminLike &&
             "Manage subjects, blocks, and instructor assignments."}
           {isDean &&
@@ -348,39 +348,39 @@ export function DashboardInfo({
           {role === "STUDENT" &&
             "Track your courses, lesson content, quizzes, and scores."}
         </p>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-on-surface-variant">
           Last sync: {lastSync ? lastSync.toLocaleString() : "Not synced yet"}
         </p>
       </article>
 
-      <article className="rounded-md border border-slate-200 bg-slate-50 p-4">
+      <article className="rounded-lg border border-outline-variant/20 bg-surface-container p-4">
         <p className="mb-2 font-semibold">Quick Actions</p>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
           {isAdminLike ? (
             <button
               onClick={() => onNavigate("admin_blocks")}
-              className="rounded bg-blue-700 px-3 py-2 text-white"
+              className="rounded-lg bg-primary px-4 py-2.5 font-label text-sm font-bold text-on-primary hover:opacity-90 transition-opacity"
             >
               Open Block Admin
             </button>
           ) : isDean && !hideLmsSisFeatures ? (
             <button
               onClick={() => onNavigate("grade_computation")}
-              className="rounded bg-blue-700 px-3 py-2 text-white"
+              className="rounded-lg bg-primary px-4 py-2.5 font-label text-sm font-bold text-on-primary hover:opacity-90 transition-opacity"
             >
               Review Grades
             </button>
           ) : isDean ? (
             <button
               onClick={() => onNavigate("storage")}
-              className="rounded bg-blue-700 px-3 py-2 text-white"
+              className="rounded-lg bg-primary px-4 py-2.5 font-label text-sm font-bold text-on-primary hover:opacity-90 transition-opacity"
             >
               Open Files
             </button>
           ) : (
             <button
               onClick={() => onNavigate("courses")}
-              className="rounded bg-blue-700 px-3 py-2 text-white"
+              className="rounded-lg bg-primary px-4 py-2.5 font-label text-sm font-bold text-on-primary hover:opacity-90 transition-opacity"
             >
               My Courses
             </button>
@@ -388,26 +388,27 @@ export function DashboardInfo({
           {!isAdminLike && !isDean && !hideLmsSisFeatures && (
             <button
               onClick={() => onNavigate("scores")}
-              className="rounded border border-slate-300 bg-white px-3 py-2"
+              className="rounded border border-outline-variant/40 bg-white px-3 py-2"
             >
               My Scores
             </button>
           )}
           <button
             onClick={() => onNavigate("storage")}
-            className="rounded border border-slate-300 bg-white px-3 py-2"
+            className="rounded border border-outline-variant/40 bg-white px-3 py-2"
           >
             My Storage
           </button>
           <button
             onClick={() => onNavigate("profile")}
-            className="rounded border border-slate-300 bg-white px-3 py-2"
+            className="rounded border border-outline-variant/40 bg-white px-3 py-2"
           >
             Profile
           </button>
           <button
+            data-keep-action-text="true"
             onClick={onRefresh}
-            className="rounded border border-slate-300 bg-white px-3 py-2"
+            className="rounded border border-outline-variant/40 bg-white px-3 py-2"
           >
             Refresh Data
           </button>
@@ -415,7 +416,7 @@ export function DashboardInfo({
       </article>
 
       <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
-        <article className="rounded-md border border-slate-200 bg-white p-4">
+        <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4">
           <p className="mb-2 font-semibold">
             {isAdminLike || isDean
               ? "Administration Snapshot"
@@ -424,26 +425,26 @@ export function DashboardInfo({
           <div className="grid gap-2 sm:grid-cols-3">
             {isAdminLike || isDean ? (
               <>
-                <p className="rounded bg-slate-50 p-2">
+                <p className="rounded bg-surface-container p-2">
                   Total Courses: {courses.length}
                 </p>
-                <p className="rounded bg-slate-50 p-2">
+                <p className="rounded bg-surface-container p-2">
                   Total Blocks:{" "}
                   {courses.reduce((a, c) => a + c.sections.length, 0)}
                 </p>
-                <p className="rounded bg-slate-50 p-2">
+                <p className="rounded bg-surface-container p-2">
                   Archived: {archivedCourses.length}
                 </p>
               </>
             ) : (
               <>
-                <p className="rounded bg-slate-50 p-2">
+                <p className="rounded bg-surface-container p-2">
                   Courses: {courses.length}
                 </p>
-                <p className="rounded bg-slate-50 p-2">
+                <p className="rounded bg-surface-container p-2">
                   Lessons: {lessonsCount}
                 </p>
-                <p className="rounded bg-slate-50 p-2">
+                <p className="rounded bg-surface-container p-2">
                   Average Score: {avgScore}%
                 </p>
               </>
@@ -454,21 +455,21 @@ export function DashboardInfo({
               recentCourses.map((course) => (
                 <div
                   key={course.id}
-                  className="rounded border border-slate-200 p-2"
+                  className="rounded-lg border border-outline-variant/20 p-2"
                 >
                   <p className="font-medium">{course.title}</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-on-surface-variant">
                     {course.sections.length} block(s)
                   </p>
                 </div>
               ))
             ) : (
-              <p className="text-slate-500">No courses yet.</p>
+              <p className="text-on-surface-variant">No courses yet.</p>
             )}
           </div>
         </article>
 
-        <article className="rounded-md border border-slate-200 bg-white p-4">
+        <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4">
           <p className="mb-2 font-semibold">
             {isAdminLike || isDean ? "Admin Shortcuts" : "Recent Quiz Attempts"}
           </p>
@@ -477,7 +478,7 @@ export function DashboardInfo({
               {isAdminLike && (
                 <button
                   onClick={() => onNavigate("admin_blocks")}
-                  className="w-full rounded border border-slate-300 bg-white px-3 py-2 text-left"
+                  className="w-full rounded border border-outline-variant/40 bg-white px-3 py-2 text-left"
                 >
                   Manage Courses and Blocks
                 </button>
@@ -485,14 +486,14 @@ export function DashboardInfo({
               {isDean && !hideLmsSisFeatures && (
                 <button
                   onClick={() => onNavigate("grade_computation")}
-                  className="w-full rounded border border-slate-300 bg-white px-3 py-2 text-left"
+                  className="w-full rounded border border-outline-variant/40 bg-white px-3 py-2 text-left"
                 >
                   Review Grade Submissions
                 </button>
               )}
               <button
                 onClick={() => onNavigate("storage")}
-                className="w-full rounded border border-slate-300 bg-white px-3 py-2 text-left"
+                className="w-full rounded border border-outline-variant/40 bg-white px-3 py-2 text-left"
               >
                 Open Files Hub
               </button>
@@ -503,17 +504,17 @@ export function DashboardInfo({
                 recentAttempts.map((attempt) => (
                   <div
                     key={attempt.id}
-                    className="rounded border border-slate-200 p-2"
+                    className="rounded-lg border border-outline-variant/20 p-2"
                   >
                     <p className="font-medium">{attempt.quiz.lesson.title}</p>
-                    <p className="text-xs text-slate-600">
+                    <p className="text-xs text-on-surface">
                       {attempt.score}/{attempt.total}
                       {attempt.student ? ` - ${attempt.student.fullName}` : ""}
                     </p>
                   </div>
                 ))
               ) : (
-                <p className="text-slate-500">No attempts yet.</p>
+                <p className="text-on-surface-variant">No attempts yet.</p>
               )}
             </div>
           )}

@@ -27,7 +27,7 @@ export function GradeComputationHub({
   onSelectCourse,
 }: Props) {
   const selectedCourse = useMemo(
-    () => courses.find((c) => c.id === selectedCourseId) || courses[0] || null,
+    () => courses.find((c) => c.id === selectedCourseId) || null,
     [courses, selectedCourseId],
   );
 
@@ -73,9 +73,12 @@ export function GradeComputationHub({
   const [viewingBlock, setViewingBlock] = useState<any | null>(null);
   const [isLoadingBlockDetails, setIsLoadingBlockDetails] = useState(false);
   const [showCoursePicker, setShowCoursePicker] = useState(true);
+  const [courseFilter, setCourseFilter] = useState("");
   const [isSubmittingAll, setIsSubmittingAll] = useState(false);
   const [isSavingWeights, setIsSavingWeights] = useState(false);
   const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
+  const [rowsPage, setRowsPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
   const canReviewGrades =
     user.role === "ADMIN" || user.role === "DEAN" || user.role === "REGISTRAR";
   const canApproveGrades = user.role === "ADMIN" || user.role === "DEAN";
@@ -219,18 +222,6 @@ export function GradeComputationHub({
     reviewFilter,
   ]);
 
-  const groupedRows = useMemo(() => {
-    return rows.reduce(
-      (acc, row) => {
-        const key = row.blockName || "Unassigned";
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(row);
-        return acc;
-      },
-      {} as Record<string, Array<(typeof rows)[number]>>,
-    );
-  }, [rows]);
-
   const blockOptions = useMemo(
     () => Array.from(new Set(rows.map((r) => r.blockName))).sort(),
     [rows],
@@ -279,6 +270,50 @@ export function GradeComputationHub({
     const lowest = total ? Math.min(...rows.map((r) => r.finalGrade)) : 0;
     return { total, passed, failed, average, highest, lowest };
   }, [rows]);
+
+  const rowsTotalPages = useMemo(
+    () => Math.max(1, Math.ceil(rows.length / rowsPerPage)),
+    [rows.length, rowsPerPage],
+  );
+  const rowsSafePage = Math.min(rowsPage, rowsTotalPages);
+  const pagedRows = useMemo(
+    () => rows.slice((rowsSafePage - 1) * rowsPerPage, rowsSafePage * rowsPerPage),
+    [rows, rowsSafePage, rowsPerPage],
+  );
+  const groupedRows = useMemo(() => {
+    return pagedRows.reduce(
+      (acc, row) => {
+        const key = row.blockName || "Unassigned";
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(row);
+        return acc;
+      },
+      {} as Record<string, Array<(typeof rows)[number]>>,
+    );
+  }, [pagedRows]);
+
+  const filteredCourses = useMemo(
+    () =>
+      courses.filter((c) =>
+        c.title.toLowerCase().includes(courseFilter.trim().toLowerCase()),
+      ),
+    [courses, courseFilter],
+  );
+
+  useEffect(() => {
+    if (!selectedCourseId) setShowCoursePicker(true);
+  }, [selectedCourseId]);
+
+  useEffect(() => {
+    setRowsPage(1);
+  }, [
+    selectedCourse?.id,
+    searchQuery,
+    blockFilter,
+    reviewFilter,
+    sortMode,
+    rowsPerPage,
+  ]);
 
   async function saveStudent(row: any, lock: boolean, silent = false) {
     if (!selectedCourse) return;
@@ -667,71 +702,90 @@ export function GradeComputationHub({
 
   if (showCoursePicker) {
     return (
-      <section className="space-y-4">
-        <div className="flex items-center justify-between pb-1">
-          <h3 className="text-lg font-semibold">Subjects</h3>
-          <span className="rounded border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600">
-            {gradingContext.gradingPeriod}
-          </span>
-        </div>
-        <div className="overflow-auto rounded border border-slate-200">
-          <table className="min-w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-600">
-              <tr>
-                <th className="px-4 py-3">Subject</th>
-                <th className="px-4 py-3">Description</th>
-                <th className="px-4 py-3">Blocks</th>
-                <th className="w-10 px-3 py-3" aria-label="Open" />
-              </tr>
-            </thead>
-            <tbody>
-              {courses.map((course) => (
-                <tr
-                  key={course.id}
-                  onClick={() => {
-                    onSelectCourse(course.id);
-                    setShowCoursePicker(false);
-                  }}
-                  className="group cursor-pointer border-t border-slate-100 transition-colors hover:bg-blue-50"
-                >
-                  <td className="px-4 py-3 font-medium text-slate-900">
-                    {course.title}
-                  </td>
-                  <td className="px-4 py-3 text-slate-600">
-                    {course.description || "-"}
-                  </td>
-                  <td className="px-4 py-3 text-slate-600">
-                    {course.sections?.length || 0}
-                  </td>
-                  <td className="px-3 py-3 text-right">
-                    <svg
-                      viewBox="0 0 24 24"
-                      className="ml-auto h-4 w-4 text-slate-400 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="m9 18 6-6-6-6" />
-                    </svg>
-                  </td>
-                </tr>
+      <section className="space-y-5">
+        <header className="overflow-hidden rounded-lg border border-outline-variant/20 bg-gradient-to-r from-primary to-primary-container shadow-sm">
+          <div className="p-4 text-on-primary sm:p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="font-headline text-xl font-bold tracking-tight">
+                Grades Section
+              </p>
+              <span className="rounded-md bg-primary-fixed/30 px-2.5 py-1 text-xs font-label text-primary-fixed">
+                {gradingContext.semester}
+              </span>
+            </div>
+            <p className="mt-1 font-body text-sm text-primary-fixed">
+              Select a subject first before viewing and managing student grades.
+            </p>
+          </div>
+        </header>
+        <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-sm md:p-5">
+          <div className="mb-3 grid gap-3 sm:grid-cols-[1fr_280px]">
+            <input
+              value={courseFilter}
+              onChange={(e) => setCourseFilter(e.target.value)}
+              className="rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-3 py-2.5 font-body text-sm text-on-surface placeholder:text-on-surface-variant focus:ring-1 focus:ring-primary outline-none"
+              placeholder="Search subject"
+            />
+            <select
+              data-keep-action-text="true"
+              value=""
+              onChange={(e) => {
+                const id = Number(e.target.value);
+                if (!id) return;
+                onSelectCourse(id);
+                setShowCoursePicker(false);
+              }}
+              className="rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-3 py-2.5 font-body text-sm text-on-surface"
+            >
+              <option value="">Select subject first</option>
+              {filteredCourses.map((course) => (
+                <option key={course.id} value={course.id}>
+                  {course.title}
+                </option>
               ))}
-              {!courses.length && (
-                <tr>
-                  <td
-                    colSpan={4}
-                    className="px-4 py-6 text-center text-slate-500"
-                  >
-                    No subjects available.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            </select>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredCourses.map((course) => (
+              <button
+                key={course.id}
+                onClick={() => {
+                  onSelectCourse(course.id);
+                  setShowCoursePicker(false);
+                }}
+                className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-3 text-left transition-colors hover:bg-surface-container"
+              >
+                <p className="font-label text-xs uppercase tracking-wider text-on-surface-variant">
+                  Subject
+                </p>
+                <p className="mt-1 font-headline text-base font-bold text-primary line-clamp-2">
+                  {course.title}
+                </p>
+              </button>
+            ))}
+            {!filteredCourses.length && (
+              <p className="text-sm text-on-surface-variant">No subjects found.</p>
+            )}
+          </div>
+        </article>
+      </section>
+    );
+  }
+
+  if (!selectedCourse) {
+    return (
+      <section className="space-y-3">
+        <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 font-body text-sm text-on-surface-variant">
+          Select a subject first to open the Grades Section.
+        </article>
+        <button
+          onClick={() => setShowCoursePicker(true)}
+          className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 font-label text-sm font-semibold text-on-primary hover:opacity-90"
+        >
+          <span className="material-symbols-outlined text-[1rem]">menu_book</span>
+          Choose Subject
+        </button>
       </section>
     );
   }
@@ -837,6 +891,20 @@ export function GradeComputationHub({
             <option value="APPROVED">Approved</option>
             <option value="REJECTED">Rejected</option>
           </select>
+          <div className="ml-auto flex items-center gap-2">
+            <label className="text-xs text-slate-600">Rows</label>
+            <select
+              data-keep-action-text="true"
+              value={rowsPerPage}
+              onChange={(e) => setRowsPerPage(Number(e.target.value))}
+              className="h-10 min-w-[90px] rounded border border-slate-300 px-2.5 text-sm"
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -879,7 +947,206 @@ export function GradeComputationHub({
         </div>
       </div>
 
-      <div className="w-full overflow-x-hidden overflow-y-auto rounded border border-slate-200 bg-white">
+      <div className="grid gap-3 md:hidden">
+        {(
+          Object.entries(groupedRows) as Array<
+            [string, Array<(typeof rows)[number]>]
+          >
+        ).map(([block, blockRows]) => (
+          <article
+            key={`mobile-group-${block}`}
+            className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-3"
+          >
+            <div className="mb-2 flex items-center justify-between">
+              <p className="font-label text-sm font-semibold text-on-surface">
+                {block}
+              </p>
+              <span className="rounded bg-surface-container px-2 py-0.5 text-[11px] text-on-surface-variant">
+                {blockRows.length} students
+              </span>
+            </div>
+            <div className="space-y-2.5">
+              {blockRows.map((row) => {
+                const readonly =
+                  row.meta.isLocked ||
+                  row.meta.reviewStatus === "PENDING" ||
+                  row.meta.reviewStatus === "APPROVED";
+                const courseworkAvg =
+                  (row.quizAvg + row.assignmentAvg + row.activityAvg) / 3;
+                const missingPieces: string[] = [];
+                if (
+                  (termExamField === "midterm" ? row.midterm : row.finals) ===
+                    undefined ||
+                  (termExamField === "midterm" ? row.midterm : row.finals) ===
+                    null
+                ) {
+                  missingPieces.push(`Missing ${termExamLabel}`);
+                }
+                if (row.attendance === undefined || row.attendance === null)
+                  missingPieces.push("Missing Attendance");
+                return (
+                  <div
+                    key={`mobile-row-${row.studentId}`}
+                    className="rounded-lg border border-outline-variant/20 bg-surface-container-low p-3"
+                  >
+                    <div className="mb-2 flex items-start justify-between gap-2">
+                      <p className="min-w-0 font-body text-sm font-semibold text-on-surface">
+                        <span className="block truncate" title={row.studentName}>
+                          {row.studentName}
+                        </span>
+                      </p>
+                      <span className="rounded bg-surface-container px-2 py-0.5 text-[11px] font-medium text-on-surface-variant">
+                        {row.meta.reviewStatus}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="rounded border border-outline-variant/20 bg-surface-container-lowest p-2">
+                        <p className="text-on-surface-variant">CW Avg</p>
+                        <p className="font-semibold text-on-surface">
+                          {courseworkAvg.toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="rounded border border-outline-variant/20 bg-surface-container-lowest p-2">
+                        <p className="text-on-surface-variant">Computed</p>
+                        <p className="font-semibold text-on-surface">
+                          {row.finalGrade.toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="rounded border border-outline-variant/20 bg-surface-container-lowest p-2">
+                        <p className="text-on-surface-variant">Equivalent</p>
+                        <p className="font-semibold text-on-surface">
+                          {row.equivalentGrade.toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="rounded border border-outline-variant/20 bg-surface-container-lowest p-2">
+                        <p className="text-on-surface-variant">Result</p>
+                        <p
+                          className={`font-semibold ${row.result === "PASSED" ? "text-emerald-700" : "text-rose-700"}`}
+                        >
+                          {row.result}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <label className="text-xs text-on-surface-variant">
+                        {termExamLabel}
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={manual[String(row.studentId)]?.[termExamField] ?? ""}
+                          onChange={(e) =>
+                            setManualFieldInput(
+                              row.studentId,
+                              termExamField,
+                              e.target.value,
+                            )
+                          }
+                          className="mt-1 w-full rounded-md border border-outline-variant/40 bg-surface-container-lowest px-2 py-1.5 text-sm text-on-surface"
+                          disabled={readonly}
+                        />
+                      </label>
+                      <label className="text-xs text-on-surface-variant">
+                        Attendance
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={manual[String(row.studentId)]?.attendance ?? ""}
+                          onChange={(e) =>
+                            setManualFieldInput(
+                              row.studentId,
+                              "attendance",
+                              e.target.value,
+                            )
+                          }
+                          className="mt-1 w-full rounded-md border border-outline-variant/40 bg-surface-container-lowest px-2 py-1.5 text-sm text-on-surface"
+                          disabled={readonly}
+                        />
+                      </label>
+                    </div>
+
+                    {missingPieces.length > 0 && (
+                      <p className="mt-2 text-[11px] text-amber-700">
+                        {missingPieces[0]}
+                      </p>
+                    )}
+
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      <button
+                        className="rounded-md border border-outline-variant/30 px-2.5 py-1 text-xs text-on-surface disabled:text-on-surface-variant"
+                        disabled={readonly}
+                        onClick={() => saveStudent(row, true)}
+                      >
+                        Save & Lock
+                      </button>
+                      <button
+                        className="rounded-md border border-outline-variant/30 px-2.5 py-1 text-xs text-on-surface"
+                        onClick={() => saveStudent(row, false)}
+                      >
+                        Save Draft
+                      </button>
+                      <button
+                        className="rounded-md border border-outline-variant/30 px-2.5 py-1 text-xs text-on-surface disabled:text-on-surface-variant"
+                        disabled={readonly}
+                        onClick={() => resetStudent(row)}
+                      >
+                        Reset
+                      </button>
+                      <button
+                        className="rounded-md border border-outline-variant/30 px-2.5 py-1 text-xs text-on-surface"
+                        onClick={() =>
+                          setExpandedRows((prev) => ({
+                            ...prev,
+                            [row.studentId]: !prev[row.studentId],
+                          }))
+                        }
+                      >
+                        {expandedRows[row.studentId] ? "Hide Details" : "View Details"}
+                      </button>
+                    </div>
+
+                    {expandedRows[row.studentId] && (
+                      <div className="mt-2 rounded-md border border-outline-variant/20 bg-surface-container-lowest p-2 text-[11px] text-on-surface-variant">
+                        <p>
+                          Quiz:{" "}
+                          <b className="text-on-surface">
+                            {((row.quizAvg * weights.quiz) / 100).toFixed(2)}
+                          </b>{" "}
+                          ({row.quizAvg.toFixed(2)} x {weights.quiz}%)
+                        </p>
+                        <p>
+                          Assignments:{" "}
+                          <b className="text-on-surface">
+                            {((row.assignmentAvg * weights.assignment) / 100).toFixed(2)}
+                          </b>{" "}
+                          ({row.assignmentAvg.toFixed(2)} x {weights.assignment}%)
+                        </p>
+                        <p>
+                          Activities:{" "}
+                          <b className="text-on-surface">
+                            {((row.activityAvg * weights.activity) / 100).toFixed(2)}
+                          </b>{" "}
+                          ({row.activityAvg.toFixed(2)} x {weights.activity}%)
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </article>
+        ))}
+        {!pagedRows.length && (
+          <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest px-4 py-6 text-center text-sm text-on-surface-variant">
+            No students in selected course.
+          </article>
+        )}
+      </div>
+
+      <div className="hidden w-full overflow-x-hidden overflow-y-auto rounded border border-slate-200 bg-white md:block">
         <table className="w-full table-fixed text-left text-sm">
           <thead className="bg-slate-50 text-slate-600">
             <tr className="text-xs uppercase tracking-normal">
@@ -1199,7 +1466,7 @@ export function GradeComputationHub({
                 })}
               </Fragment>
             ))}
-            {!rows.length && (
+            {!pagedRows.length && (
               <tr>
                 <td
                   colSpan={11}
@@ -1212,6 +1479,34 @@ export function GradeComputationHub({
           </tbody>
         </table>
       </div>
+
+      {rows.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">
+          <p>
+            Showing {(rowsSafePage - 1) * rowsPerPage + 1}-
+            {Math.min(rowsSafePage * rowsPerPage, rows.length)} of {rows.length} students
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              className="rounded border border-slate-300 px-2 py-1 disabled:opacity-50"
+              onClick={() => setRowsPage((p) => Math.max(1, p - 1))}
+              disabled={rowsSafePage <= 1}
+            >
+              Previous
+            </button>
+            <span>
+              {rowsSafePage} / {rowsTotalPages}
+            </span>
+            <button
+              className="rounded border border-slate-300 px-2 py-1 disabled:opacity-50"
+              onClick={() => setRowsPage((p) => Math.min(rowsTotalPages, p + 1))}
+              disabled={rowsSafePage >= rowsTotalPages}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {weightsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">

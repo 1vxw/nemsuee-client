@@ -12,9 +12,9 @@ export function InstructorGradebookTable({
   onSelectCell,
 }: InstructorGradebookTableProps) {
   return (
-    <div className="overflow-x-auto rounded-md border border-slate-200 bg-white">
-      <table className="min-w-full text-xs">
-        <thead className="bg-slate-50 text-slate-600">
+    <div className="overflow-x-auto rounded-lg border border-outline-variant/20 bg-surface-container-lowest">
+      <table className="min-w-full text-xs font-body">
+        <thead className="bg-surface-container font-label text-on-surface-variant">
           <tr>
             <th className="px-3 py-2 text-left">Block</th>
             <th className="px-3 py-2 text-left">Student</th>
@@ -38,7 +38,7 @@ export function InstructorGradebookTable({
                   return (
                     <td
                       key={`${studentRow.key}-${lesson}`}
-                      className="px-3 py-2 text-slate-400"
+                      className="px-3 py-2 text-on-surface-variant"
                     >
                       -
                     </td>
@@ -54,7 +54,7 @@ export function InstructorGradebookTable({
                       {cell.attempt.score}/{cell.attempt.total} (
                       {Math.round(cell.pct)}%)
                     </button>
-                    <div className="mt-1 h-1.5 w-20 rounded bg-slate-200">
+                    <div className="mt-1 h-1.5 w-20 rounded bg-surface-container-high">
                       <div
                         className={`h-full rounded ${cell.passed ? "bg-emerald-500" : "bg-rose-500"}`}
                         style={{ width: `${Math.max(0, Math.min(100, Math.round(cell.pct)))}%` }}

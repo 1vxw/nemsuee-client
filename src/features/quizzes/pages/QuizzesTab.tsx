@@ -335,30 +335,33 @@ export function QuizzesTab({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="min-w-0 space-y-4 md:space-y-6">
       {user.role === "STUDENT" && (
-        <section className="rounded-md border border-slate-200 bg-white p-3">
+        <section className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-3 sm:p-4 md:p-5">
           <button
             data-keep-action-text="true"
-            className="mb-2 flex w-full items-center justify-between text-left"
+            className="mb-3 flex w-full items-center justify-between text-left sm:mb-4"
             onClick={() => setShowActivityHistory((v) => !v)}
           >
-            <p className="text-sm font-semibold text-slate-900">
-              My Quiz Activity (Completed Quizzes)
-            </p>
-            <span className="text-xs text-slate-500">
-              {showActivityHistory ? "Hide" : "Show"}
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-secondary text-[1.25rem] sm:text-xl">history_edu</span>
+              <p className="font-headline text-sm font-bold text-primary sm:text-base md:text-lg">
+                My Quiz Activity
+              </p>
+            </div>
+            <span className="material-symbols-outlined text-on-surface-variant text-[1.25rem]">
+              {showActivityHistory ? "expand_less" : "expand_more"}
             </span>
           </button>
           {showActivityHistory && recentStudentAttempts.length ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-xs">
-                <thead className="bg-slate-50 text-slate-600">
+            <div className="overflow-x-auto rounded-lg border border-outline-variant/20">
+              <table className="min-w-full text-sm font-body">
+                <thead className="bg-surface-container text-on-surface-variant font-label">
                   <tr>
-                    <th className="px-2 py-1.5 text-left">Lesson</th>
-                    <th className="px-2 py-1.5 text-left">Result</th>
-                    <th className="px-2 py-1.5 text-left">Status</th>
-                    <th className="px-2 py-1.5 text-left">Submitted</th>
+                    <th className="px-4 py-3 text-left">Lesson</th>
+                    <th className="px-4 py-3 text-left">Result</th>
+                    <th className="px-4 py-3 text-left">Status</th>
+                    <th className="px-4 py-3 text-left">Submitted</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -370,21 +373,17 @@ export function QuizzesTab({
                     const passing = Number(a?.quiz?.passingPercentage || 60);
                     const passed = pct >= passing;
                     return (
-                      <tr key={a.id} className="border-t border-slate-100">
-                        <td className="px-2 py-1.5">{a?.quiz?.lesson?.title || "-"}</td>
-                        <td className="px-2 py-1.5">
-                          {a?.score}/{a?.total} ({Math.round(pct)}%)
-                        </td>
-                        <td className="px-2 py-1.5">
+                      <tr key={a.id} className="border-t border-outline-variant/20">
+                        <td className="px-4 py-3 text-on-surface font-medium">{a?.quiz?.lesson?.title || "-"}</td>
+                        <td className="px-4 py-3 text-on-surface-variant">{a?.score}/{a?.total} ({Math.round(pct)}%)</td>
+                        <td className="px-4 py-3">
                           <span
-                            className={`rounded px-2 py-0.5 ${passed ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}
+                            className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${passed ? "bg-emerald-100 text-emerald-700" : "bg-error-container text-error"}`}
                           >
                             {passed ? "Passed" : "Failed"}
                           </span>
                         </td>
-                        <td className="px-2 py-1.5">
-                          {new Date(a?.createdAt || Date.now()).toLocaleString()}
-                        </td>
+                        <td className="px-4 py-3 text-on-surface-variant text-xs">{new Date(a?.createdAt || Date.now()).toLocaleString()}</td>
                       </tr>
                     );
                   })}
@@ -392,21 +391,24 @@ export function QuizzesTab({
               </table>
             </div>
           ) : showActivityHistory ? (
-            <p className="text-xs text-slate-500">No quiz attempts yet.</p>
+            <p className="rounded-lg bg-surface-container px-4 py-6 text-center text-sm text-on-surface-variant">No quiz attempts yet.</p>
           ) : null}
         </section>
       )}
       {selectedCourse.sections.map((section) => (
         <section
           key={section.id}
-          className="rounded-lg border border-slate-200 bg-white shadow-sm"
+          className="overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container-lowest shadow-sm"
         >
-          <div className="border-b border-slate-200 bg-slate-50 px-3 py-2">
-            <p className="text-sm font-semibold text-slate-900">
-              {section.name}
-            </p>
+          <div className="border-b border-outline-variant/20 bg-surface-container px-3 py-2.5 sm:px-4 sm:py-3 md:px-5 md:py-4">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="material-symbols-outlined text-secondary text-base sm:text-xl">folder</span>
+              <p className="font-headline text-sm font-bold text-primary sm:text-base md:text-lg">
+                {section.name}
+              </p>
+            </div>
           </div>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-outline-variant/20">
             {section.lessons.map((lesson) => {
               const lessonQuizzes = courseQuizzes.filter(
                 (q: any) => Number(q.lessonId) === lesson.id,
@@ -430,20 +432,20 @@ export function QuizzesTab({
               return (
                 <article
                   key={lesson.id}
-                  className="flex items-start justify-between gap-3 px-3 py-3"
+                  className="flex flex-col gap-3 px-3 py-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-2 sm:px-4 sm:py-4"
                 >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-slate-900">
-                      Q {lesson.title}
+                  <div className="min-w-0 flex-1 sm:flex-initial">
+                    <p className="font-headline text-sm font-bold text-primary truncate sm:text-base">
+                      {lesson.title}
                     </p>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs font-label">
                       <span
-                        className={`rounded px-2 py-0.5 ${statusLabel === "Quiz Ready" ? "bg-emerald-100 text-emerald-700" : statusLabel === "File Quiz Available" ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-600"}`}
+                        className={`font-bold ${statusLabel === "Quiz Ready" ? "text-emerald-700" : statusLabel === "File Quiz Available" ? "text-on-primary-fixed-variant" : "text-on-surface-variant"}`}
                       >
                         {statusLabel}
                       </span>
                       {hasQuiz && (
-                        <span className="text-slate-500">
+                        <span className="text-on-surface-variant">
                           {lessonQuizzes.reduce(
                             (n: number, q: any) =>
                               n + (q.questions?.length || 0),
@@ -453,14 +455,14 @@ export function QuizzesTab({
                         </span>
                       )}
                       {user.role === "INSTRUCTOR" && hasQuiz && (
-                        <span className="text-slate-500">
+                        <span className="text-on-surface-variant">
                           {attemptsForLesson.length} submissions
                         </span>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                  <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                     {user.role === "INSTRUCTOR" && !hasQuiz && (
                       <>
                         <button
@@ -479,19 +481,11 @@ export function QuizzesTab({
                               },
                             ]);
                           }}
-                          className="rounded bg-blue-700 p-1.5 text-white"
+                          className="rounded-lg bg-primary p-2 text-on-primary hover:opacity-90 transition-opacity"
                           title="Create quiz"
                           aria-label="Create quiz"
                         >
-                          <svg
-                            viewBox="0 0 24 24"
-                            className="h-4 w-4"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <path d="M12 5v14M5 12h14" />
-                          </svg>
+                          <span className="material-symbols-outlined text-[1.125rem]">add</span>
                         </button>
                         <button
                           onClick={() =>
@@ -499,73 +493,39 @@ export function QuizzesTab({
                               "Upload Quiz File: use Add Lesson and provide a file URL.",
                             )
                           }
-                          className="rounded border border-slate-300 p-1.5 hover:bg-slate-50"
+                          className="rounded-lg border border-outline-variant/40 p-2 hover:bg-surface-container transition-colors"
                           title="Upload quiz file"
                           aria-label="Upload quiz file"
                         >
-                          <svg
-                            viewBox="0 0 24 24"
-                            className="h-4 w-4"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <path d="M12 16V4" />
-                            <path d="M7 9l5-5 5 5" />
-                            <path d="M4 20h16" />
-                          </svg>
+                          <span className="material-symbols-outlined text-[1.125rem]">upload_file</span>
                         </button>
                       </>
                     )}
                     {hasFileQuiz &&
                       (studentFileLockedByOpenQuiz ? (
                         <button
-                          className="cursor-not-allowed rounded border border-slate-200 bg-slate-100 p-1.5 text-slate-400"
+                          className="cursor-not-allowed rounded-lg border border-outline-variant/20 bg-surface-container p-2 text-on-surface-variant"
                           title="Resource file is locked while quiz is open"
                           aria-label="Resource file locked while quiz is open"
                           disabled
                         >
-                          <svg
-                            viewBox="0 0 24 24"
-                            className="h-4 w-4"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <path d="M14 3h7v7" />
-                            <path d="M10 14L21 3" />
-                            <path d="M21 14v7h-7" />
-                            <path d="M3 10V3h7" />
-                            <path d="M3 21l7-7" />
-                          </svg>
+                          <span className="material-symbols-outlined text-[1.125rem]">link_off</span>
                         </button>
                       ) : (
                         <a
-                          className="rounded border border-slate-300 p-1.5 hover:bg-slate-50"
+                          className="rounded-lg border border-outline-variant/40 p-2 hover:bg-surface-container transition-colors"
                           href={lesson.fileUrl || "#"}
                           target="_blank"
                           rel="noreferrer"
                           title="Open quiz file"
                           aria-label="Open quiz file"
                         >
-                          <svg
-                            viewBox="0 0 24 24"
-                            className="h-4 w-4"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <path d="M14 3h7v7" />
-                            <path d="M10 14L21 3" />
-                            <path d="M21 14v7h-7" />
-                            <path d="M3 10V3h7" />
-                            <path d="M3 21l7-7" />
-                          </svg>
+                          <span className="material-symbols-outlined text-[1.125rem]">open_in_new</span>
                         </a>
                       ))}
                   </div>
                   {hasQuiz && (
-                    <div className="mt-3 w-full space-y-2">
+                    <div className="w-full space-y-2 sm:mt-0 sm:basis-full sm:space-y-3">
                       {lessonQuizzes.map((quiz: any) => {
                         const myAttempt = attempts.find(
                           (a: any) => Number(a.quiz?.id) === Number(quiz.id),
@@ -593,9 +553,9 @@ export function QuizzesTab({
                         const attemptToneClass =
                           user.role === "STUDENT" && latestPct !== null
                             ? latestPct >= passThreshold
-                              ? "border-emerald-400 bg-emerald-50"
-                              : "border-rose-400 bg-rose-50"
-                            : "border-slate-200 bg-slate-50";
+                              ? "border-emerald-200 bg-emerald-50"
+                              : "border-error-container bg-error-container/50"
+                            : "border-outline-variant/20 bg-surface-container";
                         const blockReason = getQuizAccessBlockReason(quiz);
                         const maxAttemptsReached = Boolean(
                           quiz.maxAttempts &&
@@ -614,13 +574,16 @@ export function QuizzesTab({
                         return (
                           <div
                             key={quiz.id}
-                            className={`flex items-center justify-between gap-2 rounded-md border px-2 py-2 ${attemptToneClass}`}
+                            className={`flex flex-col gap-2 rounded-lg border px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-4 sm:py-3 ${attemptToneClass}`}
                           >
-                            <div className="min-w-0">
-                              <p className="truncate text-xs font-semibold text-slate-900">
+                            <div className="min-w-0 flex-1">
+                              <p className="font-headline text-sm font-bold text-primary truncate sm:text-base">
                                 {quiz.title || "Quiz"}
                               </p>
-                              <p className="text-[11px] text-slate-500">
+                              <p className="text-[11px] text-on-surface-variant font-label mt-0.5 sm:text-xs">
+                                {section.name} · {lesson.title}
+                              </p>
+                              <p className="text-[11px] text-on-surface-variant font-label sm:text-xs">
                                 {(quiz.questions || []).length} questions
                                 {quiz.timeLimitMinutes
                                   ? ` · ${quiz.timeLimitMinutes} min`
@@ -633,7 +596,7 @@ export function QuizzesTab({
                                   : ""}
                               </p>
                             </div>
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center justify-end gap-1.5 flex-shrink-0 sm:justify-start">
                               {user.role === "INSTRUCTOR" ? (
                                 <>
                                   <button
@@ -654,39 +617,17 @@ export function QuizzesTab({
                                       );
                                       setCourseQuizzes(rows || []);
                                     }}
-                                    className="rounded border border-rose-200 p-1.5 text-rose-700 hover:bg-rose-50"
+                                    className="rounded-lg border border-error-container p-2 text-error hover:bg-error-container/50 transition-colors"
                                     title="Delete quiz"
                                   >
-                                    <svg
-                                      viewBox="0 0 24 24"
-                                      className="h-4 w-4"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="2"
-                                    >
-                                      <path d="M3 6h18" />
-                                      <path d="M8 6V4h8v2" />
-                                      <path d="M19 6l-1 14H6L5 6" />
-                                      <path d="M10 11v6M14 11v6" />
-                                    </svg>
+                                    <span className="material-symbols-outlined text-[1.125rem]">delete</span>
                                   </button>
                                   <button
                                     onClick={() => navigate("/scores")}
-                                    className="rounded border border-slate-300 p-1.5 hover:bg-white"
+                                    className="rounded-lg border border-outline-variant/40 p-2 hover:bg-surface-container transition-colors"
                                     title="View results"
                                   >
-                                    <svg
-                                      viewBox="0 0 24 24"
-                                      className="h-4 w-4"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="2"
-                                    >
-                                      <path d="M4 19h16" />
-                                      <path d="M7 16V9" />
-                                      <path d="M12 16V5" />
-                                      <path d="M17 16v-3" />
-                                    </svg>
+                                    <span className="material-symbols-outlined text-[1.125rem]">bar_chart</span>
                                   </button>
                                   <button
                                     onClick={async () => {
@@ -706,40 +647,19 @@ export function QuizzesTab({
                                       );
                                       setCourseQuizzes(rows || []);
                                     }}
-                                    className="rounded border border-slate-300 p-1.5 hover:bg-white"
+                                    className="rounded-lg border border-outline-variant/40 p-2 hover:bg-surface-container transition-colors"
                                     title={
                                       quiz.isOpen ? "Close quiz" : "Open quiz"
                                     }
                                   >
-                                    <svg
-                                      viewBox="0 0 24 24"
-                                      className="h-4 w-4"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="2"
-                                    >
-                                      {quiz.isOpen ? (
-                                        <path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6Z" />
-                                      ) : (
-                                        <path d="M3 3l18 18M10.7 5.1A10.5 10.5 0 0 1 12 5c5.5 0 9 6 9 6a16.8 16.8 0 0 1-3 3.8M6.6 6.6A16.9 16.9 0 0 0 3 12s3.5 6 9 6a10.6 10.6 0 0 0 4.2-.8M9.9 9.9a3 3 0 1 0 4.2 4.2" />
-                                      )}
-                                    </svg>
+                                    <span className="material-symbols-outlined text-[1.125rem]">{quiz.isOpen ? "visibility" : "visibility_off"}</span>
                                   </button>
                                   <button
                                     onClick={() => setSettingsQuiz(quiz)}
-                                    className="rounded border border-slate-300 p-1.5 hover:bg-white"
+                                    className="rounded-lg border border-outline-variant/40 p-2 hover:bg-surface-container transition-colors"
                                     title="Quiz settings"
                                   >
-                                    <svg
-                                      viewBox="0 0 24 24"
-                                      className="h-4 w-4"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="2"
-                                    >
-                                      <circle cx="12" cy="12" r="3" />
-                                      <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z" />
-                                    </svg>
+                                    <span className="material-symbols-outlined text-[1.125rem]">settings</span>
                                   </button>
                                 </>
                               ) : (
@@ -781,7 +701,7 @@ export function QuizzesTab({
                                         setMessage((e as Error).message);
                                       }
                                     }}
-                                    className={`rounded p-1.5 ${isBlocked ? "cursor-not-allowed text-slate-400" : "text-slate-700 hover:text-slate-900"}`}
+                                    className={`rounded-lg p-2 transition-colors ${isBlocked ? "cursor-not-allowed text-on-surface-variant" : "text-primary hover:bg-surface-container"}`}
                                     title={
                                       isBlocked
                                         ? blockReason || "Unavailable"
@@ -799,46 +719,13 @@ export function QuizzesTab({
                                     disabled={isBlocked}
                                     aria-disabled={isBlocked}
                                   >
-                                    {myAttempt ? (
-                                      <svg
-                                        viewBox="0 0 24 24"
-                                        className="h-4 w-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                      >
-                                        <path d="M3 12a9 9 0 1 0 3-6.7" />
-                                        <path d="M3 4v6h6" />
-                                      </svg>
-                                    ) : quiz.mode === "URL" ? (
-                                      <svg
-                                        viewBox="0 0 24 24"
-                                        className="h-4 w-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                      >
-                                        <path d="M14 3h7v7" />
-                                        <path d="M10 14L21 3" />
-                                        <path d="M21 14v7h-7" />
-                                        <path d="M3 10V3h7" />
-                                        <path d="M3 21l7-7" />
-                                      </svg>
-                                    ) : (
-                                      <svg
-                                        viewBox="0 0 24 24"
-                                        className="h-4 w-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                      >
-                                        <path d="M8 5v14l11-7z" />
-                                      </svg>
-                                    )}
+                                    <span className="material-symbols-outlined text-[1.125rem]">
+                                      {myAttempt ? "replay" : quiz.mode === "URL" ? "open_in_new" : "play_circle"}
+                                    </span>
                                   </button>
                                   <button
                                     data-keep-action-text="true"
-                                    className={`rounded p-1.5 disabled:opacity-50 ${latestAttempt && canStudentViewResult ? "text-slate-700 hover:text-slate-900" : "text-slate-400"}`}
+                                    className={`rounded-lg p-2 transition-colors disabled:opacity-50 ${latestAttempt && canStudentViewResult ? "text-primary hover:bg-surface-container" : "text-on-surface-variant"}`}
                                     disabled={!latestAttempt || !canStudentViewResult}
                                     onClick={async () => {
                                       if (!latestAttempt) return;
@@ -874,16 +761,7 @@ export function QuizzesTab({
                                         : "View result"
                                     }
                                   >
-                                    <svg
-                                      viewBox="0 0 24 24"
-                                      className="h-4 w-4"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="2"
-                                    >
-                                      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
-                                      <circle cx="12" cy="12" r="3" />
-                                    </svg>
+                                    <span className="material-symbols-outlined text-[1.125rem]">visibility</span>
                                   </button>
                                 </>
                               )}
@@ -897,49 +775,55 @@ export function QuizzesTab({
               );
             })}
             {!section.lessons.length && (
-              <p className="px-3 py-4 text-center text-sm text-slate-500">
-                No lessons in this block yet.
-              </p>
+              <div className="px-4 py-8 text-center md:px-5">
+                <span className="material-symbols-outlined text-3xl text-outline-variant/40 mb-2 block">quiz</span>
+                <p className="text-sm text-on-surface-variant font-body">No lessons in this block yet.</p>
+              </div>
             )}
           </div>
         </section>
       ))}
       {!selectedCourse.sections.some((s) => s.lessons.length) && (
-        <p className="rounded-md border border-dashed border-slate-300 px-3 py-4 text-center text-sm text-slate-500">
-          No quizzes available yet.
-        </p>
+        <div className="rounded-xl border border-dashed border-outline-variant/30 px-8 py-12 text-center">
+          <span className="material-symbols-outlined text-4xl text-outline-variant/30 mb-3 block">quiz</span>
+          <p className="font-headline text-lg font-bold text-primary mb-1">No quizzes available yet</p>
+          <p className="text-sm text-on-surface-variant">Lessons will appear here once your instructor adds course content.</p>
+        </div>
       )}
       {createLessonId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-          <div className="w-full max-w-2xl rounded-lg border border-slate-200 bg-white p-4 shadow-lg">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-semibold text-slate-900">
-                Manual Quiz Creation
-              </p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-2xl rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-5 shadow-xl md:p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-secondary text-2xl">add_circle</span>
+                <p className="font-headline text-lg font-bold text-primary">
+                  Create Quiz
+                </p>
+              </div>
               <button
-                className="rounded border border-slate-300 px-2 py-1 text-xs"
+                className="rounded-lg border border-outline-variant/40 px-3 py-2 text-sm font-label hover:bg-surface-container transition-colors"
                 onClick={resetComposer}
               >
                 Close
               </button>
             </div>
-            <div className="mb-3 grid gap-2 sm:grid-cols-[140px_1fr] sm:items-center">
-              <label className="text-xs font-medium text-slate-600">
+            <div className="mb-4 grid gap-3 sm:grid-cols-[140px_1fr] sm:items-start">
+              <label className="text-sm font-label font-medium text-on-surface-variant">
                 Quiz Setup
               </label>
-              <div className="grid gap-2">
+              <div className="grid gap-3">
                 <input
                   value={quizTitle}
                   onChange={(e) => setQuizTitle(e.target.value)}
                   placeholder="Quiz title"
-                  className="rounded border border-slate-300 px-3 py-2 text-sm"
+                  className="rounded-lg border border-outline-variant/40 px-4 py-2.5 text-sm font-body focus:ring-1 focus:ring-primary focus:border-primary outline-none"
                 />
                 <select
                   value={quizMode}
                   onChange={(e) =>
                     setQuizMode(e.target.value as "MANUAL" | "URL")
                   }
-                  className="rounded border border-slate-300 px-3 py-2 text-sm"
+                  className="rounded-lg border border-outline-variant/40 px-4 py-2.5 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
                 >
                   <option value="MANUAL">Manual</option>
                   <option value="URL">Google Form URL</option>
@@ -949,7 +833,7 @@ export function QuizzesTab({
                     value={externalUrl}
                     onChange={(e) => setExternalUrl(e.target.value)}
                     placeholder="https://forms.google.com/..."
-                    className="rounded border border-slate-300 px-3 py-2 text-sm"
+                    className="rounded-lg border border-outline-variant/40 px-4 py-2.5 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
                   />
                 ) : (
                   <select
@@ -968,7 +852,7 @@ export function QuizzesTab({
                         })),
                       );
                     }}
-                    className="rounded border border-slate-300 px-3 py-2 text-sm"
+                    className="rounded-lg border border-outline-variant/40 px-4 py-2.5 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
                   >
                     <option value="MULTIPLE_CHOICE">Multiple Choice</option>
                     <option value="TRUE_FALSE">True / False</option>
@@ -982,10 +866,10 @@ export function QuizzesTab({
                 {draftQuestions.map((q, idx) => (
                   <div
                     key={idx}
-                    className="rounded border border-slate-200 p-3"
+                    className="rounded-xl border border-outline-variant/20 bg-surface-container p-4"
                   >
-                    <div className="mb-2 flex items-center justify-between">
-                      <p className="text-xs font-semibold text-slate-700">
+                    <div className="mb-3 flex items-center justify-between">
+                      <p className="text-sm font-label font-bold text-primary">
                         Question {idx + 1}
                       </p>
                       <button
@@ -994,7 +878,7 @@ export function QuizzesTab({
                             prev.filter((_, i) => i !== idx),
                           )
                         }
-                        className="rounded border border-rose-300 px-2 py-0.5 text-[11px] text-rose-700"
+                        className="rounded-lg border border-error-container px-2.5 py-1 text-xs font-label font-bold text-error hover:bg-error-container/30"
                       >
                         Remove
                       </button>
@@ -1009,7 +893,7 @@ export function QuizzesTab({
                         )
                       }
                       placeholder="Question prompt"
-                      className="mb-2 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                      className="mb-3 w-full rounded-lg border border-outline-variant/40 px-4 py-2 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
                     />
                     {quizType === "IDENTIFICATION" ? (
                       <input
@@ -1022,10 +906,10 @@ export function QuizzesTab({
                           )
                         }
                         placeholder="Correct answer"
-                        className="rounded border border-slate-300 px-3 py-2 text-sm"
+                        className="rounded-lg border border-outline-variant/40 px-4 py-2 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
                       />
                     ) : isTrueFalse ? (
-                      <p className="mb-2 text-xs text-slate-600">
+                      <p className="mb-2 text-xs text-on-surface-variant font-body">
                         Options are fixed: A=True, B=False
                       </p>
                     ) : (
@@ -1055,7 +939,7 @@ export function QuizzesTab({
                               )
                             }
                             placeholder={`Option ${opt}`}
-                            className="rounded border border-slate-300 px-3 py-2 text-sm"
+                            className="rounded-lg border border-outline-variant/40 px-4 py-2 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
                           />
                         ))}
                       </div>
@@ -1078,7 +962,7 @@ export function QuizzesTab({
                           ),
                         )
                       }
-                      className="mt-2 rounded border border-slate-300 px-3 py-2 text-sm"
+                      className="mt-2 rounded-lg border border-outline-variant/40 px-4 py-2 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
                     >
                       <option value="A">Correct: A</option>
                       <option value="B">Correct: B</option>
@@ -1093,9 +977,9 @@ export function QuizzesTab({
                 ))}
               </div>
             )}
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="mt-4 flex flex-wrap items-center gap-3">
               <button
-                className="rounded border border-slate-300 p-2"
+                className="flex items-center gap-2 rounded-lg border border-outline-variant/40 px-4 py-2 font-label text-sm hover:bg-surface-container transition-colors"
                 onClick={() =>
                   setDraftQuestions((prev) => [
                     ...prev,
@@ -1112,52 +996,36 @@ export function QuizzesTab({
                 title="Add question"
                 aria-label="Add question"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
+                <span className="material-symbols-outlined text-lg">add</span>
+                Add Question
               </button>
               <button
-                className="rounded bg-blue-700 p-2 text-white"
+                className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-label text-sm font-bold text-on-primary hover:opacity-90 transition-opacity"
                 onClick={() => submitManualQuiz(createLessonId)}
                 title="Save quiz"
                 aria-label="Save quiz"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M5 4h12l2 2v14H5z" />
-                  <path d="M8 4v6h8V4" />
-                  <path d="M9 19h6" />
-                </svg>
+                <span className="material-symbols-outlined text-lg">save</span>
+                Create Quiz
               </button>
             </div>
           </div>
         </div>
       )}
       {takeQuiz && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-          <div className="w-full max-w-2xl rounded-lg border border-slate-200 bg-white p-4 shadow-lg">
-            <div className="mb-3 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-2xl rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-5 shadow-xl md:p-6">
+            <div className="mb-4 flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold">{takeQuiz.title}</p>
+                <p className="font-headline text-lg font-bold text-primary">{takeQuiz.title}</p>
                 {takeQuiz.timeLimitMinutes ? (
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-on-surface-variant mt-1">
                     Time limit: {takeQuiz.timeLimitMinutes} minutes
                   </p>
                 ) : null}
                 {takeQuiz.timeLimitMinutes ? (
                   <p
-                    className={`text-xs font-semibold ${takeRemainingSeconds !== null && takeRemainingSeconds <= 60 ? "text-rose-600" : "text-slate-700"}`}
+                    className={`text-sm font-bold mt-1 ${takeRemainingSeconds !== null && takeRemainingSeconds <= 60 ? "text-error" : "text-on-surface"}`}
                   >
                     Time left:{" "}
                     {takeRemainingSeconds !== null
@@ -1165,16 +1033,16 @@ export function QuizzesTab({
                       : "00:00"}
                   </p>
                 ) : (
-                  <p className="text-xs font-semibold text-slate-700">
+                  <p className="text-sm font-bold text-on-surface mt-1">
                     No time limit
                   </p>
                 )}
-                <p className="text-[11px] text-slate-500">
+                <p className="text-xs text-on-surface-variant mt-1">
                   Progress is saved locally on this device.
                 </p>
               </div>
               <button
-                className="rounded border border-slate-300 px-2 py-1 text-xs"
+                className="rounded-lg border border-outline-variant/40 px-3 py-2 text-sm font-label hover:bg-surface-container transition-colors"
                 onClick={() => {
                   setTakeQuiz(null);
                   setTakeRemainingSeconds(null);
@@ -1186,13 +1054,13 @@ export function QuizzesTab({
             </div>
             <div className="max-h-[55vh] space-y-3 overflow-auto">
               {(takeQuiz.questions || []).map((q: any, idx: number) => (
-                <div key={q.id} className="rounded border border-slate-200 p-2">
-                  <p className="mb-2 text-xs font-semibold">
+                <div key={q.id} className="rounded-xl border border-outline-variant/20 bg-surface-container p-4">
+                  <p className="mb-3 font-label text-sm font-bold text-primary">
                     Q{idx + 1}. {q.prompt}
                   </p>
                   {takeQuiz.quizType === "IDENTIFICATION" ? (
                     <input
-                      className="w-full rounded border border-slate-300 px-2 py-1 text-xs"
+                      className="w-full rounded-lg border border-outline-variant/40 px-4 py-2 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
                       value={takeAnswers[q.id] || ""}
                       onChange={(e) =>
                         setTakeAnswers((prev) => ({
@@ -1233,9 +1101,9 @@ export function QuizzesTab({
                 </div>
               ))}
             </div>
-            <div className="mt-3">
+            <div className="mt-4">
               <button
-                className="rounded bg-slate-900 p-2 text-white"
+                className="flex items-center gap-2 rounded-lg bg-primary px-4 py-3 font-label text-sm font-bold text-on-primary hover:opacity-90 transition-opacity disabled:opacity-60"
                 onClick={() => submitTakeQuiz(false)}
                 disabled={submittingTakeQuiz}
                 title={submittingTakeQuiz ? "Submitting..." : "Submit quiz"}
@@ -1244,26 +1112,12 @@ export function QuizzesTab({
                 }
               >
                 {submittingTakeQuiz ? (
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-4 w-4 animate-spin"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M21 12a9 9 0 1 1-3-6.7" />
-                  </svg>
+                  <span className="material-symbols-outlined animate-spin">progress_activity</span>
                 ) : (
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M22 2L11 13" />
-                    <path d="M22 2l-7 20-4-9-9-4 20-7z" />
-                  </svg>
+                  <>
+                    <span className="material-symbols-outlined">send</span>
+                    Submit Quiz
+                  </>
                 )}
               </button>
             </div>
@@ -1271,21 +1125,24 @@ export function QuizzesTab({
         </div>
       )}
       {settingsQuiz && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-          <div className="w-full max-w-lg rounded-lg border border-slate-200 bg-white p-4 shadow-lg">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-semibold">Quiz Settings</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-5 shadow-xl md:p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-secondary text-xl">settings</span>
+                <p className="font-headline text-lg font-bold text-primary">Quiz Settings</p>
+              </div>
               <button
-                className="rounded border border-slate-300 px-2 py-1 text-xs"
+                className="rounded-lg border border-outline-variant/40 px-3 py-2 text-sm font-label hover:bg-surface-container transition-colors"
                 onClick={() => setSettingsQuiz(null)}
               >
                 Close
               </button>
             </div>
-            <div className="grid gap-2 text-sm">
+            <div className="grid gap-3 text-sm">
               <input
                 id="quiz-title"
-                className="rounded border border-slate-300 px-2 py-2"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 font-body focus:ring-1 focus:ring-primary outline-none"
                 defaultValue={settingsQuiz.title || ""}
                 placeholder="Quiz title"
               />
@@ -1293,7 +1150,7 @@ export function QuizzesTab({
                 id="quiz-time-limit"
                 type="number"
                 min={1}
-                className="rounded border border-slate-300 px-2 py-2"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 font-body focus:ring-1 focus:ring-primary outline-none"
                 defaultValue={settingsQuiz.timeLimitMinutes || ""}
                 placeholder="Time limit (minutes)"
               />
@@ -1301,7 +1158,7 @@ export function QuizzesTab({
                 id="quiz-max-attempts"
                 type="number"
                 min={1}
-                className="rounded border border-slate-300 px-2 py-2"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 font-body focus:ring-1 focus:ring-primary outline-none"
                 defaultValue={settingsQuiz.maxAttempts || ""}
                 placeholder="Max attempts"
               />
@@ -1310,13 +1167,13 @@ export function QuizzesTab({
                 type="number"
                 min={1}
                 max={100}
-                className="rounded border border-slate-300 px-2 py-2"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 font-body focus:ring-1 focus:ring-primary outline-none"
                 defaultValue={settingsQuiz.passingPercentage || 60}
                 placeholder="Passing score (%)"
               />
               <input
                 id="quiz-access-code"
-                className="rounded border border-slate-300 px-2 py-2"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 font-body focus:ring-1 focus:ring-primary outline-none"
                 defaultValue={settingsQuiz.accessCode || ""}
                 placeholder="Access code (optional)"
               />
@@ -1355,9 +1212,9 @@ export function QuizzesTab({
                 Show quiz results in student Scores tab
               </label>
             </div>
-            <div className="mt-3">
+            <div className="mt-4">
               <button
-                className="rounded bg-blue-700 px-3 py-2 text-xs text-white"
+                className="rounded-lg bg-primary px-4 py-2.5 font-label text-sm font-bold text-on-primary hover:opacity-90 transition-opacity"
                 onClick={async () => {
                   const title =
                     (
@@ -1449,12 +1306,15 @@ export function QuizzesTab({
         </div>
       )}
       {studentResultOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-          <div className="w-full max-w-2xl rounded-lg border border-slate-200 bg-white p-4 shadow-lg">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-semibold">Quiz Result</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-2xl rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-5 shadow-xl md:p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-secondary text-xl">quiz</span>
+                <p className="font-headline text-lg font-bold text-primary">Quiz Result</p>
+              </div>
               <button
-                className="rounded border border-slate-300 px-2 py-1 text-xs"
+                className="rounded-lg border border-outline-variant/40 px-3 py-2 text-sm font-label hover:bg-surface-container transition-colors"
                 onClick={() => {
                   setStudentResultOpen(false);
                   setStudentResultData(null);
@@ -1464,43 +1324,46 @@ export function QuizzesTab({
               </button>
             </div>
             {studentResultLoading ? (
-              <p className="text-sm text-slate-500">Loading result...</p>
+              <div className="flex items-center gap-2 py-8 text-on-surface-variant">
+                <span className="material-symbols-outlined animate-spin">progress_activity</span>
+                <p className="text-sm font-body">Loading result...</p>
+              </div>
             ) : !studentResultData ? (
-              <p className="text-sm text-slate-500">No result data.</p>
+              <p className="text-sm text-on-surface-variant font-body py-8">No result data.</p>
             ) : (
-              <div className="space-y-3">
-                <div className="rounded border border-slate-200 bg-slate-50 p-3 text-sm">
-                  <p className="font-semibold text-slate-900">
+              <div className="space-y-4">
+                <div className="rounded-xl border border-outline-variant/20 bg-surface-container p-4 text-sm">
+                  <p className="font-headline font-bold text-primary">
                     {studentResultData?.quiz?.title || "Quiz"}
                   </p>
-                  <p className="text-slate-600">
+                  <p className="text-on-surface-variant mt-1">
                     Block: {studentResultData?.quiz?.sectionName || "N/A"}
                   </p>
-                  <p className="text-slate-600">
+                  <p className="text-on-surface-variant">
                     Lesson: {studentResultData?.quiz?.lessonTitle || "N/A"}
                   </p>
-                  <p className="font-semibold text-blue-700">
+                  <p className="font-headline font-bold text-primary mt-2">
                     Score: {studentResultData?.score}/{studentResultData?.total}
                   </p>
                 </div>
                 {!studentResultData?.quiz?.canViewAnswerKey ? (
-                  <p className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                  <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 font-body">
                     Answer key is hidden by instructor.
                   </p>
                 ) : (
-                  <div className="max-h-[45vh] space-y-2 overflow-auto">
+                  <div className="max-h-[45vh] space-y-3 overflow-auto">
                     {(studentResultData?.questions || []).map((q: any, idx: number) => (
-                      <div key={q.id} className="rounded border border-slate-200 p-2 text-xs">
-                        <p className="font-semibold text-slate-900">
+                      <div key={q.id} className="rounded-xl border border-outline-variant/20 bg-surface-container p-3 text-sm">
+                        <p className="font-label font-bold text-primary">
                           Q{idx + 1}. {q.prompt}
                         </p>
-                        <p className="text-slate-600">
+                        <p className="text-on-surface-variant mt-1">
                           Your answer: {q.studentAnswer || "(no answer)"}
                         </p>
-                        <p className="text-slate-600">
+                        <p className="text-on-surface-variant">
                           Correct answer: {q.correctAnswer || "-"}
                         </p>
-                        <p className={q.isCorrect ? "text-emerald-700" : "text-rose-700"}>
+                        <p className={`mt-1 font-bold ${q.isCorrect ? "text-emerald-700" : "text-error"}`}>
                           {q.isCorrect ? "Correct" : "Incorrect"}
                         </p>
                       </div>

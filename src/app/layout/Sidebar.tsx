@@ -2,6 +2,19 @@ import { useState } from "react";
 import type { Course, TeachingBlock, User, ViewKey } from "../../shared/types/lms";
 import { menu } from "./menu";
 
+const menuIcons: Record<string, string> = {
+  dashboard: "space_dashboard",
+  courses: "school",
+  scores: "grade",
+  grade_computation: "fact_check",
+  admin_blocks: "admin_panel_settings",
+  archives: "archive",
+  admin_settings: "admin_panel_settings",
+  storage: "cloud_sync",
+  notifications: "notifications",
+  settings: "settings",
+};
+
 export function Sidebar({
   user,
   view,
@@ -32,73 +45,96 @@ export function Sidebar({
   const hideIdentity = hideLmsSisFeatures && (user.role === "INSTRUCTOR" || user.role === "STUDENT");
 
   return (
-    <aside className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="rounded-md bg-gradient-to-br from-blue-700 to-blue-900 p-4 text-white">
-        <p className="text-xs uppercase tracking-widest text-slate-200">NEMSU</p>
-        <h1 className="text-lg font-bold">E-Learning Platform</h1>
+    <aside className="rounded-xl bg-surface-container-low p-6 shadow-sm border border-outline-variant/20">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-on-primary">
+          <span className="material-symbols-outlined text-xl">school</span>
+        </div>
+        <div>
+          <h3 className="font-headline font-bold text-primary text-base leading-tight">The Athenaeum</h3>
+          <p className="text-xs text-on-surface-variant uppercase tracking-widest font-label">Academic Portal</p>
+        </div>
       </div>
-      <p className="mt-4 rounded-md bg-slate-100 p-3 text-sm">
-        {!hideIdentity && (
-          <>
-            <span className="font-semibold">{user.fullName}</span>
-            <br />
-          </>
-        )}
-        {user.role}
-      </p>
-      <nav className="mt-3 space-y-2">
+
+      {/* User Info */}
+      <div className="bg-surface-container-lowest rounded-lg p-3 mb-6 border border-outline-variant/10">
+        <p className="text-sm font-body text-on-surface">
+          {!hideIdentity && (
+            <>
+              <span className="font-semibold">{user.fullName}</span>
+              <br />
+            </>
+          )}
+          <span className="text-xs text-on-surface-variant font-label uppercase tracking-wider">{user.role}</span>
+        </p>
+      </div>
+
+      {/* Navigation */}
+      <nav className="space-y-1" data-no-action-iconize="true">
         {items.map((m) => {
           if (m.key !== "courses" && m.key !== "archives") {
             return (
               <button
                 key={m.key}
                 onClick={() => setView(m.key)}
-                data-keep-action-text={m.key === "course_search" ? "true" : undefined}
-                className={`w-full rounded px-3 py-2 text-left text-sm ${view === m.key ? "bg-blue-700 text-white" : "bg-white hover:bg-slate-100"}`}
+                data-keep-action-text="true"
+                title={m.label}
+                className={`w-full flex items-center gap-4 rounded-lg px-4 py-3 text-left text-sm font-label font-medium transition-all ${
+                  view === m.key
+                    ? "bg-surface-container-lowest text-primary shadow-sm shadow-primary/10 border-l-2 border-secondary"
+                    : "text-on-surface-variant hover:bg-surface-container-lowest hover:text-on-surface"
+                }`}
               >
-                {m.label}
+                <span className="material-symbols-outlined text-lg">{menuIcons[m.key] || "article"}</span>
+                <span className="font-body tracking-normal normal-case [font-family:Manrope,system-ui,sans-serif]">
+                  {m.label}
+                </span>
               </button>
             );
           }
+
           if (m.key === "archives") {
             return (
               <div key={m.key}>
                 <button
-                  onClick={() => setView("archives")}
-                  className={`flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm ${view === "archives" ? "bg-blue-700 text-white" : "bg-white hover:bg-slate-100"}`}
+                  onClick={() => {
+                    setView("archives");
+                    setCoursesOpen(false);
+                  }}
+                  data-keep-action-text="true"
+                  className={`w-full flex items-center justify-between rounded-lg px-4 py-3 text-left text-sm font-label font-medium transition-all ${
+                    view === "archives"
+                      ? "bg-surface-container-lowest text-primary shadow-sm shadow-primary/10 border-l-2 border-secondary"
+                      : "text-on-surface-variant hover:bg-surface-container-lowest hover:text-on-surface"
+                  }`}
                 >
-                  <span>{m.label}</span>
-                  <svg
-                    viewBox="0 0 20 20"
-                    className={`h-4 w-4 transition-transform ${view === "archives" ? "rotate-90" : "rotate-0"}`}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M8 5l5 5-5 5" />
-                  </svg>
+                  <span className="flex items-center gap-4">
+                    <span className="material-symbols-outlined text-lg">archive</span>
+                    {m.label}
+                  </span>
+                  <span className="material-symbols-outlined text-base transition-transform" style={{ transform: view === "archives" ? "rotate(90deg)" : "rotate(0deg)" }}>
+                    chevron_right
+                  </span>
                 </button>
                 {view === "archives" && (
-                  <div className="mt-1 space-y-1 pl-3">
+                  <div className="mt-1 space-y-1 pl-4">
                     {archivedCourses.length ? (
                       archivedCourses.map((course) => (
                         <button
                           key={course.id}
                           onClick={() => onOpenArchivedCourse(course.id)}
-                          className={`w-full rounded px-3 py-2 text-left text-xs ${
+                          className={`w-full rounded-md px-3 py-2 text-left text-xs font-body transition-colors ${
                             selectedCourseId === course.id
-                              ? "bg-slate-200 text-slate-900"
-                              : "bg-slate-50 text-slate-700 hover:bg-slate-100"
+                              ? "bg-surface-container-lowest text-primary"
+                              : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
                           }`}
                         >
                           {course.title}
                         </button>
                       ))
                     ) : (
-                      <p className="px-3 py-2 text-xs text-slate-500">No archived courses</p>
+                      <p className="px-3 py-2 text-xs text-on-surface-variant">No archived courses</p>
                     )}
                   </div>
                 )}
@@ -110,41 +146,40 @@ export function Sidebar({
             <div key={m.key}>
               <button
                 onClick={() => {
-                  setCoursesOpen((v) => !v);
-                  setView("courses");
+                  setCoursesOpen(true);
+                  setView("course_catalog");
                 }}
-                className={`flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm ${view === "courses" ? "bg-blue-700 text-white" : "bg-white hover:bg-slate-100"}`}
+                data-keep-action-text="true"
+                className={`w-full flex items-center justify-between rounded-lg px-4 py-3 text-left text-sm font-label font-medium transition-all ${
+                  view === "courses" || view === "course_catalog"
+                    ? "bg-surface-container-lowest text-primary shadow-sm shadow-primary/10 border-l-2 border-secondary"
+                    : "text-on-surface-variant hover:bg-surface-container-lowest hover:text-on-surface"
+                }`}
               >
-                <span>{m.label}</span>
-                <svg
-                  viewBox="0 0 20 20"
-                  className={`h-4 w-4 transition-transform ${coursesOpen ? "rotate-90" : "rotate-0"}`}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M8 5l5 5-5 5" />
-                </svg>
+                <span className="flex items-center gap-4">
+                  <span className="material-symbols-outlined text-lg">school</span>
+                  {m.label}
+                </span>
+                <span className="material-symbols-outlined text-base transition-transform" style={{ transform: coursesOpen ? "rotate(90deg)" : "rotate(0deg)" }}>
+                  chevron_right
+                </span>
               </button>
               {coursesOpen && (
-                <div className="mt-1 space-y-1 pl-3">
+                <div className="mt-1 space-y-1 pl-4">
                   {user.role === "INSTRUCTOR" && teachingBlocks.length ? (
                     teachingBlocks.map((block) => (
                       <button
                         key={`${block.courseId}-${block.id}`}
                         onClick={() => onOpenTeachingBlock?.(block.courseId, block.id)}
-                        className={`w-full rounded px-3 py-2 text-left text-xs ${
+                        className={`w-full rounded-md px-3 py-2 text-left text-xs transition-colors ${
                           selectedCourseId === block.courseId
-                            ? "bg-slate-200 text-slate-900"
-                            : "bg-slate-50 text-slate-700 hover:bg-slate-100"
+                            ? "bg-surface-container text-primary"
+                            : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
                         }`}
                         title={`${block.courseTitle} - ${block.name}`}
                       >
-                        <span className="block truncate font-medium">{block.courseTitle}</span>
-                        <span className="block truncate text-[11px] text-slate-500">{block.name}</span>
+                        <span className="block truncate font-body font-medium">{block.courseTitle}</span>
+                        <span className="block truncate text-[10px] text-on-surface-variant font-label">{block.name}</span>
                       </button>
                     ))
                   ) : courses.length ? (
@@ -152,17 +187,17 @@ export function Sidebar({
                       <button
                         key={course.id}
                         onClick={() => onOpenCourse(course.id)}
-                        className={`w-full rounded px-3 py-2 text-left text-xs ${
+                        className={`w-full rounded-md px-3 py-2 text-left text-xs font-body transition-colors ${
                           selectedCourseId === course.id
-                            ? "bg-slate-200 text-slate-900"
-                            : "bg-slate-50 text-slate-700 hover:bg-slate-100"
+                            ? "bg-surface-container text-primary"
+                            : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
                         }`}
                       >
                         {course.title}
                       </button>
                     ))
                   ) : (
-                    <p className="px-3 py-2 text-xs text-slate-500">No courses</p>
+                    <p className="px-3 py-2 text-xs text-on-surface-variant">No courses</p>
                   )}
                 </div>
               )}
@@ -170,6 +205,21 @@ export function Sidebar({
           );
         })}
       </nav>
+
+      {/* Enroll Button (Students) - opens Course Catalog tab */}
+      {user.role === "STUDENT" && (
+        <div className="mt-8 pt-6 border-t border-outline-variant/20">
+          <button
+            onClick={() => {
+              setView("course_search");
+            }}
+            className="w-full py-3 bg-secondary-container text-on-secondary-container rounded-lg font-label font-bold text-sm shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+          >
+            <span className="material-symbols-outlined text-sm">add</span>
+            Enroll New Course
+          </button>
+        </div>
+      )}
     </aside>
   );
 }

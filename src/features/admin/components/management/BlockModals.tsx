@@ -26,8 +26,10 @@ export function AddBlockModal(props: {
           <h3 className="text-lg font-semibold">Add Block</h3>
           <button
             onClick={onClose}
-            className="rounded-md border border-slate-300 px-2 py-1 text-xs"
+            data-keep-action-text="true"
+            className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-2 py-1 text-xs"
           >
+            <span className="material-symbols-outlined text-[0.9rem]">close</span>
             Close
           </button>
         </div>
@@ -41,8 +43,10 @@ export function AddBlockModal(props: {
           />
           <button
             onClick={onSubmit}
-            className="rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white"
+            data-keep-action-text="true"
+            className="inline-flex items-center gap-1.5 rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white"
           >
+            <span className="material-symbols-outlined text-[1rem]">add_circle</span>
             Add Block
           </button>
         </div>
@@ -100,8 +104,10 @@ export function ManageBlockModal(props: {
           </div>
           <button
             onClick={onClose}
-            className="rounded-md border border-slate-300 px-2 py-1 text-xs"
+            data-keep-action-text="true"
+            className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-2 py-1 text-xs"
           >
+            <span className="material-symbols-outlined text-[0.9rem]">close</span>
             Close
           </button>
         </div>
@@ -116,8 +122,10 @@ export function ManageBlockModal(props: {
             />
             <button
               onClick={onSaveName}
-              className="rounded-md bg-slate-900 px-3 py-2 text-sm text-white"
+              data-keep-action-text="true"
+              className="inline-flex items-center gap-1.5 rounded-md bg-slate-900 px-3 py-2 text-sm text-white"
             >
+              <span className="material-symbols-outlined text-[1rem]">save</span>
               Save Block Name
             </button>
           </div>
@@ -141,8 +149,10 @@ export function ManageBlockModal(props: {
                   onClick={() =>
                     onRemoveInstructor(instructor.instructorId, instructor.fullName)
                   }
-                  className="rounded-md border border-rose-300 px-2 py-1 text-xs text-rose-700"
+                  data-keep-action-text="true"
+                  className="inline-flex items-center gap-1 rounded-md border border-rose-300 px-2 py-1 text-xs text-rose-700"
                 >
+                  <span className="material-symbols-outlined text-[0.9rem]">person_remove</span>
                   Remove Instructor
                 </button>
               </div>
@@ -166,8 +176,10 @@ export function ManageBlockModal(props: {
             />
             <button
               onClick={onAssignInstructor}
-              className="rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white"
+              data-keep-action-text="true"
+              className="inline-flex items-center gap-1.5 rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white"
             >
+              <span className="material-symbols-outlined text-[1rem]">person_add</span>
               Assign Instructor
             </button>
           </div>

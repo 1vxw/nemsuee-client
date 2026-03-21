@@ -51,8 +51,10 @@ export function AdminSettingsPanel(props: {
         </div>
         <button
           onClick={() => loadSettings()}
-          className="rounded-md border border-slate-300 px-3 py-1.5 text-xs"
+          data-keep-action-text="true"
+          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-xs"
         >
+          <span className="material-symbols-outlined text-[1rem]">refresh</span>
           Refresh
         </button>
       </div>
@@ -85,8 +87,10 @@ export function AdminSettingsPanel(props: {
               }
             }}
             disabled={loading}
-            className="rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+            data-keep-action-text="true"
+            className="inline-flex items-center gap-1.5 rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
           >
+            <span className="material-symbols-outlined text-[1rem]">fact_check</span>
             Apply Mode
           </button>
           <span className="text-xs text-slate-500">
@@ -134,8 +138,10 @@ export function AdminSettingsPanel(props: {
               }
             }}
             disabled={loading}
-            className="rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+            data-keep-action-text="true"
+            className="inline-flex items-center gap-1.5 rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
           >
+            <span className="material-symbols-outlined text-[1rem]">toggle_on</span>
             Apply Toggle
           </button>
           <span className="text-xs text-slate-500">
@@ -170,8 +176,10 @@ export function AdminSettingsPanel(props: {
             }
           }}
           disabled={loading}
-          className="rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+          data-keep-action-text="true"
+          className="inline-flex items-center gap-1.5 rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
         >
+          <span className="material-symbols-outlined text-[1rem]">save</span>
           Save Settings
         </button>
       </div>

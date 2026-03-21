@@ -66,8 +66,10 @@ export function CourseOfferingsSection(props: {
         </select>
         <button
           onClick={onCreateOffering}
-          className="rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white"
+          data-keep-action-text="true"
+          className="inline-flex items-center gap-1.5 rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white"
         >
+          <span className="material-symbols-outlined text-[1rem]">add_circle</span>
           Create Course
         </button>
       </div>
@@ -104,14 +106,18 @@ export function CourseOfferingsSection(props: {
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => onManageOffering(offering)}
-                        className="rounded-md border border-slate-300 px-2 py-1 text-xs"
+                        data-keep-action-text="true"
+                        className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-2 py-1 text-xs"
                       >
+                        <span className="material-symbols-outlined text-[0.9rem]">settings</span>
                         Manage
                       </button>
                       <button
                         onClick={() => onAssignInstructor(offering)}
-                        className="rounded-md border border-blue-300 px-2 py-1 text-xs text-blue-700"
+                        data-keep-action-text="true"
+                        className="inline-flex items-center gap-1 rounded-md border border-blue-300 px-2 py-1 text-xs text-blue-700"
                       >
+                        <span className="material-symbols-outlined text-[0.9rem]">person_add</span>
                         Assign Instructor
                       </button>
                     </div>

@@ -1,22 +1,18 @@
 import { useEffect, useState } from "react";
 import type {
   Attempt,
-  CatalogCourse,
   Course,
   Lesson,
   RosterRow,
   User,
 } from "../../../shared/types/lms";
 import { SelectedCoursePanel } from "./SelectedCoursePanel";
-import { StudentCatalogPanel } from "../components/discover/StudentCatalogPanel";
 import {
-  fetchCatalogCourses,
   fetchCourseRoster,
   fetchPendingEnrollments,
   removeAllStudentsInSection,
   removeSelfEnrollment,
   removeStudentEnrollment,
-  sendEnrollRequest,
 } from "../services/course.service";
 
 export function CoursesHub(props: {
@@ -48,12 +44,6 @@ export function CoursesHub(props: {
     studentViewMode = "all",
     forcedCourseTab = null,
   } = props;
-  const [catalogQuery, setCatalogQuery] = useState("");
-  const [catalog, setCatalog] = useState<CatalogCourse[]>([]);
-  const [selectedCatalogCourseId, setSelectedCatalogCourseId] = useState<
-    number | null
-  >(null);
-  const [keyInput, setKeyInput] = useState<Record<number, string>>({});
   const [roster, setRoster] = useState<Record<number, RosterRow[]>>({});
   const [pending, setPending] = useState<
     Record<
@@ -71,9 +61,6 @@ export function CoursesHub(props: {
   const [manualSection, setManualSection] = useState<Record<number, number>>(
     {},
   );
-  const [showEnrollRequest, setShowEnrollRequest] = useState<
-    Record<number, boolean>
-  >({});
   const [showAddSection, setShowAddSection] = useState<Record<number, boolean>>(
     {},
   );
@@ -129,36 +116,6 @@ export function CoursesHub(props: {
       return "Examinations";
     if (lesson.fileUrl) return "Resources";
     return "Lecture";
-  }
-
-  async function loadCatalog(query = catalogQuery) {
-    try {
-      setCatalog(await fetchCatalogCourses(api, headers, query));
-    } catch (e) {
-      setMessage((e as Error).message);
-    }
-  }
-
-  useEffect(() => {
-    if (user.role === "STUDENT") loadCatalog("");
-  }, [user.role]);
-
-  const selectedCatalogCourse =
-    catalog.find((c) => c.id === selectedCatalogCourseId) || null;
-
-  async function requestEnroll(courseId: number) {
-    try {
-      await sendEnrollRequest(api, headers, courseId, keyInput[courseId] || "");
-      setCatalog((prev) =>
-        prev.map((c) =>
-          c.id === courseId ? { ...c, enrollmentStatus: "PENDING" } : c,
-        ),
-      );
-      await refreshCore();
-      setMessage("Enrollment request submitted.");
-    } catch (e) {
-      setMessage((e as Error).message);
-    }
   }
 
   async function loadPending(courseId: number) {
@@ -470,26 +427,8 @@ export function CoursesHub(props: {
   }, [selectedCourse?.id, user.role]);
 
   return (
-    <section className="space-y-4">
-      <StudentCatalogPanel
-        studentViewMode={studentViewMode}
-        userRole={user.role}
-        catalogQuery={catalogQuery}
-        setCatalogQuery={setCatalogQuery}
-        loadCatalog={loadCatalog}
-        catalog={catalog}
-        selectedCatalogCourseId={selectedCatalogCourseId}
-        setSelectedCatalogCourseId={setSelectedCatalogCourseId}
-        selectedCatalogCourse={selectedCatalogCourse}
-        showEnrollRequest={showEnrollRequest}
-        setShowEnrollRequest={setShowEnrollRequest}
-        keyInput={keyInput}
-        setKeyInput={setKeyInput}
-        requestEnroll={requestEnroll}
-      />
-
-      {selectedCourse ? (
-        <SelectedCoursePanel
+    <section>
+      <SelectedCoursePanel
           selectedCourse={selectedCourse}
           user={user}
           studentViewMode={studentViewMode}
@@ -541,13 +480,6 @@ export function CoursesHub(props: {
           kickStudent={kickStudent}
           kickAllInSection={kickAllInSection}
         />
-      ) : (
-        studentViewMode !== "search" && (
-          <article className="rounded-md border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
-            Loading course view...
-          </article>
-        )
-      )}
     </section>
   );
 }

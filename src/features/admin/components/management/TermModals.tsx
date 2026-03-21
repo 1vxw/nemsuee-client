@@ -24,8 +24,10 @@ export function CreateTermModal(props: {
           <h3 className="text-lg font-semibold">Create Academic Term</h3>
           <button
             onClick={onClose}
-            className="rounded-md border border-slate-300 px-2 py-1 text-xs"
+            data-keep-action-text="true"
+            className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-2 py-1 text-xs"
           >
+            <span className="material-symbols-outlined text-[0.9rem]">close</span>
             Close
           </button>
         </div>
@@ -44,8 +46,10 @@ export function CreateTermModal(props: {
           />
           <button
             onClick={onSubmit}
-            className="rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white"
+            data-keep-action-text="true"
+            className="inline-flex items-center gap-1.5 rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white"
           >
+            <span className="material-symbols-outlined text-[1rem]">add_circle</span>
             Create Term
           </button>
         </div>
@@ -80,8 +84,10 @@ export function EditTermModal(props: {
           <h3 className="text-lg font-semibold">Edit Academic Term</h3>
           <button
             onClick={onClose}
-            className="rounded-md border border-slate-300 px-2 py-1 text-xs"
+            data-keep-action-text="true"
+            className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-2 py-1 text-xs"
           >
+            <span className="material-symbols-outlined text-[0.9rem]">close</span>
             Close
           </button>
         </div>
@@ -100,8 +106,10 @@ export function EditTermModal(props: {
           />
           <button
             onClick={onSubmit}
-            className="rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white"
+            data-keep-action-text="true"
+            className="inline-flex items-center gap-1.5 rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white"
           >
+            <span className="material-symbols-outlined text-[1rem]">save</span>
             Save Term
           </button>
         </div>

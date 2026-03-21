@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { GroupedRowsByBlockLesson } from "../types/scoreTypes";
+import type { GroupedRowsByBlockLesson, ScoreRow } from "../types/scoreTypes";
 
 type InstructorLessonGroupsTableProps = {
   groupedRows: GroupedRowsByBlockLesson;
@@ -7,7 +7,7 @@ type InstructorLessonGroupsTableProps = {
   collapsedLessonGroups: Record<string, boolean>;
   setCollapsedLessons: Dispatch<SetStateAction<Record<string, boolean>>>;
   setCollapsedLessonGroups: Dispatch<SetStateAction<Record<string, boolean>>>;
-  onViewAttempt: () => void;
+  onViewAttempt: (row: ScoreRow) => void;
 };
 
 export function InstructorLessonGroupsTable({
@@ -23,10 +23,10 @@ export function InstructorLessonGroupsTable({
       {Object.entries(groupedRows).map(([block, rows]) => (
         <section
           key={block}
-          className="rounded-md border border-slate-200 bg-white shadow-sm"
+          className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest shadow-sm"
         >
           <button
-            className="flex w-full items-center justify-between border-b border-slate-200 bg-slate-50 px-3 py-2 text-left"
+            className="flex w-full items-center justify-between border-b border-outline-variant/20 bg-surface-container px-4 py-3 text-left"
             onClick={() =>
               setCollapsedLessons((prev) => ({
                 ...prev,
@@ -46,10 +46,10 @@ export function InstructorLessonGroupsTable({
               {Object.entries(rows).map(([lesson, lessonRows]) => (
                 <article
                   key={`${block}-${lesson}`}
-                  className="overflow-x-auto rounded-md border border-slate-200"
+                  className="overflow-x-auto rounded-lg border border-outline-variant/20"
                 >
                   <button
-                    className="flex w-full items-center justify-between border-b border-slate-200 bg-white px-3 py-2 text-left"
+                    className="flex w-full items-center justify-between border-b border-outline-variant/20 bg-surface-container-lowest px-4 py-3 text-left"
                     onClick={() =>
                       setCollapsedLessonGroups((prev) => ({
                         ...prev,
@@ -57,10 +57,10 @@ export function InstructorLessonGroupsTable({
                       }))
                     }
                   >
-                    <span className="text-sm font-semibold text-slate-700">
+                    <span className="font-label text-sm font-bold text-primary">
                       {lesson}
                     </span>
-                    <span className="text-[11px] text-slate-500">
+                    <span className="font-label text-[11px] text-on-surface-variant">
                       {lessonRows.length} submission
                       {lessonRows.length > 1 ? "s" : ""} | Quiz |{" "}
                       {Math.max(
@@ -72,7 +72,7 @@ export function InstructorLessonGroupsTable({
                   </button>
                   {!collapsedLessonGroups[`${block}::${lesson}`] && (
                     <table className="min-w-full text-xs">
-                      <thead className="bg-slate-50 text-slate-600">
+                      <thead className="bg-surface-container font-label text-on-surface-variant">
                         <tr>
                           <th className="px-3 py-2 text-left">Student</th>
                           <th className="px-3 py-2 text-left">Attempt</th>
@@ -88,15 +88,15 @@ export function InstructorLessonGroupsTable({
                           return (
                             <tr key={a.id} className="border-t border-slate-100">
                               <td className="px-3 py-2">{row.studentName || "-"}</td>
-                              <td className="px-3 py-2 text-[11px] text-slate-500">
+                              <td className="px-3 py-2 font-label text-[11px] text-on-surface-variant">
                                 Latest
                                 {row.attemptCount > 1 ? ` of ${row.attemptCount}` : ""}
                               </td>
                               <td className="px-3 py-2">
-                                <p className="font-semibold text-slate-800">
+                                <p className="font-label font-bold text-primary">
                                   {a.score}/{a.total} ({Math.round(row.pct)}%)
                                 </p>
-                                <div className="mt-1 h-1.5 w-24 rounded bg-slate-200">
+                                <div className="mt-1 h-1.5 w-24 rounded bg-surface-container-high">
                                   <div
                                     className={`h-full rounded ${row.passed ? "bg-emerald-500" : "bg-rose-500"}`}
                                     style={{
@@ -122,8 +122,8 @@ export function InstructorLessonGroupsTable({
                               </td>
                               <td className="px-3 py-2">
                                 <button
-                                  className="rounded border border-slate-300 px-2 py-1 hover:bg-slate-50"
-                                  onClick={onViewAttempt}
+                                  className="rounded-lg border border-outline-variant/40 px-2.5 py-1.5 font-label text-xs hover:bg-surface-container transition-colors"
+                                  onClick={() => onViewAttempt(row)}
                                 >
                                   View Attempt
                                 </button>

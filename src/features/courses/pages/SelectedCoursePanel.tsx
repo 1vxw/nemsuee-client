@@ -13,6 +13,7 @@ import {
 import {
   CourseAnnouncementsPanel,
   CourseHeaderPanel,
+  CourseSidebarPanel,
   CourseTabs,
   InstructorOverviewPanels,
   PendingRequestsPanel,
@@ -23,10 +24,7 @@ import {
   StudentContentTab,
   TasksTab,
 } from "./selected-course/TabPanels";
-import {
-  withResourceScope,
-  type ResourceScope,
-} from "../utils/resourceScope";
+import { withResourceScope, type ResourceScope } from "../utils/resourceScope";
 
 type Props = {
   selectedCourse: Course | null;
@@ -238,6 +236,16 @@ export function SelectedCoursePanel(props: Props) {
     selectedCourse.sections.find(
       (section) => section.id === lessonComposerSectionId,
     ) || null;
+  const instructorPendingCount = pending[selectedCourse.id]?.length || 0;
+  const instructorLessonCount = selectedCourse.sections.reduce(
+    (sum, section) => sum + section.lessons.length,
+    0,
+  );
+  const instructorQuizCount = selectedCourse.sections.reduce(
+    (sum, section) => sum + section.lessons.filter((lesson) => lesson.quiz).length,
+    0,
+  );
+  const showStudentSidebar = activeCourseTab === "content" && user.role === "STUDENT";
   const resourceScope: ResourceScope = {
     semester: activeTermScope.semester,
     term: activeTermScope.academicYear,
@@ -357,7 +365,7 @@ export function SelectedCoursePanel(props: Props) {
   }, [api, headers]);
 
   return (
-    <article className="rounded-md border border-slate-200 p-3">
+    <section className="space-y-4 md:space-y-6">
       <CourseAnnouncementsPanel
         announcements={announcements}
         showAnnouncementHistory={showAnnouncementHistory}
@@ -370,92 +378,150 @@ export function SelectedCoursePanel(props: Props) {
         loadRoster={loadRoster}
         setShowCourseInfo={setShowCourseInfo}
       />
+
       {user.role === "INSTRUCTOR" && (
-        <InstructorOverviewPanels
-          selectedCourse={selectedCourse}
-          filteredRosterCount={filteredRosterRows.length}
-          setActiveCourseTab={setActiveCourseTab}
-          setLessonComposerSectionId={setLessonComposerSectionId}
-          setShowEnrollmentManager={setShowEnrollmentManager}
-          createAnnouncement={createAnnouncement}
-        />
-      )}
-      {user.role === "INSTRUCTOR" && (
-        <PendingRequestsPanel
-          selectedCourse={selectedCourse}
-          pendingRows={pending[selectedCourse.id] || []}
-          approveSection={approveSection}
-          setApproveSection={setApproveSection}
-          loadPending={loadPending}
-          decide={decide}
-        />
-      )}
-      <CourseTabs
-        activeCourseTab={activeCourseTab}
-        setActiveCourseTab={setActiveCourseTab}
-      />
-
-      {activeCourseTab === "content" && user.role === "INSTRUCTOR" && (
-        <InstructorContentTab
-          selectedCourse={selectedCourse}
-          collapsedBlocks={collapsedBlocks}
-          setCollapsedBlocks={setCollapsedBlocks}
-          groupForLesson={groupForLesson}
-          setEditingLesson={setEditingLesson}
-          setEditLessonInput={setEditLessonInput}
-          lessonMenuOpenId={lessonMenuOpenId}
-          setLessonMenuOpenId={setLessonMenuOpenId}
-          deleteLesson={deleteLesson}
-          resourceScope={resourceScope}
-        />
+        <section className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+          <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest px-3 py-2.5">
+            <p className="text-[10px] font-label uppercase tracking-wider text-on-surface-variant">Blocks</p>
+            <p className="mt-1 font-headline text-lg font-bold text-primary">{selectedCourse.sections.length}</p>
+          </article>
+          <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest px-3 py-2.5">
+            <p className="text-[10px] font-label uppercase tracking-wider text-on-surface-variant">Lessons</p>
+            <p className="mt-1 font-headline text-lg font-bold text-primary">{instructorLessonCount}</p>
+          </article>
+          <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest px-3 py-2.5">
+            <p className="text-[10px] font-label uppercase tracking-wider text-on-surface-variant">Quizzes</p>
+            <p className="mt-1 font-headline text-lg font-bold text-primary">{instructorQuizCount}</p>
+          </article>
+          <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest px-3 py-2.5">
+            <p className="text-[10px] font-label uppercase tracking-wider text-on-surface-variant">Pending</p>
+            <p className="mt-1 font-headline text-lg font-bold text-primary">{instructorPendingCount}</p>
+          </article>
+        </section>
       )}
 
-      {activeCourseTab === "content" && user.role === "STUDENT" && (
-        <StudentContentTab
-          selectedCourse={selectedCourse}
-          groupForLesson={groupForLesson}
-          api={api}
-          headers={headers}
-          refreshCore={refreshCore}
-          setMessage={setMessage}
-          resourceScope={resourceScope}
-        />
-      )}
+      {/* 2-Column Layout: Content + Sidebar (sidebar only on Content tab) */}
+      <div
+        className={`grid grid-cols-1 gap-4 md:gap-6 ${
+          showStudentSidebar ? "lg:grid-cols-3 lg:gap-8" : ""
+        }`}
+      >
+        {/* Left Column: Main Content */}
+        <div
+          className={`space-y-4 md:space-y-6 ${
+            showStudentSidebar ? "lg:col-span-2 lg:space-y-7" : ""
+          }`}
+        >
+          {user.role === "INSTRUCTOR" && (
+            <>
+              <InstructorOverviewPanels
+                selectedCourse={selectedCourse}
+                filteredRosterCount={filteredRosterRows.length}
+                setActiveCourseTab={setActiveCourseTab}
+                setLessonComposerSectionId={setLessonComposerSectionId}
+                setShowEnrollmentManager={setShowEnrollmentManager}
+                createAnnouncement={createAnnouncement}
+              />
+              {pending[selectedCourse.id] && pending[selectedCourse.id].length > 0 && (
+                <PendingRequestsPanel
+                  selectedCourse={selectedCourse}
+                  pendingRows={pending[selectedCourse.id] || []}
+                  approveSection={approveSection}
+                  setApproveSection={setApproveSection}
+                  loadPending={loadPending}
+                  decide={decide}
+                />
+              )}
+            </>
+          )}
 
-      {activeCourseTab === "quizzes" && (
-        <QuizzesTab
-          selectedCourse={selectedCourse}
-          attempts={attempts}
-          user={user}
-          api={api}
-          headers={headers}
-          refreshCore={refreshCore}
-          setMessage={setMessage}
-          updateQuiz={updateQuiz}
-          deleteQuiz={deleteQuiz}
-        />
-      )}
+          {/* Tabs */}
+          <div className="border-b border-outline-variant/20 pt-2 md:pt-4">
+            <CourseTabs
+              activeCourseTab={activeCourseTab}
+              setActiveCourseTab={setActiveCourseTab}
+            />
+          </div>
 
-      {activeCourseTab === "assignments" && (
-        <TasksTab
-          kind="ASSIGNMENT"
-          selectedCourse={selectedCourse}
-          user={user}
-          api={api}
-          headers={headers}
-          setMessage={setMessage}
-        />
-      )}
-      {activeCourseTab === "activities" && (
-        <TasksTab
-          kind="ACTIVITY"
-          selectedCourse={selectedCourse}
-          user={user}
-          api={api}
-          headers={headers}
-          setMessage={setMessage}
-        />
-      )}
+          {/* Content Areas */}
+          <div className="pt-3 md:pt-5">
+              {activeCourseTab === "content" && user.role === "INSTRUCTOR" && (
+              <InstructorContentTab
+                selectedCourse={selectedCourse}
+                collapsedBlocks={collapsedBlocks}
+                setCollapsedBlocks={setCollapsedBlocks}
+                groupForLesson={groupForLesson}
+                setEditingLesson={setEditingLesson}
+                setEditLessonInput={setEditLessonInput}
+                lessonMenuOpenId={lessonMenuOpenId}
+                setLessonMenuOpenId={setLessonMenuOpenId}
+                deleteLesson={deleteLesson}
+                resourceScope={resourceScope}
+              />
+            )}
+
+            {activeCourseTab === "content" && user.role === "STUDENT" && (
+              <StudentContentTab
+                selectedCourse={selectedCourse}
+                groupForLesson={groupForLesson}
+                api={api}
+                headers={headers}
+                refreshCore={refreshCore}
+                setMessage={setMessage}
+                resourceScope={resourceScope}
+                academicYear={activeTermScope.academicYear}
+              />
+            )}
+
+            {activeCourseTab === "quizzes" && (
+              <QuizzesTab
+                selectedCourse={selectedCourse}
+                attempts={attempts}
+                user={user}
+                api={api}
+                headers={headers}
+                refreshCore={refreshCore}
+                setMessage={setMessage}
+                updateQuiz={updateQuiz}
+                deleteQuiz={deleteQuiz}
+              />
+            )}
+
+            {activeCourseTab === "assignments" && (
+              <TasksTab
+                kind="ASSIGNMENT"
+                selectedCourse={selectedCourse}
+                user={user}
+                api={api}
+                headers={headers}
+                setMessage={setMessage}
+              />
+            )}
+
+            {activeCourseTab === "activities" && (
+              <TasksTab
+                kind="ACTIVITY"
+                selectedCourse={selectedCourse}
+                user={user}
+                api={api}
+                headers={headers}
+                setMessage={setMessage}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Right Column: Sidebar - only shown on Content tab */}
+        {showStudentSidebar && (
+          <CourseSidebarPanel
+            selectedCourse={selectedCourse}
+            user={user}
+            attempts={attempts}
+            api={api}
+            headers={headers}
+          />
+        )}
+      </div>
 
       <CourseInfoModal
         open={showCourseInfo}
@@ -537,6 +603,6 @@ export function SelectedCoursePanel(props: Props) {
         isUploadingResource={isUploadingResource}
         setLessonComposerSectionId={setLessonComposerSectionId}
       />
-    </article>
+    </section>
   );
 }

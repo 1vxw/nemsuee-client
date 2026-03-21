@@ -50,14 +50,18 @@ export function CourseConfigurationSection(props: {
           <div className="mt-3 flex flex-wrap gap-2">
             <button
               onClick={onEditCourse}
-              className="rounded-md border border-slate-300 px-3 py-1.5 text-xs"
+              data-keep-action-text="true"
+              className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-3 py-1.5 text-xs"
             >
+              <span className="material-symbols-outlined text-[0.9rem]">edit</span>
               Edit Course
             </button>
             <button
               onClick={onDeleteCourse}
-              className="rounded-md border border-rose-300 px-3 py-1.5 text-xs text-rose-700"
+              data-keep-action-text="true"
+              className="inline-flex items-center gap-1 rounded-md border border-rose-300 px-3 py-1.5 text-xs text-rose-700"
             >
+              <span className="material-symbols-outlined text-[0.9rem]">delete</span>
               Delete Course
             </button>
           </div>
@@ -95,8 +99,10 @@ export function EditCourseModal(props: {
           <h3 className="text-lg font-semibold">Edit Course</h3>
           <button
             onClick={onClose}
-            className="rounded-md border border-slate-300 px-2 py-1 text-xs"
+            data-keep-action-text="true"
+            className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-2 py-1 text-xs"
           >
+            <span className="material-symbols-outlined text-[0.9rem]">close</span>
             Close
           </button>
         </div>
@@ -115,8 +121,10 @@ export function EditCourseModal(props: {
           />
           <button
             onClick={onSubmit}
-            className="rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white"
+            data-keep-action-text="true"
+            className="inline-flex items-center gap-1.5 rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white"
           >
+            <span className="material-symbols-outlined text-[1rem]">save</span>
             Save Course Changes
           </button>
         </div>

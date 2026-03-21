@@ -29,7 +29,7 @@ export function ScoresPagination({
   setScorePage,
 }: ScoresPaginationProps) {
   return (
-    <div className="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-xs">
+    <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-outline-variant/20 bg-surface-container-lowest px-4 py-2.5 font-label text-xs text-on-surface-variant">
       <p>
         {instructorViewMode === "GRADEBOOK"
           ? scoreBlockFilter !== "ALL"
@@ -49,7 +49,7 @@ export function ScoresPagination({
       </p>
       <div className="flex items-center gap-2">
         <button
-          className="rounded border border-slate-300 px-2 py-1 disabled:opacity-50"
+          className="rounded-lg border border-outline-variant/40 px-2.5 py-1.5 hover:bg-surface-container transition-colors disabled:opacity-50"
           disabled={
             instructorViewMode === "GRADEBOOK"
               ? gradebookSafePage <= 1
@@ -65,7 +65,7 @@ export function ScoresPagination({
             : `${safePage} / ${totalPages}`}
         </span>
         <button
-          className="rounded border border-slate-300 px-2 py-1 disabled:opacity-50"
+          className="rounded-lg border border-outline-variant/40 px-2.5 py-1.5 hover:bg-surface-container transition-colors disabled:opacity-50"
           disabled={
             instructorViewMode === "GRADEBOOK"
               ? gradebookSafePage >= gradebookTotalPages

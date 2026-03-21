@@ -29,8 +29,7 @@ export function useScoresViewModel(
     Record<string, boolean>
   >({});
   const [scorePage, setScorePage] = useState(1);
-
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(10);
 
   const computed = useMemo(() => {
     const courseAttempts = attempts.filter(
@@ -266,6 +265,7 @@ export function useScoresViewModel(
     scoreQuery,
     scoreSortBy,
     scorePage,
+    pageSize,
   ]);
 
   return {
@@ -287,6 +287,7 @@ export function useScoresViewModel(
     setCollapsedLessonGroups,
     scorePage,
     setScorePage,
+    setPageSize,
     ...computed,
   };
 }

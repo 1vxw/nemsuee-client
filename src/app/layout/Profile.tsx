@@ -10,30 +10,30 @@ export function Profile({ user }: { user: User }) {
 
   return (
     <section className="space-y-4">
-      <article className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
+      <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-sm md:p-5">
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-700 text-lg font-semibold text-white">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary font-headline text-lg font-bold text-on-primary sm:h-14 sm:w-14 sm:text-xl">
             {initials}
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-slate-900">{user.fullName}</h3>
-            <p className="text-sm text-slate-600">{user.email}</p>
+          <div className="min-w-0">
+            <h3 className="font-headline text-lg font-bold text-primary truncate">{user.fullName}</h3>
+            <p className="mt-0.5 font-body text-sm text-on-surface-variant truncate">{user.email}</p>
           </div>
         </div>
       </article>
 
-      <article className="grid gap-3 md:grid-cols-3">
-        <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Role</p>
-          <p className="mt-1 text-base font-semibold text-slate-900">{user.role}</p>
+      <article className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+        <div className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-sm">
+          <p className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant">Role</p>
+          <p className="mt-1 font-headline text-base font-bold text-primary">{user.role}</p>
         </div>
-        <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Account ID</p>
-          <p className="mt-1 text-base font-semibold text-slate-900">#{user.id}</p>
+        <div className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-sm">
+          <p className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant">Account ID</p>
+          <p className="mt-1 font-headline text-base font-bold text-primary">#{user.id}</p>
         </div>
-        <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Student ID</p>
-          <p className="mt-1 text-base font-semibold text-slate-900">
+        <div className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-sm sm:col-span-2 md:col-span-1">
+          <p className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant">Student ID</p>
+          <p className="mt-1 font-headline text-base font-bold text-primary">
             {user.studentId || "N/A"}
           </p>
         </div>

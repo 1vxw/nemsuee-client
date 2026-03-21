@@ -1,29 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700;900&family=Manrope:wght@400;500;600;700&family=Inter:wght@400;500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #001d44;
+  --color-primary-container: #00326b;
+  --color-primary-fixed: #d7e2ff;
+  --color-primary-fixed-dim: #abc7ff;
+  --color-on-primary: #ffffff;
+  --color-on-primary-fixed: #001b3f;
+  --color-on-primary-fixed-variant: #00458f;
+  --color-on-primary-container: #6b9bef;
+
+  --color-secondary: #775a19;
+  --color-secondary-container: #fed488;
+  --color-secondary-fixed: #ffdea5;
+  --color-secondary-fixed-dim: #e9c176;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-fixed: #261900;
+  --color-on-secondary-fixed-variant: #5d4201;
+  --color-on-secondary-container: #785a1a;
+
+  --color-tertiary: #002416;
+  --color-tertiary-container: #003c27;
+  --color-tertiary-fixed: #9ff4c9;
+  --color-tertiary-fixed-dim: #84d7ae;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-fixed: #002114;
+  --color-on-tertiary-fixed-variant: #005237;
+  --color-on-tertiary-container: #59ac85;
+
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+
+  --color-surface: #f9f9fe;
+  --color-surface-bright: #f9f9fe;
+  --color-surface-dim: #dad9de;
+  --color-surface-container: #eeedf2;
+  --color-surface-container-high: #e8e8ed;
+  --color-surface-container-highest: #e2e2e7;
+  --color-surface-container-low: #f4f3f8;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-surface: #1a1c1f;
+  --color-on-surface-variant: #43474f;
+
+  --color-background: #f9f9fe;
+  --color-on-background: #1a1c1f;
+  --color-inverse-surface: #2f3034;
+  --color-inverse-on-surface: #f1f0f5;
+  --color-inverse-primary: #abc7ff;
+
+  --color-outline: #737780;
+  --color-outline-variant: #c3c6d1;
+  --color-surface-tint: #255dad;
+  --color-surface-variant: #e2e2e7;
+
+  --font-family-headline: "Noto Serif", serif;
+  --font-family-body: "Manrope", sans-serif;
+  --font-family-label: "Inter", sans-serif;
+
+  --border-radius-none: 0;
+  --border-radius-xs: 0.125rem;
+  --border-radius-sm: 0.25rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 0.75rem;
+}
 
 :root {
   font-family: "Manrope Variable", "Manrope", "Segoe UI", sans-serif;
-  --bg-main: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  --bg-main: linear-gradient(180deg, #f9f9fe 0%, #f4f3f8 100%);
   --panel: #ffffff;
-  --brand: #1d4ed8;
-  --ink: #0f172a;
-  --muted: #475569;
+  --brand: #001d44;
+  --ink: #1a1c1f;
+  --muted: #43474f;
 }
 
 [data-theme="dark"] {
-  --bg-main: linear-gradient(180deg, #020617 0%, #0f172a 100%);
-  --panel: #0b1220;
-  --brand: #3b82f6;
-  --ink: #e2e8f0;
-  --muted: #94a3b8;
+  --bg-main: linear-gradient(180deg, #1a1c1f 0%, #2f3034 100%);
+  --panel: #2f3034;
+  --brand: #abc7ff;
+  --ink: #f1f0f5;
+  --muted: #c3c6d1;
 }
 
 * { box-sizing: border-box; }
+
+/* Standard base sizing - 16px base for consistent scaling */
+html {
+  font-size: 16px;
+}
 
 body {
   margin: 0;
   min-height: 100vh;
   background: var(--bg-main);
   color: var(--ink);
+  font-size: 0.875rem;
+  line-height: 1.5;
   transition: background-color 180ms ease, color 180ms ease;
 }
 
@@ -80,6 +155,71 @@ select {
 
 [data-theme="dark"] select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+}
+
+/* Material Symbols Outlined - 16px mobile-first, 18px sm+ */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 1rem;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+@media (min-width: 640px) {
+  .material-symbols-outlined {
+    font-size: 1.125rem;
+  }
+}
+
+/* Academic Design System Utilities */
+.academic-gradient {
+  background: linear-gradient(135deg, #001d44 0%, #00326b 100%);
+}
+
+/* Typography System */
+.font-headline {
+  font-family: var(--font-family-headline);
+  font-weight: 700;
+}
+
+.font-body {
+  font-family: var(--font-family-body);
+  font-weight: 400;
+}
+
+.font-label {
+  font-family: var(--font-family-label);
+}
+
+.glass-effect {
+  @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-md;
+}
+
+.glass-elevated {
+  @apply bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg;
+}
+
+/* Tonal layering for cards */
+.card-elevated {
+  @apply bg-surface-container-lowest shadow-sm shadow-primary/5;
+}
+
+.card-base {
+  @apply bg-surface-container rounded-lg;
+}
+
+/* Smooth transitions */
+@media (prefers-reduced-motion: no-preference) {
+  * {
+    @apply transition-colors duration-200;
+  }
 }
 
 

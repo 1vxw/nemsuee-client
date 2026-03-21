@@ -12,24 +12,24 @@ export function ScoreSummaryStats({
   averageScore,
 }: ScoreSummaryStatsProps) {
   return (
-    <div className="grid gap-2 md:grid-cols-4">
-      <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
-        <p className="text-[11px] uppercase tracking-wide text-slate-500">
+    <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+      <div className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest px-3 py-2.5 sm:px-4 sm:py-3">
+        <p className="text-[11px] font-label font-bold uppercase tracking-wider text-on-surface-variant">
           Total Submissions
         </p>
-        <p className="text-base font-semibold text-slate-900">{totalSubmissions}</p>
+        <p className="font-headline text-base font-bold text-primary sm:text-lg">{totalSubmissions}</p>
       </div>
-      <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
-        <p className="text-[11px] uppercase tracking-wide text-slate-500">Passed</p>
-        <p className="text-base font-semibold text-emerald-700">{passedCount}</p>
+      <div className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest px-3 py-2.5 sm:px-4 sm:py-3">
+        <p className="text-[11px] font-label font-bold uppercase tracking-wider text-on-surface-variant">Passed</p>
+        <p className="font-headline text-base font-bold text-emerald-700 sm:text-lg">{passedCount}</p>
       </div>
-      <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
-        <p className="text-[11px] uppercase tracking-wide text-slate-500">Failed</p>
-        <p className="text-base font-semibold text-rose-700">{failedCount}</p>
+      <div className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest px-3 py-2.5 sm:px-4 sm:py-3">
+        <p className="text-[11px] font-label font-bold uppercase tracking-wider text-on-surface-variant">Failed</p>
+        <p className="font-headline text-base font-bold text-error sm:text-lg">{failedCount}</p>
       </div>
-      <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
-        <p className="text-[11px] uppercase tracking-wide text-slate-500">Average Score</p>
-        <p className="text-base font-semibold text-slate-900">{averageScore}%</p>
+      <div className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest px-3 py-2.5 sm:px-4 sm:py-3">
+        <p className="text-[11px] font-label font-bold uppercase tracking-wider text-on-surface-variant">Average Score</p>
+        <p className="font-headline text-base font-bold text-primary sm:text-lg">{averageScore}%</p>
       </div>
     </div>
   );

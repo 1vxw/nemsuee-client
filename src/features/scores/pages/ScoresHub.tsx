@@ -24,10 +24,22 @@ export function ScoresHub({
   onSelectCourse,
 }: ScoresHubProps) {
   const [courseFilter, setCourseFilter] = useState("");
+  const [showCoursePicker, setShowCoursePicker] = useState(true);
   const selectedCourse = useMemo(
-    () => courses.find((c) => c.id === selectedCourseId) ?? courses[0] ?? null,
+    () => courses.find((c) => c.id === selectedCourseId) ?? null,
     [courses, selectedCourseId],
   );
+  const filteredCourses = useMemo(
+    () =>
+      courses.filter((c) =>
+        c.title.toLowerCase().includes(courseFilter.trim().toLowerCase()),
+      ),
+    [courses, courseFilter],
+  );
+
+  useEffect(() => {
+    if (!selectedCourseId) setShowCoursePicker(true);
+  }, [selectedCourseId]);
   const [publishedGrades, setPublishedGrades] = useState<any[]>([]);
   const [semester, setSemester] = useState("1st Semester");
   const [term, setTerm] = useState("");
@@ -83,28 +95,28 @@ export function ScoresHub({
     });
     return (
       <section className="space-y-4">
-        <header className="overflow-hidden rounded-xl border border-blue-200 bg-gradient-to-r from-blue-800 via-blue-900 to-blue-900 shadow-sm">
-          <div className="bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),transparent_45%)] p-4 text-white">
+        <header className="overflow-hidden rounded-lg border border-outline-variant/20 bg-gradient-to-r from-primary to-primary-container shadow-sm">
+          <div className="p-4 text-on-primary sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xl font-semibold tracking-tight">Grades</p>
-              <p className="text-xs text-blue-100">Published records only</p>
+              <p className="font-headline text-xl font-bold tracking-tight">Grades</p>
+              <p className="text-xs font-label text-primary-fixed">Published records only</p>
             </div>
-            <p className="mt-1 text-sm text-blue-100">
+            <p className="mt-1 font-body text-sm text-primary-fixed">
               {semester} / {term}
             </p>
           </div>
         </header>
 
-        <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="mb-4 grid gap-2 md:grid-cols-[1fr_1fr_auto]">
+        <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-sm md:p-5">
+          <div className="mb-4 grid gap-3 md:grid-cols-[1fr_1fr_auto]">
             <label className="space-y-1">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              <span className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant">
                 Semester
               </span>
               <select
                 value={semester}
                 onChange={(e) => setSemester(e.target.value)}
-                className="h-10 w-full rounded border border-slate-300 px-3 text-sm"
+                className="h-10 w-full rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-3 font-body text-sm text-on-surface"
               >
                 <option>1st Semester</option>
                 <option>2nd Semester</option>
@@ -112,13 +124,13 @@ export function ScoresHub({
               </select>
             </label>
             <label className="space-y-1">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              <span className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant">
                 School Year
               </span>
               <select
                 value={term}
                 onChange={(e) => setTerm(e.target.value)}
-                className="h-10 w-full rounded border border-slate-300 px-3 text-sm"
+                className="h-10 w-full rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-3 font-body text-sm text-on-surface"
               >
                 {termOptions.map((option) => (
                   <option key={option} value={option}>
@@ -130,7 +142,7 @@ export function ScoresHub({
             <div className="flex items-end">
               <button
                 data-keep-action-text="true"
-                className="h-10 rounded bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700"
+                className="h-10 rounded-lg bg-primary px-4 font-label text-sm font-bold text-on-primary hover:opacity-90 transition-opacity"
                 onClick={() => {
                   api(
                     `/grade-computation/me/final-course?semester=${encodeURIComponent(semester)}&term=${encodeURIComponent(term)}`,
@@ -145,9 +157,9 @@ export function ScoresHub({
             </div>
           </div>
 
-          <div className="overflow-auto rounded-lg border border-slate-200">
-            <table className="min-w-full text-left text-xs">
-              <thead className="bg-blue-50 text-blue-900">
+          <div className="overflow-auto rounded-lg border border-outline-variant/20">
+            <table className="min-w-full text-left text-xs font-body">
+              <thead className="bg-surface-container font-label text-on-surface-variant">
                 <tr>
                   <th className="px-3 py-2">Course</th>
                   <th className="px-3 py-2">Instructor</th>
@@ -161,7 +173,7 @@ export function ScoresHub({
               </thead>
               <tbody>
                 {visible.map((g) => (
-                  <tr key={g.courseId} className="border-t border-slate-100">
+                  <tr key={g.courseId} className="border-t border-outline-variant/20">
                     <td className="px-3 py-2">{g.courseTitle}</td>
                     <td className="px-3 py-2">{g.instructor}</td>
                     <td className="px-3 py-2">{g.units}</td>
@@ -177,7 +189,7 @@ export function ScoresHub({
                     </td>
                     <td className="px-3 py-2">
                       <button
-                        className="rounded border border-blue-300 px-2 py-1 text-xs text-blue-700 hover:bg-blue-50"
+                        className="rounded-lg border border-outline-variant/40 px-2.5 py-1.5 font-label text-xs text-primary hover:bg-surface-container transition-colors"
                         onClick={() => {
                           setBreakdownRow(g);
                           setBreakdownOpen(true);
@@ -190,25 +202,25 @@ export function ScoresHub({
                 ))}
                 {!visible.length && (
                   <tr>
-                    <td colSpan={8} className="px-3 py-4 text-center text-slate-500">No published grades yet.</td>
+                    <td colSpan={8} className="px-4 py-8 text-center font-body text-sm text-on-surface-variant">No published grades yet.</td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-          <p className="mt-3 text-sm italic text-slate-600">
+          <p className="mt-3 font-body text-sm italic text-on-surface-variant">
             Pending means your grade is encoded but not yet approved, and is excluded from completion computation.
           </p>
         </article>
         {breakdownOpen && breakdownRow && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-            <div className="w-full max-w-6xl rounded-md bg-white p-4 shadow-lg">
-              <div className="mb-3 flex items-center justify-between">
-                <p className="text-sm font-semibold text-slate-900">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+            <div className="w-full max-w-6xl rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-xl md:p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <p className="font-headline text-base font-bold text-primary">
                   Grade Breakdown - {breakdownRow.courseTitle}
                 </p>
                 <button
-                  className="rounded border border-slate-300 px-2 py-1 text-xs"
+                  className="rounded-lg border border-outline-variant/40 px-3 py-1.5 font-label text-xs hover:bg-surface-container transition-colors"
                   onClick={() => {
                     setBreakdownOpen(false);
                     setBreakdownRow(null);
@@ -217,9 +229,9 @@ export function ScoresHub({
                   Close
                 </button>
               </div>
-              <div className="overflow-auto rounded border border-slate-200">
-                <table className="min-w-full text-left text-xs">
-                  <thead className="bg-blue-900 text-white">
+              <div className="overflow-auto rounded-lg border border-outline-variant/20">
+                <table className="min-w-full text-left text-xs font-body">
+                  <thead className="bg-primary font-label text-on-primary">
                     <tr>
                       <th className="px-3 py-2">Grade item</th>
                       <th className="px-3 py-2">Calculated weight</th>
@@ -245,8 +257,8 @@ export function ScoresHub({
                         feedback: "-",
                       },
                     ].map((r) => (
-                      <tr key={r.item} className="border-t border-slate-100">
-                        <td className="px-3 py-2 font-medium text-slate-900">{r.item}</td>
+                      <tr key={r.item} className="border-t border-outline-variant/20">
+                        <td className="px-3 py-2 font-label font-medium text-primary">{r.item}</td>
                         <td className="px-3 py-2">{r.weight}%</td>
                         <td className="px-3 py-2">{r.grade.toFixed(2)}</td>
                         <td className="px-3 py-2">1.00 - 5.00</td>
@@ -257,8 +269,8 @@ export function ScoresHub({
                         </td>
                       </tr>
                     ))}
-                    <tr className="border-t border-slate-200 bg-slate-50">
-                      <td className="px-3 py-2 font-semibold text-slate-900">
+                    <tr className="border-t-2 border-outline-variant/30 bg-surface-container">
+                      <td className="px-3 py-2 font-label font-bold text-primary">
                         Course total
                       </td>
                       <td className="px-3 py-2">100%</td>
@@ -288,43 +300,123 @@ export function ScoresHub({
 
   if (user.role !== "INSTRUCTOR") {
     return (
-      <article className="rounded-md border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
+      <article className="rounded-lg border border-outline-variant/20 bg-surface-container p-4 font-body text-sm text-on-surface-variant">
         Scores page is available for instructors.
       </article>
     );
   }
 
+  if (showCoursePicker) {
+    return (
+      <section className="space-y-5">
+        <header className="overflow-hidden rounded-lg border border-outline-variant/20 bg-gradient-to-r from-primary to-primary-container shadow-sm">
+          <div className="p-4 text-on-primary sm:p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="font-headline text-xl font-bold tracking-tight">
+                Quiz Scores
+              </p>
+              <span className="rounded-md bg-primary-fixed/30 px-2.5 py-1 text-xs font-label text-primary-fixed">
+                Instructor View
+              </span>
+            </div>
+            <p className="mt-1 font-body text-sm text-primary-fixed">
+              Select a subject first before opening quiz grades.
+            </p>
+          </div>
+        </header>
+
+        <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-sm md:p-5">
+          <div className="mb-3 grid gap-3 sm:grid-cols-[1fr_280px]">
+            <input
+              value={courseFilter}
+              onChange={(e) => setCourseFilter(e.target.value)}
+              className="rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-3 py-2.5 font-body text-sm text-on-surface placeholder:text-on-surface-variant focus:ring-1 focus:ring-primary outline-none"
+              placeholder="Search subject"
+            />
+            <select
+              data-keep-action-text="true"
+              value=""
+              onChange={(e) => {
+                const id = Number(e.target.value);
+                if (!id) return;
+                onSelectCourse(id);
+                setShowCoursePicker(false);
+              }}
+              className="rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-3 py-2.5 font-body text-sm text-on-surface"
+            >
+              <option value="">Select subject first</option>
+              {filteredCourses.map((course) => (
+                <option key={course.id} value={course.id}>
+                  {course.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredCourses.map((course) => (
+              <button
+                key={course.id}
+                onClick={() => {
+                  onSelectCourse(course.id);
+                  setShowCoursePicker(false);
+                }}
+                className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-3 text-left hover:bg-surface-container transition-colors"
+              >
+                <p className="font-label text-xs uppercase tracking-wider text-on-surface-variant">
+                  Subject
+                </p>
+                <p className="mt-1 font-headline text-base font-bold text-primary line-clamp-2">
+                  {course.title}
+                </p>
+              </button>
+            ))}
+            {!filteredCourses.length && (
+              <p className="text-sm text-on-surface-variant">No subjects found.</p>
+            )}
+          </div>
+        </article>
+      </section>
+    );
+  }
+
   return (
-    <section className="space-y-3">
-      <header className="rounded-md border border-slate-200 bg-white p-3">
-        <div className="mb-2 flex items-center justify-between">
-          <p className="text-lg font-semibold text-slate-900">Quiz Scores</p>
-          <p className="text-xs text-slate-500">
+    <section className="space-y-4">
+      <header className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 md:p-5">
+        <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="font-headline text-lg font-bold text-primary">Quiz Scores</p>
+          <p className="text-xs font-label text-on-surface-variant">
             Select a course to view student performance.
           </p>
         </div>
-        <div className="grid gap-2 sm:grid-cols-[1fr_280px]">
+        <div className="grid gap-3 sm:grid-cols-[auto_1fr_280px]">
+          <button
+            onClick={() => setShowCoursePicker(true)}
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-3 py-2.5 font-label text-sm text-on-surface hover:bg-surface-container"
+          >
+            <span className="material-symbols-outlined text-[1rem]">arrow_back</span>
+            Subjects
+          </button>
           <input
             value={courseFilter}
             onChange={(e) => setCourseFilter(e.target.value)}
-            className="rounded border border-slate-300 px-3 py-2 text-sm"
-            placeholder="Filter courses"
+            className="rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-3 py-2.5 font-body text-sm text-on-surface placeholder:text-on-surface-variant focus:ring-1 focus:ring-primary outline-none"
+            placeholder="Search subject"
           />
           <select
             data-keep-action-text="true"
             value={selectedCourse?.id ?? ""}
             onChange={(e) => onSelectCourse(Number(e.target.value))}
-            className="rounded border border-slate-300 px-3 py-2 text-sm"
+            className="rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-3 py-2.5 font-body text-sm text-on-surface"
           >
-            {courses
-              .filter((c) =>
-                c.title.toLowerCase().includes(courseFilter.trim().toLowerCase()),
-              )
-              .map((course) => (
-                <option key={course.id} value={course.id}>
-                  {course.title}
-                </option>
-              ))}
+            <option value="" disabled>
+              Select subject first
+            </option>
+            {filteredCourses.map((course) => (
+              <option key={course.id} value={course.id}>
+                {course.title}
+              </option>
+            ))}
           </select>
         </div>
       </header>
@@ -339,9 +431,29 @@ export function ScoresHub({
           setMessage={setMessage}
         />
       ) : (
-        <article className="rounded-md border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
-          No course available for scores yet.
-        </article>
+        <section className="space-y-3">
+          <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 font-body text-sm text-on-surface-variant">
+            Select a subject first to view quiz scores.
+          </article>
+          {!!filteredCourses.length && (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredCourses.map((course) => (
+                <button
+                  key={course.id}
+                  onClick={() => onSelectCourse(course.id)}
+                  className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-3 text-left hover:bg-surface-container transition-colors"
+                >
+                  <p className="font-label text-xs uppercase tracking-wider text-on-surface-variant">
+                    Subject
+                  </p>
+                  <p className="mt-1 font-headline text-base font-bold text-primary line-clamp-2">
+                    {course.title}
+                  </p>
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
       )}
     </section>
   );

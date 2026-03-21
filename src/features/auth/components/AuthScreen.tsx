@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import type { User } from "../../../shared/types/lms";
-import logo from "../../../assets/logo.png";
-import cover from "../../../assets/cover.png";
+import coverImage from "../../../assets/cover.png";
+import logoImage from "../../../assets/logo.png";
 
 export function AuthScreen({
   api,
@@ -30,6 +30,7 @@ export function AuthScreen({
   const [studentId, setStudentId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showTestAccounts, setShowTestAccounts] = useState(false);
+  const [showCampusNotice, setShowCampusNotice] = useState(true);
 
   const passwordChecks = useMemo(
     () => ({
@@ -97,358 +98,497 @@ export function AuthScreen({
     }
   }
 
-  const shellText = isDark ? "text-slate-100" : "text-slate-900";
-  const subText = isDark ? "text-slate-300" : "text-slate-600";
-  const inputClass = `w-full rounded-lg border px-3 py-2.5 outline-none transition focus:border-blue-500 ${
-    isDark
-      ? "border-slate-700 bg-slate-900 text-slate-100 placeholder:text-slate-400"
-      : "border-slate-300 bg-white text-slate-900"
-  }`;
-
   return (
-    <main className="min-h-screen bg-[var(--bg-main)] text-[var(--ink)] transition-colors">
-      <header
-        className={`border-b backdrop-blur transition-colors ${
-          isDark ? "border-slate-800 bg-slate-950/90" : "border-slate-200 bg-white/90"
-        }`}
+    <main className="min-h-screen flex flex-col bg-surface text-on-surface overflow-x-hidden">
+      <nav
+        className={`fixed top-0 w-full z-50 h-14 flex justify-between items-center px-8 transition-all duration-300 ease-in-out backdrop-blur-lg ${isDark ? "border-b border-white/10 bg-slate-950/40" : "border-b border-black/10 bg-white/40"}`}
       >
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <img src={logo} alt="NEMSU" className="h-10 w-10 rounded-full" />
-            <div>
-              <p className={`text-sm font-semibold leading-none ${shellText}`}>
-                North Eastern Mindanao State University
-              </p>
-              <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                E-Learning Environment
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <nav className={`hidden items-center gap-3 text-sm md:flex ${isDark ? "text-slate-300" : "text-slate-600"}`}>
-              <a href="https://nemsu.edu.ph" target="_blank" rel="noreferrer" className="hover:text-blue-500">
-                About
-              </a>
-              <a href="https://nemsu.edu.ph/contact-us/" target="_blank" rel="noreferrer" className="hover:text-blue-500">
-                Contact
-              </a>
-              <a href="mailto:information@nemsu.edu.ph" className="hover:text-blue-500">
-                information@nemsu.edu.ph
-              </a>
-              <a href="mailto:registrarmain@nemsu.edu.ph" className="hover:text-blue-500">
-                registrarmain@nemsu.edu.ph
-              </a>
-              <a href="https://www.facebook.com/nemsuofficialph" target="_blank" rel="noreferrer" aria-label="NEMSU Facebook" className="hover:text-blue-500">
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor"><path d="M13.5 8H16V5h-2.5C11 5 9.5 6.6 9.5 9.2V11H7v3h2.5v5H13v-5h2.6l.4-3H13V9.5c0-.9.3-1.5 1.5-1.5Z"/></svg>
-              </a>
-              <a href="https://www.youtube.com/@nemsuofficialph" target="_blank" rel="noreferrer" aria-label="NEMSU YouTube" className="hover:text-blue-500">
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor"><path d="M23 12s0-3.3-.4-4.9a2.6 2.6 0 0 0-1.8-1.8C19.2 5 12 5 12 5s-7.2 0-8.8.3a2.6 2.6 0 0 0-1.8 1.8C1 8.7 1 12 1 12s0 3.3.4 4.9a2.6 2.6 0 0 0 1.8 1.8C4.8 19 12 19 12 19s7.2 0 8.8-.3a2.6 2.6 0 0 0 1.8-1.8c.4-1.6.4-4.9.4-4.9ZM10 15.5v-7l6 3.5-6 3.5Z"/></svg>
-              </a>
-            </nav>
-            <button
-              type="button"
-              onClick={onToggleTheme}
-              className={`inline-flex h-10 w-10 items-center justify-center rounded-full border transition ${
-                isDark
-                  ? "border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800"
-                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-              }`}
-              aria-label="Toggle theme"
-              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
-                {isDark ? (
-                  <path d="M12 4v2m0 12v2m6-8h2M4 12H2m14.4 4.4 1.2 1.2M6.4 6.4 5.2 5.2m11.2 0-1.2 1.2M6.4 17.6l-1.2 1.2M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" />
-                ) : (
-                  <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" />
-                )}
-              </svg>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <section
-        className="w-full min-h-[calc(100vh-124px)]"
-        style={{
-          backgroundImage: isDark
-            ? `linear-gradient(rgba(2, 6, 23, 0.66), rgba(2, 6, 23, 0.72)), url(${cover})`
-            : `linear-gradient(rgba(2, 6, 23, 0.48), rgba(2, 6, 23, 0.54)), url(${cover})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="mx-auto grid min-h-[calc(100vh-124px)] w-full max-w-6xl items-center gap-8 px-4 py-10 md:grid-cols-2">
-          <div className="p-2">
-            <p className="mb-3 text-xs uppercase tracking-[0.2em] text-blue-200">NEMSU EE</p>
-            <h1 className="text-4xl font-bold leading-tight text-white drop-shadow-sm">E-Learning Environment</h1>
-            <p className="mt-3 max-w-md text-base text-slate-100/95">
-              Access your courses, assessments, and academic services through a secure university portal.
-            </p>
-            <div className="mt-6 space-y-2 text-sm text-slate-100">
-              <p>✔ Role-based access control</p>
-              <p>✔ Strong password policy</p>
-              <p>✔ Secure login sessions</p>
-            </div>
-          </div>
-
-          <form
-            onSubmit={onSubmit}
-            data-auth-form="true"
-            className={`rounded-none border p-8 shadow-xl backdrop-blur-sm transition-colors ${
-              isDark
-                ? "border-blue-500/40 bg-slate-950/80 text-slate-100"
-                : "border-slate-200 bg-white/92 text-slate-900"
-            }`}
-            style={{ borderTopLeftRadius: "2rem", borderBottomRightRadius: "3rem" }}
+        <div className="flex items-center gap-2">
+          <img
+            src={logoImage}
+            alt="NEMSUEE logo"
+            className="h-9 w-9 rounded-sm object-contain"
+          />
+          <span 
+            className={`text-l font-black tracking-tight font-headline ${isDark ? "text-white" : "text-primary"}`}
           >
-            <div className={`mb-6 flex rounded-xl p-1 text-sm ${isDark ? "bg-slate-800" : "bg-slate-100"}`}>
+            North Eastern Mindanao State University
+          </span>
+        </div>
+        <div className="hidden md:flex gap-8 items-center">
+          <a
+            className={`font-label text-sm hover:opacity-75 transition-opacity ${isDark ? "text-white" : "text-on-surface-variant hover:text-primary"}`}
+            href="#"
+          >
+            About NEMSU
+          </a>
+          <a
+            className={`font-label text-sm hover:opacity-75 transition-opacity ${isDark ? "text-white" : "text-on-surface-variant hover:text-primary"}`}
+            href="#"
+          >
+            Academic Programs
+          </a>
+          <a
+            className={`font-label text-sm hover:opacity-75 transition-opacity ${isDark ? "text-white" : "text-on-surface-variant hover:text-primary"}`}
+            href="#"
+          >
+            Support
+          </a>
+          <button
+            onClick={onToggleTheme}
+            className={`px-5 py-2 rounded-md font-label text-sm font-semibold tracking-wide hover:opacity-90 transition-opacity ${isDark ? "bg-white text-slate-950" : "bg-primary text-on-primary"}`}
+          >
+            {isDark ? "Light" : "Dark"}
+          </button>
+        </div>
+        <div className={`md:hidden ${isDark ? "text-white" : "text-primary"}`}>
+          <span className="material-symbols-outlined">menu</span>
+        </div>
+      </nav>
+      <main className="flex-1 flex flex-col md:flex-row pt-14">
+        <section
+          className="relative w-full md:w-1/2 lg:w-3/5 overflow-hidden flex items-start justify-center p-8 pt-16 md:p-20 md:pt-24"
+          style={{
+            backgroundImage: `linear-gradient(135deg, rgba(0, 29, 68, 0.99) 0%, rgba(0, 50, 107, 0.96) 50%, rgba(119, 90, 25, 0.8) 100%), url(${coverImage})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundAttachment: "fixed",
+          }}
+        >
+          <div className="absolute inset-0 z-0"></div>
+          <div className="relative z-10 max-w-2xl">
+            <h1 className="font-headline font-black text-white text-5xl lg:text-7xl leading-none mb-2">
+              Enter the <br />
+              <span className="text-secondary-fixed">Digital Athenaeum</span>
+            </h1>
+            <p className="text-primary-fixed-dim text-xl lg:text-2xl font-body leading-tight max-w-xl opacity-90">
+              Welcome to North Eastern Mindanao State University E-Learning
+              Experience. A space dedicated to academic excellence, research,
+              and collaborative growth.
+            </p>
+            <div className="mt-8 flex gap-8 border-t border-white/10 pt-8">
+              <div>
+                <div className="text-white font-headline text-3xl font-bold">
+                  12k+
+                </div>
+                <div className="text-primary-fixed-dim font-label text-xs uppercase tracking-widest mt-1">
+                  Students
+                </div>
+              </div>
+              <div>
+                <div className="text-white font-headline text-3xl font-bold">
+                  450+
+                </div>
+                <div className="text-primary-fixed-dim font-label text-xs uppercase tracking-widest mt-1">
+                  Courses
+                </div>
+              </div>
+              <div>
+                <div className="text-white font-headline text-3xl font-bold">
+                  98%
+                </div>
+                <div className="text-primary-fixed-dim font-label text-xs uppercase tracking-widest mt-1">
+                  Success Rate
+                </div>
+              </div>
+            </div>
+          </div>
+          {showCampusNotice && (
+            <div className="fixed top-24 left-4 right-4 md:bottom-8 md:top-auto md:left-8 md:right-auto z-50 flex items-start md:items-center gap-3 bg-white/10 backdrop-blur-md rounded-lg border border-white/20 px-4 py-3 max-w-xs md:max-w-none animate-in fade-in slide-in-from-top-2 duration-300">
+              <span className="material-symbols-outlined text-secondary-fixed text-2xl flex-shrink-0">
+                notifications_active
+              </span>
+              <div className="flex-1">
+                <p className="font-label text-xs uppercase tracking-widest text-white/80">
+                  Campus Notice
+                </p>
+                <p className="font-body text-sm text-white font-semibold">
+                  Semester finals scheduled for Dec 12.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowCampusNotice(false)}
+                className="flex-shrink-0 text-white/60 hover:text-white/80 transition-colors p-1"
+                aria-label="Close campus notice"
+              >
+                <span className="material-symbols-outlined text-sm">close</span>
+              </button>
+            </div>
+          )}
+          <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-secondary/10 rounded-full blur-3xl"></div>
+        </section>
+        <section className="w-full md:w-1/2 lg:w-2/5 bg-surface flex flex-col items-center justify-center p-8 md:p-16">
+          <div className="w-full max-w-md">
+            <div className="mb-6">
+              <h2 className="font-headline text-3xl font-bold text-primary mb-2">
+                Portal Access
+              </h2>
+              <p className="text-on-surface-variant font-body">
+                Please provide your institutional credentials to enter your
+                learning space.
+              </p>
+            </div>
+            {message && (
+              <div className="mb-6 flex items-start gap-3 rounded-lg border border-error/30 bg-error/5 px-4 py-3">
+                <span className="material-symbols-outlined text-error text-sm mt-0.5">
+                  error
+                </span>
+                <div className="flex-1">
+                  <p className="text-sm text-error font-medium">{message}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMessage("")}
+                  className="text-error hover:text-error/80 transition-colors"
+                  aria-label="Dismiss error"
+                >
+                  <span className="material-symbols-outlined text-sm">
+                    close
+                  </span>
+                </button>
+              </div>
+            )}
+            <div className="flex gap-2 mb-6 bg-surface-container-low rounded-lg p-1">
               <button
                 type="button"
                 onClick={() => setMode("login")}
-                className={`w-1/2 rounded-md px-3 py-2 transition ${
-                  mode === "login" ? "bg-blue-600 text-white" : isDark ? "text-slate-300" : "text-slate-600"
-                }`}
+                className={`flex-1 py-2.5 rounded font-label font-semibold text-sm transition-all ${mode === "login" ? "bg-primary text-on-primary" : "text-on-surface-variant hover:text-primary"}`}
               >
                 Sign In
               </button>
               <button
                 type="button"
                 onClick={() => setMode("register")}
-                className={`w-1/2 rounded-md px-3 py-2 transition ${
-                  mode === "register" ? "bg-blue-600 text-white" : isDark ? "text-slate-300" : "text-slate-600"
-                }`}
+                className={`flex-1 py-2.5 rounded font-label font-semibold text-sm transition-all ${mode === "register" ? "bg-primary text-on-primary" : "text-on-surface-variant hover:text-primary"}`}
               >
                 Register
               </button>
             </div>
-
-            <div className="mb-1 flex items-center gap-2">
-              <h2 className={`text-2xl font-bold ${shellText}`}>
-                {mode === "login" ? "Sign In" : "Create Account"}
-              </h2>
-              {mode === "login" && (
-                <button
-                  type="button"
-                  aria-label="View test accounts"
-                  title="View test accounts"
-                  onClick={() => setShowTestAccounts(true)}
-                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold tracking-wide transition ${
-                    isDark
-                      ? "border-slate-600 bg-slate-800 text-slate-200 hover:bg-slate-700"
-                      : "border-slate-300 bg-slate-100 text-slate-700 hover:bg-slate-200"
-                  }`}
-                >
-                  <span className="inline-flex items-center gap-0.5">
-                    <span className="h-1 w-1 rounded-full bg-current" />
-                    <span className="h-1 w-1 rounded-full bg-current" />
-                    <span className="h-1 w-1 rounded-full bg-current" />
-                  </span>
-                  TEST ACCOUNTS
-                </button>
+            <form
+              onSubmit={onSubmit}
+              className="space-y-4 pt-4 border-t-2 border-secondary"
+            >
+              {mode === "register" && (
+                <div className="relative">
+                  <label className="block font-label text-sm font-medium text-on-surface-variant mb-1 ml-1">
+                    Full Name
+                  </label>
+                  <input
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    name="fullName"
+                    required
+                    placeholder="e.g. John Doe"
+                    className="w-full bg-transparent border-0 border-b-2 border-surface-variant focus:ring-0 focus:border-primary px-1 py-3 transition-all placeholder:text-outline-variant text-primary font-body"
+                  />
+                </div>
               )}
-            </div>
-            <p className={`mb-6 text-sm ${subText}`}>
-              {mode === "login"
-                ? "Use your university credentials to access your portal."
-                : "Register as Student or Instructor."}
-            </p>
-
-            {message && (
-              <div className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                <p>{message}</p>
-                <button
-                  type="button"
-                  onClick={() => setMessage("")}
-                  className="text-red-500 hover:text-red-700"
-                  aria-label="Dismiss error"
-                >
-                  ×
-                </button>
-              </div>
-            )}
-
-            {mode === "register" && (
-              <div className="mb-4">
-                <label className={`mb-2 block text-sm font-semibold ${isDark ? "text-slate-200" : "text-slate-700"}`}>
-                  Full Name
+              <div className="relative">
+                <label className="block font-label text-sm font-medium text-on-surface-variant mb-1 ml-1">
+                  Username or Institutional Email
                 </label>
                 <input
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  name="fullName"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  name="email"
+                  type="email"
                   required
-                  placeholder="Enter your full name"
-                  className={inputClass}
+                  placeholder="e.g. s.doe@nemsu.edu.ph"
+                  className="w-full bg-transparent border-0 border-b-2 border-surface-variant focus:ring-0 focus:border-primary px-1 py-3 transition-all placeholder:text-outline-variant text-primary font-body"
                 />
+                <div className="absolute right-2 top-9 text-outline-variant">
+                  <span className="material-symbols-outlined text-lg">
+                    alternate_email
+                  </span>
+                </div>
               </div>
-            )}
-            <div className="mb-4">
-              <label className={`mb-2 block text-sm font-semibold ${isDark ? "text-slate-200" : "text-slate-700"}`}>
-                Enter Your University Email Address
-              </label>
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                name="email"
-                type="email"
-                required
-                placeholder="name@nemsu.edu.ph"
-                className={inputClass}
-              />
-            </div>
-            <div className="mb-4">
-              <label className={`mb-2 block text-sm font-semibold ${isDark ? "text-slate-200" : "text-slate-700"}`}>
-                Password
-              </label>
               <div className="relative">
+                <div className="flex justify-between items-end mb-1">
+                  <label className="block font-label text-sm font-medium text-on-surface-variant ml-1">
+                    Password
+                  </label>
+                  {mode === "login" && (
+                    <a className="font-label text-xs font-semibold text-secondary hover:text-primary transition-colors">
+                      Forgot Password?
+                    </a>
+                  )}
+                </div>
                 <input
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   name="password"
                   type={showPassword ? "text" : "password"}
                   required
-                  placeholder="Enter password"
-                  className={`${inputClass} pr-20`}
+                  placeholder="••••••••••••"
+                  className="w-full bg-transparent border-0 border-b-2 border-surface-variant focus:ring-0 focus:border-primary px-1 py-3 transition-all placeholder:text-outline-variant text-primary font-body"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className={`absolute top-1/2 right-3 -translate-y-1/2 text-xs font-medium ${
-                    isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
-                  }`}
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-11 text-outline-variant hover:text-on-surface-variant transition-colors"
                 >
-                  {showPassword ? "Hide" : "Show"}
+                  <span className="material-symbols-outlined text-lg">
+                    {showPassword ? "visibility_off" : "visibility"}
+                  </span>
                 </button>
               </div>
-            </div>
-
-            {mode === "register" && (
-              <>
-                <div className="relative mb-2">
-                  <input
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    type={showConfirmPassword ? "text" : "password"}
-                    required
-                    placeholder="Confirm password"
-                    className={`${inputClass} pr-20`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword((v) => !v)}
-                    className={`absolute top-1/2 right-3 -translate-y-1/2 text-xs font-medium ${
-                      isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
-                    }`}
-                  >
-                    {showConfirmPassword ? "Hide" : "Show"}
-                  </button>
-                </div>
-                <select
-                  value={role}
-                  onChange={(e) => {
-                    const nextRole = e.target.value as "STUDENT" | "INSTRUCTOR";
-                    setRole(nextRole);
-                    if (nextRole !== "STUDENT") setStudentId("");
-                  }}
-                  name="role"
-                  className={`${inputClass} mb-2`}
-                >
-                  <option value="STUDENT">Student</option>
-                  <option value="INSTRUCTOR">Instructor (Requires admin approval)</option>
-                </select>
-                {role === "STUDENT" && (
-                  <input
-                    value={studentId}
-                    onChange={(e) => setStudentId(e.target.value)}
-                    required
-                    placeholder="Student ID"
-                    className={`${inputClass} mb-2`}
-                  />
-                )}
-                <div className={`mb-3 grid grid-cols-2 gap-1 text-xs ${isDark ? "text-slate-300" : ""}`}>
-                  <p className={passwordChecks.length ? "text-emerald-400" : "text-slate-400"}>8+ chars</p>
-                  <p className={passwordChecks.upper ? "text-emerald-400" : "text-slate-400"}>Uppercase</p>
-                  <p className={passwordChecks.lower ? "text-emerald-400" : "text-slate-400"}>Lowercase</p>
-                  <p className={passwordChecks.number ? "text-emerald-400" : "text-slate-400"}>Number</p>
-                  <p className={passwordChecks.special ? "text-emerald-400" : "text-slate-400"}>Special char</p>
-                  <p
-                    className={
-                      password === confirmPassword && password.length > 0 ? "text-emerald-400" : "text-slate-400"
-                    }
-                  >
-                    Match
-                  </p>
-                </div>
-              </>
-            )}
-
-            <button
-              disabled={isSubmitting}
-              data-keep-action-text="true"
-              className="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-base font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {isSubmitting ? "Please wait..." : mode === "login" ? "Sign In" : "Submit Registration"}
-            </button>
-            <div className="mt-5 space-y-2 text-sm">
-              <button type="button" className="block text-blue-600 hover:underline">
-                Forgot Your Password? (Students)
-              </button>
-              <button type="button" className="block text-blue-600 hover:underline">
-                Privacy Policy
-              </button>
-            </div>
-            {showTestAccounts && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-                <div
-                  className={`w-full max-w-md rounded-2xl border p-5 shadow-2xl ${
-                    isDark
-                      ? "border-slate-700 bg-slate-900 text-slate-100"
-                      : "border-slate-200 bg-white text-slate-900"
-                  }`}
-                >
-                  <div className="mb-3 flex items-center justify-between">
-                    <p className="text-sm font-semibold">
-                      Test Accounts
-                    </p>
+              {mode === "register" && (
+                <>
+                  <div className="relative">
+                    <label className="block font-label text-sm font-medium text-on-surface-variant mb-1 ml-1">
+                      Confirm Password
+                    </label>
+                    <input
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      type={showConfirmPassword ? "text" : "password"}
+                      required
+                      placeholder="••••••••••••"
+                      className="w-full bg-transparent border-0 border-b-2 border-surface-variant focus:ring-0 focus:border-primary px-1 py-3 transition-all placeholder:text-outline-variant text-primary font-body"
+                    />
                     <button
                       type="button"
-                      className={`rounded border px-2 py-1 text-xs ${
-                        isDark
-                          ? "border-slate-600 text-slate-200 hover:bg-slate-800"
-                          : "border-slate-300 text-slate-700 hover:bg-slate-100"
-                      }`}
-                      onClick={() => setShowTestAccounts(false)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="absolute right-2 top-9 text-outline-variant hover:text-on-surface-variant transition-colors"
                     >
-                      Close
+                      <span className="material-symbols-outlined text-lg">
+                        {showConfirmPassword ? "visibility_off" : "visibility"}
+                      </span>
                     </button>
                   </div>
-                  <div className="space-y-2 text-xs">
-                    <p><span className="font-semibold">Instructor:</span> 23-1-00761@vsu.edu.ph</p>
-                    <p><span className="font-semibold">Student:</span> jipre@nemsu.edu</p>
-                    <p className={`${isDark ? "text-slate-400" : "text-slate-500"} pt-1`}>
-                      Password for all test accounts: <span className="font-semibold">vince691 or Kuyaloy1.</span>
-                    </p>
+                  <div className="relative">
+                    <label className="block font-label text-sm font-medium text-on-surface-variant mb-1 ml-1">
+                      Account Type
+                    </label>
+                    <select
+                      value={role}
+                      onChange={(e) => {
+                        const nextRole = e.target.value as
+                          | "STUDENT"
+                          | "INSTRUCTOR";
+                        setRole(nextRole);
+                        if (nextRole !== "STUDENT") setStudentId("");
+                      }}
+                      className="w-full bg-transparent border-0 border-b-2 border-surface-variant focus:ring-0 focus:border-primary px-1 py-3 transition-all font-body text-on-surface appearance-none cursor-pointer"
+                      style={{
+                        backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 20 20%22 fill=%22none%22 stroke=%22%23c3c6d1%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M6 8l4 4 4-4%22/></svg>')`,
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "right 0.5rem center",
+                        backgroundSize: "1rem 1rem",
+                        paddingRight: "2.2rem",
+                      }}
+                    >
+                      <option value="STUDENT">Student</option>
+                      <option value="INSTRUCTOR">
+                        Instructor (Admin approval required)
+                      </option>
+                    </select>
                   </div>
+                  {role === "STUDENT" && (
+                    <div className="relative">
+                      <label className="block font-label text-sm font-medium text-on-surface-variant mb-1 ml-1">
+                        Student ID
+                      </label>
+                      <input
+                        value={studentId}
+                        onChange={(e) => setStudentId(e.target.value)}
+                        required
+                        placeholder="e.g. 2024-12345"
+                        className="w-full bg-transparent border-0 border-b-2 border-surface-variant focus:ring-0 focus:border-primary px-1 py-3 transition-all placeholder:text-outline-variant text-primary font-body"
+                      />
+                    </div>
+                  )}
+                  <div className="bg-surface-container-low rounded-lg p-4 space-y-2">
+                    <p className="font-label text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-3">
+                      Password Requirements
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 text-xs font-label">
+                      <div
+                        className={`flex items-center gap-2 ${passwordChecks.length ? "text-tertiary" : "text-on-surface-variant"}`}
+                      >
+                        <span className="material-symbols-outlined text-sm">
+                          {passwordChecks.length
+                            ? "task_alt"
+                            : "radio_button_unchecked"}
+                        </span>
+                        8+ characters
+                      </div>
+                      <div
+                        className={`flex items-center gap-2 ${passwordChecks.upper ? "text-tertiary" : "text-on-surface-variant"}`}
+                      >
+                        <span className="material-symbols-outlined text-sm">
+                          {passwordChecks.upper
+                            ? "task_alt"
+                            : "radio_button_unchecked"}
+                        </span>
+                        Uppercase
+                      </div>
+                      <div
+                        className={`flex items-center gap-2 ${passwordChecks.lower ? "text-tertiary" : "text-on-surface-variant"}`}
+                      >
+                        <span className="material-symbols-outlined text-sm">
+                          {passwordChecks.lower
+                            ? "task_alt"
+                            : "radio_button_unchecked"}
+                        </span>
+                        Lowercase
+                      </div>
+                      <div
+                        className={`flex items-center gap-2 ${passwordChecks.number ? "text-tertiary" : "text-on-surface-variant"}`}
+                      >
+                        <span className="material-symbols-outlined text-sm">
+                          {passwordChecks.number
+                            ? "task_alt"
+                            : "radio_button_unchecked"}
+                        </span>
+                        Number
+                      </div>
+                      <div
+                        className={`flex items-center gap-2 ${passwordChecks.special ? "text-tertiary" : "text-on-surface-variant"}`}
+                      >
+                        <span className="material-symbols-outlined text-sm">
+                          {passwordChecks.special
+                            ? "task_alt"
+                            : "radio_button_unchecked"}
+                        </span>
+                        Special char
+                      </div>
+                      <div
+                        className={`flex items-center gap-2 ${password === confirmPassword && password.length > 0 ? "text-tertiary" : "text-on-surface-variant"}`}
+                      >
+                        <span className="material-symbols-outlined text-sm">
+                          {password === confirmPassword && password.length > 0
+                            ? "task_alt"
+                            : "radio_button_unchecked"}
+                        </span>
+                        Match
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+              {mode === "login" && (
+                <div className="flex items-center gap-3 ml-1">
+                  <input
+                    type="checkbox"
+                    id="remember"
+                    className="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary"
+                  />
+                  <label
+                    className="font-label text-sm text-on-surface-variant"
+                    htmlFor="remember"
+                  >
+                    Keep me signed in on this device
+                  </label>
                 </div>
+              )}
+              <div className="pt-4">
+                <button
+                  disabled={
+                    isSubmitting || (mode === "register" && !passwordStrong)
+                  }
+                  type="submit"
+                  className="w-full py-4 bg-primary text-on-primary rounded-md font-label font-bold text-sm tracking-widest flex items-center justify-center gap-2 hover:bg-primary/95 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-primary/10 transition-all active:scale-[0.98]"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span className="material-symbols-outlined animate-spin text-sm">
+                        sync
+                      </span>
+                      Please wait...
+                    </>
+                  ) : mode === "login" ? (
+                    <>
+                      <>SIGN IN TO PORTAL</>
+                      <span className="material-symbols-outlined text-sm">
+                        arrow_forward
+                      </span>
+                    </>
+                  ) : (
+                    "CREATE ACCOUNT"
+                  )}
+                </button>
+              </div>
+            </form>
+            {mode === "login" && (
+              <div className="mt-5 pt-4 border-t border-surface-container text-center">
+                <button
+                  type="button"
+                  onClick={() => setShowTestAccounts(true)}
+                  className="font-label text-[11px] leading-none font-semibold text-secondary hover:text-primary transition-colors px-2 py-1"
+                >
+                  View Test Accounts
+                </button>
               </div>
             )}
-          </form>
+            <div className="mt-8 pt-6 border-t border-surface-container">
+              <p className="font-label text-sm font-semibold text-on-surface-variant mb-4 text-center">
+                Are you a new student or faculty member?
+              </p>
+              <div className="grid grid-cols-2 gap-3 text-center">
+                <a
+                  href="#"
+                  className="px-6 py-2 border border-outline-variant text-primary font-label text-xs font-extrabold tracking-tight rounded hover:bg-surface-container transition-colors"
+                >
+                  ACCOUNT ACTIVATION
+                </a>
+                <a
+                  href="#"
+                  className="px-6 py-2 bg-secondary-container text-on-secondary-container font-label text-xs font-extrabold tracking-tight rounded hover:opacity-90 transition-opacity"
+                >
+                  ENROLLMENT INFO
+                </a>
+              </div>
+            </div>
+            <div className="mt-8 text-center">
+              <p className="font-label text-[10px] uppercase tracking-widest text-outline">
+                © {new Date().getFullYear()} North Eastern Mindanao State
+                University. All rights reserved.
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+      {showTestAccounts && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/20 p-6">
+            <div className="flex items-center justify-between">
+              <h3 className="font-headline text-lg font-bold text-primary">
+                Test Accounts
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowTestAccounts(false)}
+                className="text-on-surface-variant hover:text-on-surface transition-colors"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="space-y-3 text-sm font-body">
+              <div className="bg-surface-container p-3 rounded-lg">
+                <p className="font-semibold text-primary mb-1">Instructor</p>
+                <p className="font-label text-xs text-on-surface-variant">
+                  23-1-00761@vsu.edu.ph
+                </p>
+              </div>
+              <div className="bg-surface-container p-3 rounded-lg">
+                <p className="font-semibold text-primary mb-1">Student</p>
+                <p className="font-label text-xs text-on-surface-variant">
+                  jipre@nemsu.edu
+                </p>
+              </div>
+              <div className="bg-tertiary-fixed/30 p-3 rounded-lg">
+                <p className="font-label text-xs text-on-tertiary-container">
+                  Password for all accounts:{" "}
+                  <span className="font-semibold">vince691 or Kuyaloy1.</span>
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </section>
-
-      <footer className={`border-t transition-colors ${isDark ? "border-slate-800 bg-slate-950" : "border-slate-200 bg-white"}`}>
-        <div
-          className={`mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-2 px-4 py-3 text-xs md:flex-row ${
-            isDark ? "text-slate-400" : "text-slate-500"
-          }`}
-        >
-          <p>
-            Copyright {new Date().getFullYear()} North Eastern Mindanao State University. All rights reserved.
-          </p>
-          <p>NEMSU EE</p>
-        </div>
-      </footer>
+      )}
     </main>
   );
 }

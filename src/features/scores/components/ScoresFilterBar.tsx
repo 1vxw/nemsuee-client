@@ -41,10 +41,10 @@ export function ScoresFilterBar({
   setInstructorViewMode,
   setScorePage,
 }: ScoresFilterBarProps) {
-  const controlClass = "h-9 rounded border border-slate-300 px-3 text-xs";
+  const controlClass = "h-9 rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-3 font-body text-xs text-on-surface";
 
   return (
-    <div className="rounded-md border border-slate-200 bg-white p-3">
+    <div className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-3 md:p-4">
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))]">
         <input
           value={scoreQuery}
@@ -124,9 +124,9 @@ export function ScoresFilterBar({
           <option value="LESSON_DESC">Lesson Z-A</option>
         </select>
         {role === "INSTRUCTOR" && (
-          <div className="inline-flex overflow-hidden rounded border border-slate-300 text-xs">
+          <div className="inline-flex overflow-hidden rounded-lg border border-outline-variant/40 text-xs font-label">
           <button
-            className={`px-3 py-1.5 ${instructorViewMode === "GRADEBOOK" ? "bg-blue-600 text-white" : "bg-white text-slate-700"}`}
+            className={`px-3 py-2 font-bold transition-colors ${instructorViewMode === "GRADEBOOK" ? "bg-primary text-on-primary" : "bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container"}`}
             onClick={() => {
               setInstructorViewMode("GRADEBOOK");
               setScorePage(1);
@@ -135,7 +135,7 @@ export function ScoresFilterBar({
             Gradebook View
           </button>
           <button
-            className={`px-3 py-1.5 ${instructorViewMode === "LESSON" ? "bg-blue-600 text-white" : "bg-white text-slate-700"}`}
+            className={`px-3 py-2 font-bold transition-colors ${instructorViewMode === "LESSON" ? "bg-primary text-on-primary" : "bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container"}`}
             onClick={() => {
               setInstructorViewMode("LESSON");
               setScorePage(1);
@@ -148,7 +148,7 @@ export function ScoresFilterBar({
         <div className="flex justify-start md:justify-end">
           <button
             data-keep-action-text="true"
-            className="h-9 rounded border border-slate-300 px-3 text-xs text-slate-700 hover:bg-slate-50"
+            className="h-9 rounded-lg border border-outline-variant/40 px-3 font-label text-xs text-on-surface hover:bg-surface-container transition-colors"
             onClick={() => {
               setScoreQuery("");
               setScoreLessonFilter("ALL");

@@ -86,6 +86,7 @@ export function useActionIconizer() {
     const iconizeActionButtons = () => {
       const buttons = document.querySelectorAll("button");
       buttons.forEach((button) => {
+        if (button.closest('[data-no-action-iconize="true"]')) return;
         if (button.dataset.actionIconized === "true") return;
         if (button.querySelector("svg, img")) return;
         const onlyTextNodes = Array.from(button.childNodes).every(

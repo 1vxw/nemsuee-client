@@ -60,31 +60,38 @@ export function CourseInfoModal(props: CourseInfoModalProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-      <div className="w-full max-w-md rounded-md border border-slate-200 bg-white p-4 shadow-lg">
-        <div className="mb-3 flex items-start justify-between gap-3">
-          <h3 className="text-base font-semibold">Course Info</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-2xl rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-xl md:p-5">
+        <div className="mb-4 flex items-start justify-between gap-3 border-b border-outline-variant/20 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-secondary">info</span>
+            <h3 className="font-headline text-lg font-bold text-primary">Course Details</h3>
+          </div>
           <button
             onClick={() => setShowCourseInfo(false)}
-            className="rounded border border-slate-300 px-2 py-1 text-xs"
+            className="inline-flex items-center gap-1 rounded-md border border-outline-variant/40 bg-surface-container-lowest px-2.5 py-1.5 text-xs font-label text-on-surface hover:bg-surface-container"
           >
+            <span className="material-symbols-outlined text-[0.95rem]">close</span>
             Close
           </button>
         </div>
-        <div className="space-y-2 text-sm">
-          <p>
-            <span className="font-semibold">Name:</span> {selectedCourse.title}
-          </p>
-          <p>
-            <span className="font-semibold">Description:</span>{" "}
-            {selectedCourse.description || "No description"}
-          </p>
-          <p>
-            <span className="font-semibold">Students Enrolled:</span>{" "}
-            {uniqueStudents.length}
+        <div className="space-y-4 text-sm">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <p className="rounded-md border border-outline-variant/20 bg-surface-container-low p-2.5">
+              <span className="font-label text-xs uppercase tracking-wider text-on-surface-variant">Name</span>
+              <span className="mt-1 block font-semibold text-on-surface">{selectedCourse.title}</span>
+            </p>
+            <p className="rounded-md border border-outline-variant/20 bg-surface-container-low p-2.5">
+              <span className="font-label text-xs uppercase tracking-wider text-on-surface-variant">Students Enrolled</span>
+              <span className="mt-1 block font-semibold text-primary">{uniqueStudents.length}</span>
+            </p>
+          </div>
+          <p className="rounded-md border border-outline-variant/20 bg-surface-container-low p-2.5">
+            <span className="font-label text-xs uppercase tracking-wider text-on-surface-variant">Description</span>
+            <span className="mt-1 block text-on-surface">{selectedCourse.description || "No description"}</span>
           </p>
           <div>
-            <p className="font-semibold">Enrolled Students:</p>
+            <p className="font-semibold text-primary">Enrolled Students</p>
             {uniqueStudents.length ? (
               <>
                 <input
@@ -93,15 +100,17 @@ export function CourseInfoModal(props: CourseInfoModalProps) {
                     setStudentQuery(e.target.value);
                     setStudentPage(1);
                   }}
-                  className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                  className="mt-2 w-full rounded-md border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant"
                   placeholder="Search enrolled students"
                 />
-                <ul className="mt-2 max-h-44 list-disc overflow-auto pl-5 text-sm">
+                <ul className="mt-2 max-h-44 overflow-auto rounded-md border border-outline-variant/20 bg-surface-container-low p-2 text-sm">
                   {pagedStudents.map((student) => (
-                    <li key={student.id}>{student.fullName}</li>
+                    <li key={student.id} className="rounded px-2 py-1.5 text-on-surface hover:bg-surface-container">
+                      {student.fullName}
+                    </li>
                   ))}
                 </ul>
-                <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
+                <div className="mt-2 flex items-center justify-between text-xs text-on-surface-variant">
                   <p>
                     Showing{" "}
                     {filteredStudents.length
@@ -118,7 +127,7 @@ export function CourseInfoModal(props: CourseInfoModalProps) {
                     <button
                       onClick={() => setStudentPage((p) => Math.max(1, p - 1))}
                       disabled={safeStudentPage <= 1}
-                      className="rounded border border-slate-300 px-2 py-1 disabled:opacity-50"
+                      className="rounded border border-outline-variant/40 px-2 py-1 disabled:opacity-50"
                     >
                       Prev
                     </button>
@@ -132,7 +141,7 @@ export function CourseInfoModal(props: CourseInfoModalProps) {
                         )
                       }
                       disabled={safeStudentPage >= studentTotalPages}
-                      className="rounded border border-slate-300 px-2 py-1 disabled:opacity-50"
+                      className="rounded border border-outline-variant/40 px-2 py-1 disabled:opacity-50"
                     >
                       Next
                     </button>
@@ -140,7 +149,7 @@ export function CourseInfoModal(props: CourseInfoModalProps) {
                 </div>
               </>
             ) : (
-              <p className="text-slate-500">No enrolled students to show.</p>
+              <p className="text-on-surface-variant">No enrolled students to show.</p>
             )}
           </div>
           {user.role === "STUDENT" && (
@@ -152,8 +161,9 @@ export function CourseInfoModal(props: CourseInfoModalProps) {
                   await leaveCourse(selectedCourse.id);
                   setShowCourseInfo(false);
                 }}
-                className="rounded-md border border-rose-300 px-3 py-2 text-xs text-rose-700 hover:bg-rose-50"
+                className="inline-flex items-center gap-1.5 rounded-md border border-error/40 px-3 py-2 text-xs font-semibold text-error hover:bg-error-container"
               >
+                <span className="material-symbols-outlined text-[0.95rem]">logout</span>
                 Leave Course
               </button>
             </div>
@@ -162,8 +172,9 @@ export function CourseInfoModal(props: CourseInfoModalProps) {
             <div className="flex flex-wrap gap-2 pt-2">
               <button
                 onClick={() => setEditCourseOpen(true)}
-                className="rounded-md border border-slate-300 px-3 py-2 text-xs hover:bg-slate-50"
+                className="inline-flex items-center gap-1.5 rounded-md border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 text-xs font-semibold text-on-surface hover:bg-surface-container"
               >
+                <span className="material-symbols-outlined text-[0.95rem]">edit</span>
                 Edit Course
               </button>
               <button
@@ -173,8 +184,9 @@ export function CourseInfoModal(props: CourseInfoModalProps) {
                   await archiveCourse(selectedCourse.id);
                   setShowCourseInfo(false);
                 }}
-                className="rounded-md border border-amber-300 px-3 py-2 text-xs text-amber-700 hover:bg-amber-50"
+                className="inline-flex items-center gap-1.5 rounded-md border border-secondary/40 px-3 py-2 text-xs font-semibold text-secondary hover:bg-secondary-container/40"
               >
+                <span className="material-symbols-outlined text-[0.95rem]">inventory_2</span>
                 Archive Course
               </button>
               <button
@@ -188,24 +200,26 @@ export function CourseInfoModal(props: CourseInfoModalProps) {
                   await deleteCourse(selectedCourse.id);
                   setShowCourseInfo(false);
                 }}
-                className="rounded-md border border-rose-300 px-3 py-2 text-xs text-rose-700 hover:bg-rose-50"
+                className="inline-flex items-center gap-1.5 rounded-md border border-error/40 px-3 py-2 text-xs font-semibold text-error hover:bg-error-container"
               >
+                <span className="material-symbols-outlined text-[0.95rem]">delete</span>
                 Delete Course
               </button>
               <button
                 onClick={() => setShowDangerTools((v) => !v)}
-                className="rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-xs text-rose-700 hover:bg-rose-100"
+                className="inline-flex items-center gap-1.5 rounded-md border border-error/40 bg-error-container px-3 py-2 text-xs font-semibold text-error hover:opacity-90"
               >
+                <span className="material-symbols-outlined text-[0.95rem]">warning</span>
                 {showDangerTools ? "Close" : "Remove all Students"}
               </button>
             </div>
           )}
           {user.role === "INSTRUCTOR" && showDangerTools && (
-            <div className="mt-3 rounded-md border border-rose-200 bg-rose-50 p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-rose-800">
+            <div className="mt-3 rounded-md border border-error/30 bg-error-container p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-error">
                 Danger Zone
               </p>
-              <p className="mb-2 text-xs text-rose-700">
+              <p className="mb-2 text-xs text-error">
                 Removes student enrollments only. Lessons/resources are not
                 deleted.
               </p>
@@ -213,7 +227,7 @@ export function CourseInfoModal(props: CourseInfoModalProps) {
                 <select
                   value={kickSectionId || selectedCourse.sections[0]?.id || ""}
                   onChange={(e) => setKickSectionId(Number(e.target.value))}
-                  className="w-full rounded-md border border-rose-300 bg-white px-3 py-2 text-sm"
+                  className="w-full rounded-md border border-error/40 bg-surface-container-lowest px-3 py-2 text-sm"
                 >
                   {selectedCourse.sections.map((s) => (
                     <option key={s.id} value={s.id}>
@@ -223,8 +237,9 @@ export function CourseInfoModal(props: CourseInfoModalProps) {
                 </select>
                 <button
                   onClick={() => setConfirmRemoveAllOpen(true)}
-                  className="rounded-md border border-rose-300 bg-white px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-error/40 bg-surface-container-lowest px-3 py-2 text-xs font-semibold text-error hover:bg-error-container"
                 >
+                  <span className="material-symbols-outlined text-[0.95rem]">group_remove</span>
                   Remove All Students
                 </button>
               </div>
@@ -511,19 +526,20 @@ export function EnrollmentManagerModal(props: EnrollmentManagerModalProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-      <div className="w-full max-w-3xl rounded-md border border-slate-200 bg-white p-4 shadow-lg">
-        <div className="mb-3 flex items-start justify-between gap-3">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-4xl rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-xl md:p-5">
+        <div className="mb-4 flex items-start justify-between gap-3 border-b border-outline-variant/20 pb-3">
           <div>
-            <h3 className="text-base font-semibold">Enrollment Manager</h3>
-            <p className="text-xs text-slate-500">
+            <h3 className="font-headline text-lg font-bold text-primary">Enrollment Manager</h3>
+            <p className="text-xs text-on-surface-variant">
               Manage enrollments by block without affecting lessons/resources.
             </p>
           </div>
           <button
             onClick={() => setShowEnrollmentManager(false)}
-            className="rounded border border-slate-300 px-2 py-1 text-xs"
+            className="inline-flex items-center gap-1 rounded-md border border-outline-variant/40 bg-surface-container-lowest px-2.5 py-1.5 text-xs font-label text-on-surface hover:bg-surface-container"
           >
+            <span className="material-symbols-outlined text-[0.95rem]">close</span>
             Close
           </button>
         </div>
@@ -540,7 +556,7 @@ export function EnrollmentManagerModal(props: EnrollmentManagerModalProps) {
               }));
               setRosterPage(1);
             }}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+            className="w-full rounded-md border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 text-sm"
           >
             {selectedCourse.sections.map((s) => (
               <option key={s.id} value={s.id}>
@@ -550,14 +566,15 @@ export function EnrollmentManagerModal(props: EnrollmentManagerModalProps) {
           </select>
           <button
             onClick={() => setShowEnrollForm((v) => !v)}
-            className="rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white"
+            className="inline-flex items-center justify-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-on-primary hover:opacity-90"
           >
+            <span className="material-symbols-outlined text-[1rem]">person_add</span>
             Enroll Student
           </button>
         </div>
 
         {showEnrollForm && (
-          <div className="mt-2 rounded-md border border-slate-200 bg-slate-50 p-2">
+          <div className="mt-2 rounded-md border border-outline-variant/20 bg-surface-container-low p-2">
             <div className="flex gap-2">
               <input
                 value={manualEmail[selectedCourse.id] || ""}
@@ -567,13 +584,14 @@ export function EnrollmentManagerModal(props: EnrollmentManagerModalProps) {
                     [selectedCourse.id]: e.target.value,
                   }))
                 }
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-md border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 text-sm"
                 placeholder="student@email.com"
               />
               <button
                 onClick={() => manualAdd(selectedCourse)}
-                className="rounded-md bg-slate-900 px-3 py-2 text-sm text-white"
+                className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-on-primary hover:opacity-90"
               >
+                <span className="material-symbols-outlined text-[0.95rem]">check</span>
                 Add
               </button>
             </div>
@@ -586,29 +604,29 @@ export function EnrollmentManagerModal(props: EnrollmentManagerModalProps) {
             setRosterQuery(e.target.value);
             setRosterPage(1);
           }}
-          className="mt-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+          className="mt-2 w-full rounded-md border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 text-sm"
           placeholder="Search student name or email"
         />
 
-        <div className="mt-2 max-h-64 space-y-1 overflow-auto rounded-md border border-slate-200 bg-white p-2">
+        <div className="mt-2 max-h-64 space-y-1 overflow-auto rounded-md border border-outline-variant/20 bg-surface-container-lowest p-2">
           {!filteredRosterRows.length && (
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-on-surface-variant">
               No enrolled students in this block.
             </p>
           )}
           {pagedRosterRows.map((row: any) => (
             <div
               key={row.id}
-              className="grid grid-cols-[1fr_auto] items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5"
+              className="grid grid-cols-[1fr_auto] items-center gap-2 rounded-md border border-outline-variant/20 bg-surface-container-low px-2 py-1.5"
             >
               <div className="min-w-0">
-                <p className="truncate text-xs font-semibold text-slate-800">
+                <p className="truncate text-xs font-semibold text-on-surface">
                   {row.student?.fullName}
                 </p>
-                <p className="truncate text-[11px] text-slate-500">
+                <p className="truncate text-[11px] text-on-surface-variant">
                   {row.student?.email || ""}
                 </p>
-                <p className="truncate text-[11px] text-slate-500">
+                <p className="truncate text-[11px] text-on-surface-variant">
                   Block: {row.section?.name || "-"}
                 </p>
               </div>
@@ -622,15 +640,16 @@ export function EnrollmentManagerModal(props: EnrollmentManagerModalProps) {
                     return;
                   await kickStudent(selectedCourse.id, row.id);
                 }}
-                className="rounded-md border border-rose-300 px-2 py-1 text-[11px] font-semibold text-rose-700 hover:bg-rose-50"
+                className="inline-flex items-center gap-1 rounded-md border border-error/40 px-2 py-1 text-[11px] font-semibold text-error hover:bg-error-container"
               >
+                <span className="material-symbols-outlined text-[0.9rem]">person_remove</span>
                 Remove
               </button>
             </div>
           ))}
         </div>
 
-        <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
+        <div className="mt-2 flex items-center justify-between text-xs text-on-surface-variant">
           <p>
             Showing{" "}
             {filteredRosterRows.length
@@ -647,7 +666,7 @@ export function EnrollmentManagerModal(props: EnrollmentManagerModalProps) {
             <button
               onClick={() => setRosterPage((p: number) => Math.max(1, p - 1))}
               disabled={safeRosterPage <= 1}
-              className="rounded border border-slate-300 px-2 py-1 disabled:opacity-50"
+              className="rounded border border-outline-variant/40 px-2 py-1 disabled:opacity-50"
             >
               Prev
             </button>
@@ -659,7 +678,7 @@ export function EnrollmentManagerModal(props: EnrollmentManagerModalProps) {
                 setRosterPage((p: number) => Math.min(rosterTotalPages, p + 1))
               }
               disabled={safeRosterPage >= rosterTotalPages}
-              className="rounded border border-slate-300 px-2 py-1 disabled:opacity-50"
+              className="rounded border border-outline-variant/40 px-2 py-1 disabled:opacity-50"
             >
               Next
             </button>
@@ -815,25 +834,26 @@ export function LessonComposerModal(props: LessonComposerModalProps) {
   if (!open || !composerSection) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-      <div className="w-full max-w-lg rounded-md border border-slate-200 bg-white p-4 shadow-lg">
-        <div className="mb-3 flex items-start justify-between gap-3">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-2xl rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-xl md:p-5">
+        <div className="mb-4 flex items-start justify-between gap-3 border-b border-outline-variant/20 pb-3">
           <div>
-            <h3 className="text-base font-semibold">Add Resource</h3>
-            <p className="text-xs text-slate-500">
+            <h3 className="font-headline text-lg font-bold text-primary">Add Resource</h3>
+            <p className="text-xs text-on-surface-variant">
               Block: {composerSection.name}
             </p>
           </div>
           <button
             onClick={() => setLessonComposerSectionId(null)}
-            className="rounded border border-slate-300 px-2 py-1 text-xs"
+            className="inline-flex items-center gap-1 rounded-md border border-outline-variant/40 bg-surface-container-lowest px-2.5 py-1.5 text-xs font-label text-on-surface hover:bg-surface-container"
           >
+            <span className="material-symbols-outlined text-[0.95rem]">close</span>
             Close
           </button>
         </div>
         {selectedCourse.sections.length >= 2 && (
           <>
-            <label className="mb-1 block text-xs font-medium text-slate-600">
+            <label className="mb-1 block text-xs font-medium text-on-surface-variant">
               Select Block
             </label>
             <select
@@ -841,7 +861,7 @@ export function LessonComposerModal(props: LessonComposerModalProps) {
               onChange={(e) =>
                 setLessonComposerSectionId(Number(e.target.value))
               }
-              className="mb-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+              className="mb-2 w-full rounded-md border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 text-sm text-on-surface"
             >
               {selectedCourse.sections.map((section) => (
                 <option key={section.id} value={section.id}>
@@ -866,7 +886,7 @@ export function LessonComposerModal(props: LessonComposerModalProps) {
               },
             }))
           }
-          className="mb-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          className="mb-2 w-full rounded-md border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant"
           placeholder="Resource title"
         />
         <textarea
@@ -884,24 +904,24 @@ export function LessonComposerModal(props: LessonComposerModalProps) {
               },
             }))
           }
-          className="mb-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          className="mb-2 w-full rounded-md border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant"
           placeholder="Resource description"
         />
-        <label className="mb-1 block text-xs font-medium text-slate-600">
+        <label className="mb-1 block text-xs font-medium text-on-surface-variant">
           Upload file to your Google Drive
         </label>
         <input
           type="file"
           onChange={(e) => setResourceFile(e.target.files?.[0] || null)}
-          className="mb-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          className="mb-2 w-full rounded-md border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 text-sm text-on-surface"
         />
         {resourceFile && (
-          <p className="mb-2 text-xs text-slate-500">
+          <p className="mb-2 text-xs text-on-surface-variant">
             Selected: {resourceFile.name} ({Math.ceil(resourceFile.size / 1024)}{" "}
             KB)
           </p>
         )}
-        <div className="mb-3 text-xs text-slate-500">
+        <div className="mb-3 text-xs text-on-surface-variant">
           Optional: existing file URL if no upload is selected.
         </div>
         <input
@@ -919,7 +939,7 @@ export function LessonComposerModal(props: LessonComposerModalProps) {
               },
             }))
           }
-          className="mb-3 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          className="mb-3 w-full rounded-md border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant"
           placeholder="https://drive.google.com/..."
         />
         <div className="flex gap-2">
@@ -927,8 +947,9 @@ export function LessonComposerModal(props: LessonComposerModalProps) {
             onClick={saveResourceToLesson}
             disabled={isUploadingResource}
             data-keep-action-text="true"
-            className="rounded-md bg-blue-700 px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-on-primary hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
+            <span className="material-symbols-outlined text-[0.95rem]">save</span>
             {isUploadingResource ? "Uploading..." : "Save Resource"}
           </button>
           <button
@@ -936,8 +957,9 @@ export function LessonComposerModal(props: LessonComposerModalProps) {
               setLessonComposerSectionId(null);
               setResourceFile(null);
             }}
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="inline-flex items-center gap-1 rounded-md border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 text-sm font-medium text-on-surface hover:bg-surface-container"
           >
+            <span className="material-symbols-outlined text-[0.95rem]">close</span>
             Cancel
           </button>
         </div>

@@ -12,8 +12,10 @@ export function InstructorManagementSection(props: {
       <div className="flex justify-end">
         <button
           onClick={onRefresh}
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+          data-keep-action-text="true"
+          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-2 text-sm"
         >
+          <span className="material-symbols-outlined text-[1rem]">refresh</span>
           Refresh Applications
         </button>
       </div>
@@ -37,14 +39,18 @@ export function InstructorManagementSection(props: {
                   <div className="flex justify-end gap-2">
                     <button
                       onClick={() => onApprove(application.userId)}
-                      className="rounded-md border border-emerald-300 px-2 py-1 text-xs text-emerald-700"
+                      data-keep-action-text="true"
+                      className="inline-flex items-center gap-1 rounded-md border border-emerald-300 px-2 py-1 text-xs text-emerald-700"
                     >
+                      <span className="material-symbols-outlined text-[0.9rem]">check_circle</span>
                       Approve Instructor
                     </button>
                     <button
                       onClick={() => onReject(application.userId)}
-                      className="rounded-md border border-rose-300 px-2 py-1 text-xs text-rose-700"
+                      data-keep-action-text="true"
+                      className="inline-flex items-center gap-1 rounded-md border border-rose-300 px-2 py-1 text-xs text-rose-700"
                     >
+                      <span className="material-symbols-outlined text-[0.9rem]">cancel</span>
                       Reject Instructor
                     </button>
                   </div>

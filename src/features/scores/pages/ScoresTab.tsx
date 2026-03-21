@@ -35,6 +35,9 @@ export function ScoresTab({
   const [selectedCellAttempt, setSelectedCellAttempt] = useState<ScoreRow | null>(
     null,
   );
+  const [attemptDetailsLoading, setAttemptDetailsLoading] = useState(false);
+  const [attemptDetailsError, setAttemptDetailsError] = useState<string | null>(null);
+  const [attemptDetailsData, setAttemptDetailsData] = useState<any | null>(null);
 
   const handleStudentViewResult = async (row: ScoreRow) => {
     const a = row.attempt as any;
@@ -49,6 +52,28 @@ export function ScoresTab({
       setViewResultOpen(false);
     } finally {
       setViewResultLoading(false);
+    }
+  };
+
+  const handleInstructorViewAttempt = async (row: ScoreRow) => {
+    setSelectedCellAttempt(row);
+    setAttemptDetailsData(null);
+    setAttemptDetailsError(null);
+    try {
+      setAttemptDetailsLoading(true);
+      const attemptId = Number((row.attempt as any)?.id || 0);
+      const quizId = Number((row.attempt as any)?.quiz?.id || (row.attempt as any)?.quizId || 0);
+      if (!attemptId || !quizId) {
+        throw new Error("Attempt details are unavailable for this row.");
+      }
+      const data = await api(`/quizzes/${quizId}/results/attempt/${attemptId}`, {
+        headers,
+      });
+      setAttemptDetailsData(data);
+    } catch (e) {
+      setAttemptDetailsError((e as Error).message);
+    } finally {
+      setAttemptDetailsLoading(false);
     }
   };
 
@@ -91,7 +116,7 @@ export function ScoresTab({
           <InstructorGradebookTable
             rows={vm.gradebookPagedRows}
             lessonColumns={vm.gradebookLessonColumns}
-            onSelectCell={setSelectedCellAttempt}
+            onSelectCell={handleInstructorViewAttempt}
           />
         ) : (
           <InstructorLessonGroupsTable
@@ -100,11 +125,7 @@ export function ScoresTab({
             collapsedLessonGroups={vm.collapsedLessonGroups}
             setCollapsedLessons={vm.setCollapsedLessons}
             setCollapsedLessonGroups={vm.setCollapsedLessonGroups}
-            onViewAttempt={() =>
-              setMessage(
-                "Detailed instructor attempt review will be added in the next patch.",
-              )
-            }
+            onViewAttempt={handleInstructorViewAttempt}
           />
         )
       ) : (
@@ -115,28 +136,53 @@ export function ScoresTab({
       )}
 
       {!vm.visibleRows.length && (
-        <p className="text-sm text-slate-500">No scores for this course yet.</p>
+        <p className="font-body text-sm text-on-surface-variant">No scores for this course yet.</p>
       )}
 
       {user.role === "INSTRUCTOR" && vm.visibleRows.length > 0 && (
-        <ScoresPagination
-          instructorViewMode={vm.instructorViewMode}
-          scoreBlockFilter={vm.scoreBlockFilter}
-          gradebookPagedRowsLength={vm.gradebookPagedRows.length}
-          gradebookSafePage={vm.gradebookSafePage}
-          gradebookTotalPages={vm.gradebookTotalPages}
-          sortedGradebookRowsLength={vm.sortedGradebookStudentRows.length}
-          visibleRowsLength={vm.visibleRows.length}
-          safePage={vm.safePage}
-          totalPages={vm.totalPages}
-          pageSize={vm.pageSize}
-          setScorePage={vm.setScorePage}
-        />
+        <div className="space-y-2">
+          <div className="flex items-center justify-end gap-2">
+            <label className="font-label text-xs text-on-surface-variant">Rows per page</label>
+            <select
+              data-keep-action-text="true"
+              value={vm.pageSize}
+              onChange={(e) => {
+                vm.setPageSize(Number(e.target.value));
+                vm.setScorePage(1);
+              }}
+              className="h-8 rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-2 font-body text-xs text-on-surface"
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
+          <ScoresPagination
+            instructorViewMode={vm.instructorViewMode}
+            scoreBlockFilter={vm.scoreBlockFilter}
+            gradebookPagedRowsLength={vm.gradebookPagedRows.length}
+            gradebookSafePage={vm.gradebookSafePage}
+            gradebookTotalPages={vm.gradebookTotalPages}
+            sortedGradebookRowsLength={vm.sortedGradebookStudentRows.length}
+            visibleRowsLength={vm.visibleRows.length}
+            safePage={vm.safePage}
+            totalPages={vm.totalPages}
+            pageSize={vm.pageSize}
+            setScorePage={vm.setScorePage}
+          />
+        </div>
       )}
 
       <ScoreAttemptDetailsModal
         selectedCellAttempt={selectedCellAttempt}
-        onClose={() => setSelectedCellAttempt(null)}
+        loading={attemptDetailsLoading}
+        details={attemptDetailsData}
+        error={attemptDetailsError}
+        onClose={() => {
+          setSelectedCellAttempt(null);
+          setAttemptDetailsData(null);
+          setAttemptDetailsError(null);
+        }}
       />
 
       <ScoreResultModal

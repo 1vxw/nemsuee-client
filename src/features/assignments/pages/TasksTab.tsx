@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Course, CourseTask, User } from "../../../shared/types/lms";
 
 type TasksTabProps = {
@@ -481,38 +481,51 @@ export function TasksTab({
   }
 
   return (
-    <section className="space-y-3">
+    <section className="min-w-0 space-y-4 md:space-y-6">
       {isInstructor && (
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-          <div className="rounded border border-slate-200 bg-white p-3 text-sm">
-            <p className="text-xs text-slate-500">Total Assignments</p>
-            <p className="font-semibold text-slate-900">{summary.total}</p>
+        <>
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
+            <div className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-2.5 shadow-sm sm:p-4">
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="material-symbols-outlined text-secondary text-[1rem] sm:text-[1.125rem]">assignment</span>
+                <p className="text-xs font-label text-on-surface-variant uppercase tracking-wide">Total</p>
+              </div>
+              <p className="font-headline text-xl font-bold text-primary sm:text-2xl">{summary.total}</p>
+            </div>
+            <div className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-2.5 shadow-sm sm:p-4">
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="material-symbols-outlined text-emerald-600 text-[1rem] sm:text-[1.125rem]">check_circle</span>
+                <p className="text-xs font-label text-on-surface-variant uppercase tracking-wide">Active</p>
+              </div>
+              <p className="font-headline text-xl font-bold text-primary sm:text-2xl">{summary.active}</p>
+            </div>
+            <div className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-2.5 shadow-sm sm:p-4">
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="material-symbols-outlined text-amber-600 text-[1rem] sm:text-[1.125rem]">schedule</span>
+                <p className="text-xs font-label text-on-surface-variant uppercase tracking-wide">Pending</p>
+              </div>
+              <p className="font-headline text-xl font-bold text-primary sm:text-2xl">{summary.pending}</p>
+            </div>
+            <div className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-2.5 shadow-sm sm:p-4">
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="material-symbols-outlined text-primary text-[1rem] sm:text-[1.125rem]">grade</span>
+                <p className="text-xs font-label text-on-surface-variant uppercase tracking-wide">Ungraded</p>
+              </div>
+              <p className="font-headline text-xl font-bold text-primary sm:text-2xl">{summary.ungraded}</p>
+            </div>
           </div>
-          <div className="rounded border border-slate-200 bg-white p-3 text-sm">
-            <p className="text-xs text-slate-500">Active Assignments</p>
-            <p className="font-semibold text-slate-900">{summary.active}</p>
-          </div>
-          <div className="rounded border border-slate-200 bg-white p-3 text-sm">
-            <p className="text-xs text-slate-500">Pending Submissions</p>
-            <p className="font-semibold text-slate-900">{summary.pending}</p>
-          </div>
-          <div className="rounded border border-slate-200 bg-white p-3 text-sm">
-            <p className="text-xs text-slate-500">Ungraded Submissions</p>
-            <p className="font-semibold text-slate-900">{summary.ungraded}</p>
-          </div>
-        </div>
-      )}
 
-      {isInstructor && (
-        <div className="flex justify-end">
-          <button
-            disabled={!selectedCourse.sections.length}
-            className="rounded bg-blue-700 px-3 py-2 text-xs text-white"
-            onClick={() => setComposeOpen(true)}
-          >
-            New {kind === "ASSIGNMENT" ? "Assignment" : "Activity"}
-          </button>
-        </div>
+          <div className="flex justify-end">
+            <button
+              disabled={!selectedCourse.sections.length}
+              className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 font-label text-xs font-bold text-on-primary hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
+              onClick={() => setComposeOpen(true)}
+            >
+              <span className="material-symbols-outlined text-[1rem]">add</span>
+              New {kind === "ASSIGNMENT" ? "Assignment" : "Activity"}
+            </button>
+          </div>
+        </>
       )}
 
       {isInstructor &&
@@ -521,7 +534,7 @@ export function TasksTab({
           return (
             <section key={blockName} className="space-y-2">
               <button
-                className="flex w-full items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-700"
+                className="flex w-full items-center justify-between rounded-lg border border-outline-variant/20 bg-surface-container px-3 py-2.5 text-xs font-label font-bold text-primary hover:bg-surface-container-high transition-colors sm:px-4 sm:py-3 sm:text-sm"
                 onClick={() =>
                   setOpenBlocks((prev) => ({
                     ...prev,
@@ -529,20 +542,97 @@ export function TasksTab({
                   }))
                 }
               >
-                <span>{blockName}</span>
-                <span>{blockTasks.length}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-secondary text-[1rem] sm:text-[1.125rem]">{blockOpen ? "expand_less" : "expand_more"}</span>
+                  <span>{blockName}</span>
+                </div>
+                <span className="rounded-full bg-secondary-container px-2.5 py-0.5 text-xs font-bold text-on-secondary-container">{blockTasks.length}</span>
               </button>
               {blockOpen && (
-                <div className="overflow-x-auto rounded-md border border-slate-200">
-                  <table className="min-w-full text-left text-xs">
-                    <thead className="bg-slate-50 text-slate-600">
+                <div className="overflow-x-auto rounded-lg border border-outline-variant/20 bg-surface-container-lowest">
+                  {/* Mobile: cards */}
+                  <div className="divide-y divide-outline-variant/20 sm:hidden">
+                    {blockTasks.map((task) => {
+                      const blockStudents = courseRoster.filter((student) => {
+                        const studentBlock = String(
+                          student.section?.name || student.sectionName || "",
+                        ).toUpperCase();
+                        return (
+                          studentBlock ===
+                          String(task.sectionName || "").toUpperCase()
+                        );
+                      });
+                      const latestByStudent = new Map<number, any>();
+                      for (const s of task.submissions || []) {
+                        const sid = Number(s.studentId);
+                        const prev = latestByStudent.get(sid);
+                        if (
+                          !prev ||
+                          new Date(s.createdAt).getTime() >
+                            new Date(prev.createdAt).getTime()
+                        )
+                          latestByStudent.set(sid, s);
+                      }
+                      const submitted = latestByStudent.size;
+                      const isClosed = Boolean(
+                        task.dueAt &&
+                        new Date(task.dueAt).getTime() < Date.now(),
+                      );
+                      return (
+                        <div
+                          key={task.id}
+                          className="flex flex-col gap-2 p-3"
+                        >
+                          <p className="font-label text-sm font-bold text-primary">
+                            {task.title}
+                          </p>
+                          <p className="text-xs text-on-surface-variant">
+                            {task.mode === "MANUAL" ? "Manual" : "File Upload"}
+                            {task.dueAt
+                              ? ` · Due ${new Date(task.dueAt).toLocaleString()}`
+                              : ""}
+                          </p>
+                          <p className="text-xs text-on-surface-variant">
+                            {submitted} / {blockStudents.length} submissions
+                          </p>
+                          <span
+                            className={`self-start rounded-full px-2 py-0.5 text-[10px] font-bold ${isClosed ? "bg-surface-container-high text-on-surface-variant" : "bg-emerald-100 text-emerald-700"}`}
+                          >
+                            {isClosed ? "Closed" : "Active"}
+                          </span>
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            <button
+                              className="rounded-lg border border-outline-variant/40 px-2.5 py-1.5 text-[11px] font-label hover:bg-surface-container"
+                              onClick={() => setViewTaskId(task.id)}
+                            >
+                              View
+                            </button>
+                            <button
+                              className="rounded-lg border border-outline-variant/40 px-2.5 py-1.5 text-[11px] font-label hover:bg-surface-container"
+                              onClick={() => openEditTask(task)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="rounded-lg border border-error-container px-2.5 py-1.5 text-[11px] font-label font-bold text-error hover:bg-error-container/30"
+                              onClick={() => deleteTask(task.id, task.title)}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <table className="hidden min-w-full text-left text-sm font-body sm:table">
+                    <thead className="bg-surface-container text-on-surface-variant font-label">
                       <tr>
-                        <th className="px-3 py-2 font-medium">Assignment</th>
-                        <th className="px-3 py-2 font-medium">Type</th>
-                        <th className="px-3 py-2 font-medium">Due Date</th>
-                        <th className="px-3 py-2 font-medium">Submissions</th>
-                        <th className="px-3 py-2 font-medium">Status</th>
-                        <th className="px-3 py-2 font-medium">Actions</th>
+                        <th className="px-4 py-3 font-medium">Assignment</th>
+                        <th className="px-4 py-3 font-medium">Type</th>
+                        <th className="px-4 py-3 font-medium">Due Date</th>
+                        <th className="px-4 py-3 font-medium">Submissions</th>
+                        <th className="px-4 py-3 font-medium">Status</th>
+                        <th className="px-4 py-3 font-medium">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -575,51 +665,47 @@ export function TasksTab({
                         return (
                           <tr
                             key={task.id}
-                            className="border-t border-slate-100"
+                            className="border-t border-outline-variant/20"
                           >
-                            <td className="px-3 py-2 text-sm font-medium text-slate-900">
+                            <td className="px-4 py-3 font-label font-medium text-primary">
                               {task.title}
                             </td>
-                            <td className="px-3 py-2 text-slate-600">
+                            <td className="px-4 py-3 text-on-surface-variant">
                               {task.mode === "MANUAL"
                                 ? "Manual"
                                 : "File Upload"}
                             </td>
-                            <td className="px-3 py-2 text-slate-600">
+                            <td className="px-4 py-3 text-on-surface-variant">
                               {task.dueAt
                                 ? new Date(task.dueAt).toLocaleString()
                                 : "-"}
                             </td>
-                            <td className="px-3 py-2 text-slate-600">
+                            <td className="px-4 py-3 text-on-surface-variant">
                               {submitted} / {blockStudents.length}
                             </td>
-                            <td className="px-3 py-2">
+                            <td className="px-4 py-3">
                               <span
-                                className={
-                                  isClosed
-                                    ? "rounded bg-slate-200 px-2 py-1 text-[11px] text-slate-700"
-                                    : "rounded bg-emerald-100 px-2 py-1 text-[11px] text-emerald-700"
-                                }
+                                className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${isClosed ? "bg-surface-container-high text-on-surface-variant" : "bg-emerald-100 text-emerald-700"}`}
                               >
                                 {isClosed ? "Closed" : "Active"}
                               </span>
                             </td>
-                            <td className="px-3 py-2">
-                              <div className="flex flex-wrap gap-1">
+                            <td className="px-4 py-3">
+                              <div className="flex flex-wrap gap-2">
                                 <button
-                                  className="rounded border border-slate-300 px-2 py-1 text-xs"
+                                  className="rounded-lg border border-outline-variant/40 px-3 py-1.5 text-xs font-label hover:bg-surface-container transition-colors"
                                   onClick={() => setViewTaskId(task.id)}
                                 >
                                   View Submissions
                                 </button>
                                 <button
-                                  className="rounded border border-slate-300 px-2 py-1 text-xs"
+                                  className="rounded-lg border border-outline-variant/40 px-3 py-1.5 text-xs font-label hover:bg-surface-container transition-colors"
                                   onClick={() => openEditTask(task)}
                                 >
                                   Edit
                                 </button>
                                 <button
-                                  className="rounded border border-rose-300 px-2 py-1 text-xs text-rose-700"
+                                  className="rounded-lg border border-error-container px-3 py-1.5 text-xs font-label font-bold text-error hover:bg-error-container/30 transition-colors"
                                   onClick={() =>
                                     deleteTask(task.id, task.title)
                                   }
@@ -640,21 +726,21 @@ export function TasksTab({
         })}
 
       {!isInstructor && (
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-1.5">
           <button
-            className={`rounded px-3 py-1.5 text-xs ${studentTaskTab === "OPEN" ? "bg-blue-700 text-white" : "border border-slate-300 text-slate-700"}`}
+            className={`rounded-lg px-3 py-1.5 text-xs font-label font-bold transition-colors sm:px-4 sm:py-2 sm:text-sm ${studentTaskTab === "OPEN" ? "bg-primary text-on-primary" : "border border-outline-variant/40 text-on-surface-variant hover:bg-surface-container"}`}
             onClick={() => setStudentTaskTab("OPEN")}
           >
             Open
           </button>
           <button
-            className={`rounded px-3 py-1.5 text-xs ${studentTaskTab === "DONE" ? "bg-blue-700 text-white" : "border border-slate-300 text-slate-700"}`}
+            className={`rounded-lg px-3 py-1.5 text-xs font-label font-bold transition-colors sm:px-4 sm:py-2 sm:text-sm ${studentTaskTab === "DONE" ? "bg-primary text-on-primary" : "border border-outline-variant/40 text-on-surface-variant hover:bg-surface-container"}`}
             onClick={() => setStudentTaskTab("DONE")}
           >
             Done
           </button>
           <button
-            className={`rounded px-3 py-1.5 text-xs ${studentTaskTab === "MISSING" ? "bg-blue-700 text-white" : "border border-slate-300 text-slate-700"}`}
+            className={`rounded-lg px-3 py-1.5 text-xs font-label font-bold transition-colors sm:px-4 sm:py-2 sm:text-sm ${studentTaskTab === "MISSING" ? "bg-primary text-on-primary" : "border border-outline-variant/40 text-on-surface-variant hover:bg-surface-container"}`}
             onClick={() => setStudentTaskTab("MISSING")}
           >
             Missing
@@ -664,10 +750,13 @@ export function TasksTab({
 
       {!isInstructor &&
         Object.entries(studentGroupedTasks).map(([blockName, blockTasks]) => (
-          <section key={blockName} className="space-y-2">
-            <h4 className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-700">
-              {blockName}
-            </h4>
+          <section key={blockName} className="space-y-3">
+            <div className="flex items-center gap-1.5 rounded-lg border border-outline-variant/20 bg-surface-container px-3 py-2.5 sm:px-4 sm:py-3">
+              <span className="material-symbols-outlined text-secondary text-[1rem] sm:text-[1.125rem]">folder</span>
+              <h4 className="font-headline text-sm font-bold text-primary sm:text-base">
+                {blockName}
+              </h4>
+            </div>
             {blockTasks.map((task) => {
               const isClosedByDeadline = Boolean(
                 task.dueAt && new Date(task.dueAt).getTime() < Date.now(),
@@ -686,12 +775,12 @@ export function TasksTab({
               return (
                 <article
                   key={task.id}
-                  className="rounded-md border border-slate-200 p-3"
+                  className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-3 shadow-sm sm:p-4"
                 >
-                  <p className="text-sm font-semibold text-slate-900">
+                  <p className="font-headline text-sm font-bold text-primary sm:text-base">
                     {task.title}
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-on-surface-variant font-label mt-1">
                     {task.mode === "MANUAL" ? "Manual" : "File Upload"}
                     {task.dueAt
                       ? ` · Due ${new Date(task.dueAt).toLocaleString()}`
@@ -699,43 +788,44 @@ export function TasksTab({
                     {isClosedByDeadline ? " · Closed" : ""}
                   </p>
                   {!allowResubmit && (
-                    <p className="mt-1 text-[11px] text-amber-700">
+                    <p className="mt-2 text-xs font-label text-amber-700 rounded-lg bg-amber-50 px-3 py-2">
                       Resubmission disabled by instructor.
                     </p>
                   )}
                   {isGraded && (
-                    <p className="mt-1 text-[11px] font-medium text-emerald-700">
+                    <p className="mt-2 text-sm font-label font-bold text-emerald-700 rounded-lg bg-emerald-50 px-3 py-2 inline-block">
                       Graded: {Number(task.mySubmission?.grade || 0).toFixed(2)}
                     </p>
                   )}
                   {task.description && (
-                    <p className="mt-2 text-sm text-slate-700">
+                    <p className="mt-3 text-sm text-on-surface font-body">
                       {task.description}
                     </p>
                   )}
                   {task.fileUrl && (
                     <a
-                      className="mt-2 inline-block rounded border border-slate-300 px-2 py-1 text-xs"
+                      className="mt-3 inline-flex items-center gap-2 rounded-lg border border-outline-variant/40 px-3 py-2 text-xs font-label hover:bg-surface-container transition-colors"
                       href={task.fileUrl}
                       target="_blank"
                       rel="noreferrer"
                     >
+                      <span className="material-symbols-outlined text-[1rem]">open_in_new</span>
                       Open Attached File
                     </a>
                   )}
-                  <div className="mt-2 rounded border border-slate-200 bg-slate-50 p-2">
+                  <div className="mt-4 rounded-xl border border-outline-variant/20 bg-surface-container p-4">
                     {isClosedByDeadline && !task.mySubmission && (
-                      <p className="mb-2 text-xs font-medium text-rose-700">
+                      <p className="mb-3 text-sm font-label font-bold text-error rounded-lg bg-error-container/50 px-3 py-2">
                         Submission closed due to deadline. Marked as missing.
                       </p>
                     )}
-                    <p className="mt-2 text-[11px] font-medium text-slate-600">
+                    <p className="text-sm font-label font-medium text-on-surface-variant">
                       Upload file
                     </p>
                     <input
                       type="file"
                       disabled={!canSubmit}
-                      className="mt-2 block text-xs disabled:opacity-60"
+                      className="mt-2 block text-sm font-body disabled:opacity-60 rounded-lg border border-outline-variant/40 p-2"
                       onChange={(e) =>
                         setSubmitState((prev) => ({
                           ...prev,
@@ -743,13 +833,14 @@ export function TasksTab({
                         }))
                       }
                     />
-                    <div className="mt-2 flex items-center gap-2">
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
                       <button
                         data-keep-action-text="true"
                         disabled={!canSubmit}
-                        className="rounded bg-slate-900 px-2 py-1 text-xs text-white disabled:cursor-not-allowed disabled:bg-slate-400"
+                        className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-label text-sm font-bold text-on-primary hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => submitTask(task.id)}
                       >
+                        <span className="material-symbols-outlined text-[1rem]">upload</span>
                         Submit
                       </button>
                       {task.mySubmission &&
@@ -758,9 +849,10 @@ export function TasksTab({
                         !isClosedByDeadline && (
                           <button
                             data-keep-action-text="true"
-                            className="rounded border border-rose-300 px-2 py-1 text-xs text-rose-700"
+                            className="flex items-center gap-2 rounded-lg border border-error-container px-4 py-2 font-label text-sm font-bold text-error hover:bg-error-container/30 transition-colors"
                             onClick={() => deleteMySubmission(task.id)}
                           >
+                            <span className="material-symbols-outlined text-[1rem]">delete</span>
                             Delete submission
                           </button>
                         )}
@@ -774,26 +866,34 @@ export function TasksTab({
 
       {((isInstructor && !tasks.length) ||
         (!isInstructor && !studentFilteredTasks.length)) && (
-        <p className="rounded border border-dashed border-slate-300 px-3 py-4 text-center text-sm text-slate-500">
-          {isInstructor
-            ? `No ${kind === "ASSIGNMENT" ? "assignments" : "activities"} yet.`
-            : studentTaskTab === "OPEN"
-              ? "No open tasks."
-              : studentTaskTab === "DONE"
-                ? "No completed tasks."
-                : "No missing tasks."}
-        </p>
+        <div className="rounded-xl border border-dashed border-outline-variant/30 px-8 py-12 text-center">
+          <span className="material-symbols-outlined text-4xl text-outline-variant/30 mb-3 block">
+            {kind === "ASSIGNMENT" ? "assignment" : "sports_soccer"}
+          </span>
+          <p className="font-headline text-lg font-bold text-primary mb-1">
+            {isInstructor
+              ? `No ${kind === "ASSIGNMENT" ? "assignments" : "activities"} yet`
+              : studentTaskTab === "OPEN"
+                ? "No open tasks"
+                : studentTaskTab === "DONE"
+                  ? "No completed tasks"
+                  : "No missing tasks"}
+          </p>
+          <p className="text-sm text-on-surface-variant">
+            {isInstructor ? "Create one to get started." : "Check back later for new tasks."}
+          </p>
+        </div>
       )}
 
       {isInstructor && viewedTask && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-          <div className="w-full max-w-5xl rounded-md bg-white p-4 shadow-lg">
-            <div className="mb-3 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-5xl rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-5 shadow-xl md:p-6">
+            <div className="mb-4 flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-slate-900">
+                <p className="font-headline text-lg font-bold text-primary">
                   {viewedTask.title}
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-sm text-on-surface-variant mt-1">
                   {viewedTask.sectionName} ·{" "}
                   {viewedTask.dueAt
                     ? `Due ${new Date(viewedTask.dueAt).toLocaleString()}`
@@ -801,17 +901,17 @@ export function TasksTab({
                 </p>
               </div>
               <button
-                className="rounded border border-slate-300 px-2 py-1 text-xs"
+                className="rounded-lg border border-outline-variant/40 px-3 py-2 text-sm font-label hover:bg-surface-container transition-colors"
                 onClick={() => setViewTaskId(null)}
               >
                 Close
               </button>
             </div>
-            <div className="mb-3 grid gap-2 md:grid-cols-4">
+            <div className="mb-4 grid gap-3 md:grid-cols-4">
               <input
                 value={submissionSearch}
                 onChange={(e) => setSubmissionSearch(e.target.value)}
-                className="rounded border border-slate-300 px-2 py-2 text-xs"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
                 placeholder="Search student"
               />
               <select
@@ -819,7 +919,7 @@ export function TasksTab({
                 onChange={(e) =>
                   setSubmissionStatus(e.target.value as SubmissionFilter)
                 }
-                className="rounded border border-slate-300 px-2 py-2 text-xs"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
               >
                 <option value="ALL">All statuses</option>
                 <option value="SUBMITTED">Submitted</option>
@@ -833,57 +933,58 @@ export function TasksTab({
                 onChange={(e) =>
                   setSubmissionSort(e.target.value as "NEWEST" | "OLDEST")
                 }
-                className="rounded border border-slate-300 px-2 py-2 text-xs"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
               >
                 <option value="NEWEST">Newest</option>
                 <option value="OLDEST">Oldest</option>
               </select>
               <button
-                className="rounded border border-slate-300 px-2 py-2 text-xs"
+                className="flex items-center gap-2 rounded-lg border border-outline-variant/40 px-4 py-2.5 text-sm font-label hover:bg-surface-container transition-colors"
                 onClick={exportCsv}
               >
-                Export Grades (CSV)
+                <span className="material-symbols-outlined text-[1rem]">download</span>
+                Export CSV
               </button>
             </div>
-            <div className="max-h-[55vh] overflow-auto rounded border border-slate-200">
-              <table className="min-w-full text-left text-xs">
-                <thead className="sticky top-0 bg-slate-50 text-slate-600">
+            <div className="max-h-[55vh] overflow-auto rounded-xl border border-outline-variant/20">
+              <table className="min-w-full text-left text-sm font-body">
+                <thead className="sticky top-0 bg-surface-container text-on-surface-variant font-label">
                   <tr>
-                    <th className="px-2 py-2 font-medium">Student</th>
-                    <th className="px-2 py-2 font-medium">Status</th>
-                    <th className="px-2 py-2 font-medium">Submitted</th>
-                    <th className="px-2 py-2 font-medium">Grade</th>
-                    <th className="px-2 py-2 font-medium">File</th>
-                    <th className="px-2 py-2 font-medium">Actions</th>
+                    <th className="px-4 py-3 font-medium">Student</th>
+                    <th className="px-4 py-3 font-medium">Status</th>
+                    <th className="px-4 py-3 font-medium">Submitted</th>
+                    <th className="px-4 py-3 font-medium">Grade</th>
+                    <th className="px-4 py-3 font-medium">File</th>
+                    <th className="px-4 py-3 font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {viewedRows.map((row) => (
                     <tr
                       key={row.student.id}
-                      className="border-t border-slate-100"
+                      className="border-t border-outline-variant/20"
                     >
-                      <td className="px-2 py-2 text-slate-900">
+                      <td className="px-4 py-3 font-medium text-primary">
                         {rosterStudentName(row.student)}
                       </td>
-                      <td className="px-2 py-2 text-slate-700">
+                      <td className="px-4 py-3 text-on-surface-variant">
                         {row.status === "NOT_SUBMITTED"
                           ? "Not submitted"
                           : row.status}
                         {row.isLate ? " · Late" : ""}
                       </td>
-                      <td className="px-2 py-2 text-slate-600">
+                      <td className="px-4 py-3 text-on-surface-variant">
                         {row.latest
                           ? new Date(row.latest.createdAt).toLocaleString()
                           : "-"}
                       </td>
-                      <td className="px-2 py-2 text-slate-700">
+                      <td className="px-4 py-3 font-medium text-on-surface">
                         {row.latest?.grade ?? "-"}
                       </td>
-                      <td className="px-2 py-2">
+                      <td className="px-4 py-3">
                         {row.latest?.fileUrl ? (
                           <a
-                            className="text-blue-700 underline"
+                            className="text-primary font-label font-bold hover:underline"
                             href={row.latest.fileUrl}
                             target="_blank"
                             rel="noreferrer"
@@ -894,10 +995,10 @@ export function TasksTab({
                           "-"
                         )}
                       </td>
-                      <td className="px-2 py-2">
+                      <td className="px-4 py-3">
                         {row.latest ? (
                           <button
-                            className="rounded border border-slate-300 px-2 py-1 text-xs"
+                            className="rounded-lg border border-outline-variant/40 px-3 py-1.5 text-xs font-label hover:bg-surface-container transition-colors"
                             onClick={() => {
                               const gradeText = prompt(
                                 "Enter grade",
@@ -931,16 +1032,19 @@ export function TasksTab({
       )}
 
       {composeOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-          <div className="w-full max-w-xl rounded-md bg-white p-4 shadow-lg">
-            <p className="mb-2 text-sm font-semibold">
-              New {kind === "ASSIGNMENT" ? "Assignment" : "Activity"}
-            </p>
-            <div className="grid gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-xl rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-5 shadow-xl md:p-6">
+            <div className="mb-4 flex items-center gap-2">
+              <span className="material-symbols-outlined text-secondary text-lg">add_circle</span>
+              <p className="font-headline text-lg font-bold text-primary">
+                New {kind === "ASSIGNMENT" ? "Assignment" : "Activity"}
+              </p>
+            </div>
+            <div className="grid gap-3">
               <select
                 value={composeSectionId}
                 onChange={(e) => setComposeSectionId(Number(e.target.value))}
-                className="rounded border border-slate-300 px-2 py-2 text-sm"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
               >
                 {selectedCourse.sections.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -953,7 +1057,7 @@ export function TasksTab({
                 onChange={(e) =>
                   setComposeMode(e.target.value as "MANUAL" | "FILE")
                 }
-                className="rounded border border-slate-300 px-2 py-2 text-sm"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
               >
                 <option value="MANUAL">Manual</option>
                 <option value="FILE">File Upload</option>
@@ -961,13 +1065,13 @@ export function TasksTab({
               <input
                 value={composeTitle}
                 onChange={(e) => setComposeTitle(e.target.value)}
-                className="rounded border border-slate-300 px-2 py-2 text-sm"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
                 placeholder="Title"
               />
               <textarea
                 value={composeDescription}
                 onChange={(e) => setComposeDescription(e.target.value)}
-                className="rounded border border-slate-300 px-2 py-2 text-sm"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
                 rows={3}
                 placeholder="Instructions"
               />
@@ -975,7 +1079,7 @@ export function TasksTab({
                 type="datetime-local"
                 value={composeDueAt}
                 onChange={(e) => setComposeDueAt(e.target.value)}
-                className="rounded border border-slate-300 px-2 py-2 text-sm"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
               />
               <label className="flex items-center gap-2 text-xs text-slate-700">
                 <input
@@ -993,15 +1097,15 @@ export function TasksTab({
                 />
               )}
             </div>
-            <div className="mt-3 flex gap-2">
+            <div className="mt-4 flex gap-3">
               <button
-                className="rounded bg-blue-700 px-3 py-2 text-xs text-white"
+                className="rounded-lg bg-primary px-4 py-2.5 font-label text-sm font-bold text-on-primary hover:opacity-90 transition-opacity"
                 onClick={createTask}
               >
                 Create
               </button>
               <button
-                className="rounded border border-slate-300 px-3 py-2 text-xs"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 font-label text-sm hover:bg-surface-container transition-colors"
                 onClick={() => setComposeOpen(false)}
               >
                 Cancel
@@ -1012,18 +1116,21 @@ export function TasksTab({
       )}
 
       {editOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-          <div className="w-full max-w-xl rounded-md bg-white p-4 shadow-lg">
-            <p className="mb-2 text-sm font-semibold">
-              Edit {kind === "ASSIGNMENT" ? "Assignment" : "Activity"}
-            </p>
-            <div className="grid gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-xl rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-5 shadow-xl md:p-6">
+            <div className="mb-4 flex items-center gap-2">
+              <span className="material-symbols-outlined text-secondary text-lg">edit</span>
+              <p className="font-headline text-lg font-bold text-primary">
+                Edit {kind === "ASSIGNMENT" ? "Assignment" : "Activity"}
+              </p>
+            </div>
+            <div className="grid gap-3">
               <select
                 value={editMode}
                 onChange={(e) =>
                   setEditMode(e.target.value as "MANUAL" | "FILE")
                 }
-                className="rounded border border-slate-300 px-2 py-2 text-sm"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
               >
                 <option value="MANUAL">Manual</option>
                 <option value="FILE">File Upload</option>
@@ -1031,13 +1138,13 @@ export function TasksTab({
               <input
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                className="rounded border border-slate-300 px-2 py-2 text-sm"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
                 placeholder="Title"
               />
               <textarea
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
-                className="rounded border border-slate-300 px-2 py-2 text-sm"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
                 rows={3}
                 placeholder="Instructions"
               />
@@ -1045,7 +1152,7 @@ export function TasksTab({
                 type="datetime-local"
                 value={editDueAt}
                 onChange={(e) => setEditDueAt(e.target.value)}
-                className="rounded border border-slate-300 px-2 py-2 text-sm"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 text-sm font-body focus:ring-1 focus:ring-primary outline-none"
               />
               <label className="flex items-center gap-2 text-xs text-slate-700">
                 <input
@@ -1078,15 +1185,15 @@ export function TasksTab({
                 </div>
               )}
             </div>
-            <div className="mt-3 flex gap-2">
+            <div className="mt-4 flex gap-3">
               <button
-                className="rounded bg-blue-700 px-3 py-2 text-xs text-white"
+                className="rounded-lg bg-primary px-4 py-2.5 font-label text-sm font-bold text-on-primary hover:opacity-90 transition-opacity"
                 onClick={updateTask}
               >
                 Save
               </button>
               <button
-                className="rounded border border-slate-300 px-3 py-2 text-xs"
+                className="rounded-lg border border-outline-variant/40 px-4 py-2.5 font-label text-sm hover:bg-surface-container transition-colors"
                 onClick={() => setEditOpen(false)}
               >
                 Cancel

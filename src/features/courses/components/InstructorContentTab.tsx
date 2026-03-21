@@ -47,14 +47,14 @@ export function InstructorContentTab(props: InstructorContentTabProps) {
   } = props;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-6 lg:space-y-5">
       {selectedCourse.sections.map((s) => (
         <section
           key={s.id}
           id={`section-${s.id}`}
-          className="rounded-xl border border-slate-200 bg-white shadow-sm"
+          className="rounded-xl border border-outline-variant/20 bg-surface-container-lowest shadow-sm"
         >
-          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3">
+          <div className="flex items-center justify-between border-b border-outline-variant/20 bg-surface-container px-4 py-3 sm:px-5 sm:py-4">
             <button
               onClick={() =>
                 setCollapsedBlocks((prev) => ({
@@ -64,24 +64,13 @@ export function InstructorContentTab(props: InstructorContentTabProps) {
               }
               className="flex items-center gap-2 text-left"
             >
-              <svg
-                viewBox="0 0 20 20"
-                className={`h-4 w-4 text-slate-500 transition-transform ${collapsedBlocks[s.id] ? "rotate-0" : "rotate-90"}`}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M8 5l5 5-5 5" />
-              </svg>
-              <p className="font-semibold text-slate-900">{s.name}</p>
+              <span className={`material-symbols-outlined text-[1rem] text-on-surface-variant transition-transform ${collapsedBlocks[s.id] ? "rotate-0" : "rotate-90"}`}>chevron_right</span>
+              <p className="font-headline text-sm font-bold text-primary sm:text-base">{s.name}</p>
             </button>
             <div />
           </div>
           {!collapsedBlocks[s.id] && (
-            <div className="space-y-3 p-3">
+            <div className="space-y-4 p-5">
               {(
                 [
                   "Lecture",
@@ -100,26 +89,26 @@ export function InstructorContentTab(props: InstructorContentTabProps) {
                 if (!items.length) return null;
                 return (
                   <div key={group}>
-                    <div className="mb-2 flex items-center gap-2">
-                      <span className="rounded bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                    <div className="mb-3 flex items-center gap-2">
+                      <span className="rounded-full bg-surface-container px-2.5 py-0.5 text-[11px] font-medium text-on-surface-variant">
                         {group}
                       </span>
                     </div>
-                    <div className="divide-y divide-slate-100 rounded-md border border-slate-200">
+                    <div className="divide-y divide-outline-variant/15 rounded-lg border border-outline-variant/20">
                       {items.map((l) => (
                         <article
                           key={l.id}
-                          className="flex items-center justify-between gap-3 overflow-visible px-3 py-2 hover:bg-slate-50"
+                          className="flex items-center justify-between gap-3 overflow-visible px-4 py-3 hover:bg-surface-container-low"
                         >
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-medium text-slate-900">
-                              {l.quiz ? "?" : l.fileUrl ? "F" : "L"}{" "}
+                            <p className="truncate text-sm font-medium text-on-surface">
+                              {l.quiz ? "Quiz" : l.fileUrl ? "Resource" : "Lesson"}{" "}
                               {stripResourceScope(l.title || "")}
                             </p>
                             {l.content &&
                               l.content.trim().toLowerCase() !==
                                 l.title.trim().toLowerCase() && (
-                                <p className="truncate text-xs text-slate-500">
+                                <p className="truncate text-xs text-on-surface-variant">
                                   {l.content}
                                 </p>
                               )}
@@ -127,7 +116,7 @@ export function InstructorContentTab(props: InstructorContentTabProps) {
                           <div className="relative flex shrink-0 items-center gap-1">
                             {l.fileUrl && (
                               <a
-                                className="rounded border border-slate-300 px-2 py-1 text-xs hover:bg-white"
+                                className="rounded border border-outline-variant/40 bg-surface-container-lowest px-2 py-1 text-xs text-on-surface hover:bg-surface-container"
                                 href={l.fileUrl}
                                 target="_blank"
                                 rel="noreferrer"
@@ -141,22 +130,15 @@ export function InstructorContentTab(props: InstructorContentTabProps) {
                                   prev === l.id ? null : l.id,
                                 )
                               }
-                              className="rounded border border-slate-300 px-2 py-1 text-xs hover:bg-white"
+                              className="rounded border border-outline-variant/40 bg-surface-container-lowest px-2 py-1 text-xs text-on-surface hover:bg-surface-container"
                               aria-label={`More actions for ${l.title}`}
                             >
-                              <svg
-                                viewBox="0 0 24 24"
-                                className="h-4 w-4"
-                                fill="currentColor"
-                                aria-hidden="true"
-                              >
-                                <circle cx="12" cy="5" r="1.8" />
-                                <circle cx="12" cy="12" r="1.8" />
-                                <circle cx="12" cy="19" r="1.8" />
-                              </svg>
+                              <span className="material-symbols-outlined text-[1rem]" aria-hidden="true">
+                                more_vert
+                              </span>
                             </button>
                             {lessonMenuOpenId === l.id && (
-                              <div className="absolute right-0 top-9 z-40 w-14 rounded-md border border-slate-200 bg-white p-1 shadow-lg">
+                              <div className="absolute right-0 top-9 z-40 w-20 rounded-md border border-outline-variant/30 bg-surface-container-lowest p-1 shadow-lg">
                                 <button
                                   onClick={() => {
                                     setEditingLesson({
@@ -170,7 +152,7 @@ export function InstructorContentTab(props: InstructorContentTabProps) {
                                     });
                                     setLessonMenuOpenId(() => null);
                                   }}
-                                  className="mx-auto block rounded p-1.5 text-xs hover:bg-slate-100"
+                                  className="mx-auto block w-full rounded p-1.5 text-xs text-on-surface hover:bg-surface-container"
                                 >
                                   Edit
                                 </button>
@@ -185,7 +167,7 @@ export function InstructorContentTab(props: InstructorContentTabProps) {
                                     );
                                     setLessonMenuOpenId(() => null);
                                   }}
-                                  className="mx-auto block rounded p-1.5 text-xs text-rose-600 hover:bg-rose-50"
+                                  className="mx-auto block w-full rounded p-1.5 text-xs text-error hover:bg-error-container"
                                 >
                                   Delete
                                 </button>
@@ -199,11 +181,11 @@ export function InstructorContentTab(props: InstructorContentTabProps) {
                 );
               })}
               {!s.lessons.length && (
-                <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center">
-                  <p className="text-sm font-medium text-slate-700">
+                <div className="rounded-lg border border-dashed border-outline-variant/40 bg-surface-container-low px-6 py-8 text-center">
+                  <p className="text-sm font-medium text-on-surface">
                     No lessons yet.
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-on-surface-variant">
                     Add your first lesson to this block.
                   </p>
                 </div>

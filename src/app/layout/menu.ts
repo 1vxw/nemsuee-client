@@ -9,8 +9,8 @@ export function menu(
     const items: { key: ViewKey; label: string }[] = [
       { key: "dashboard", label: "Dashboard" },
       { key: "courses", label: "Courses" },
-      { key: "course_search", label: "Search Course" },
       { key: "storage", label: "Files" },
+      { key: "settings", label: "Settings" },
     ];
     if (!hideLmsSisFeatures) {
       items.splice(3, 0, { key: "scores", label: "Grades" });
@@ -21,8 +21,9 @@ export function menu(
   if (role === "ADMIN" || role === "REGISTRAR") {
     const items: { key: ViewKey; label: string }[] = [
       { key: "dashboard", label: "Dashboard" },
-      { key: "admin_blocks", label: "Academic Management" },
+      { key: "admin_blocks", label: "Academic Admin" },
       { key: "storage", label: "Files" },
+      { key: "settings", label: "Settings" },
     ];
     if (!hideLmsSisFeatures) {
       items.splice(2, 0, { key: "grade_computation", label: "Grade Review" });
@@ -34,6 +35,7 @@ export function menu(
     const items: { key: ViewKey; label: string }[] = [
       { key: "dashboard", label: "Dashboard" },
       { key: "storage", label: "Files" },
+      { key: "settings", label: "Settings" },
     ];
     if (!hideLmsSisFeatures) {
       items.splice(1, 0, { key: "grade_computation", label: "Grade Review" });
@@ -46,6 +48,7 @@ export function menu(
     { key: "courses", label: "My Blocks" },
     { key: "storage", label: "Files" },
     { key: "archives", label: "Archives" },
+    { key: "settings", label: "Settings" },
   ];
   if (!hideLmsSisFeatures) {
     items.splice(2, 0, { key: "scores", label: "Quiz Scores" });

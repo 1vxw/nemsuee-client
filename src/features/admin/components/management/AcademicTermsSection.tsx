@@ -22,8 +22,10 @@ export function AcademicTermsSection(props: {
       <div className="flex justify-end">
         <button
           onClick={onCreateTerm}
-          className="rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white"
+          data-keep-action-text="true"
+          className="inline-flex items-center gap-1.5 rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white"
         >
+          <span className="material-symbols-outlined text-[1rem]">add_circle</span>
           Create Term
         </button>
       </div>
@@ -53,29 +55,39 @@ export function AcademicTermsSection(props: {
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => onEditTerm(term)}
-                        className="rounded-md border border-slate-300 px-2 py-1 text-xs"
+                        data-keep-action-text="true"
+                        className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-2 py-1 text-xs"
                       >
+                        <span className="material-symbols-outlined text-[0.9rem]">edit</span>
                         Edit Term
                       </button>
                       {!Number(term.isActive) && (
                         <button
                           onClick={() => onActivateTerm(term.id)}
-                          className="rounded-md border border-emerald-300 px-2 py-1 text-xs text-emerald-700"
+                          data-keep-action-text="true"
+                          className="inline-flex items-center gap-1 rounded-md border border-emerald-300 px-2 py-1 text-xs text-emerald-700"
                         >
+                          <span className="material-symbols-outlined text-[0.9rem]">bolt</span>
                           Activate Term
                         </button>
                       )}
                       <button
                         onClick={() => onToggleArchiveTerm(term)}
-                        className="rounded-md border border-slate-300 px-2 py-1 text-xs"
+                        data-keep-action-text="true"
+                        className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-2 py-1 text-xs"
                       >
+                        <span className="material-symbols-outlined text-[0.9rem]">
+                          {Number(term.isArchived) ? "unarchive" : "archive"}
+                        </span>
                         {Number(term.isArchived) ? "Unarchive Term" : "Archive Term"}
                       </button>
                       {!Number(term.isActive) && (
                         <button
                           onClick={() => onDeleteTerm(term)}
-                          className="rounded-md border border-rose-300 px-2 py-1 text-xs text-rose-700"
+                          data-keep-action-text="true"
+                          className="inline-flex items-center gap-1 rounded-md border border-rose-300 px-2 py-1 text-xs text-rose-700"
                         >
+                          <span className="material-symbols-outlined text-[0.9rem]">delete</span>
                           Delete Term
                         </button>
                       )}

@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import type { DriveFile, Role } from "../../../shared/types/lms";
 
 type SortMode = "NEWEST" | "OLDEST" | "NAME_ASC" | "NAME_DESC" | "SIZE_DESC";
+type FolderOption = { id: string; name: string };
 
 function toUserMessage(error: unknown) {
   const msg = (error as Error)?.message || "Request failed";
@@ -30,6 +31,7 @@ function getExtension(name: string) {
 function getFileTypeLabel(file: DriveFile) {
   const ext = getExtension(String(file.name || ""));
   const mime = String(file.mimeType || "");
+  if (mime === "application/vnd.google-apps.folder") return "Folder";
   if (mime.startsWith("image/") || ["png", "jpg", "jpeg", "gif", "webp"].includes(ext)) return "Image";
   if (mime === "application/pdf" || ext === "pdf") return "PDF";
   if (mime.startsWith("video/") || ["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) return "Video";
@@ -137,6 +139,17 @@ export function Storage({
   const [content, setContent] = useState("My notes");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewFile, setPreviewFile] = useState<DriveFile | null>(null);
+  const [showDisconnectWarning, setShowDisconnectWarning] = useState(false);
+  const [confirmDisconnectText, setConfirmDisconnectText] = useState("");
+  const [folders, setFolders] = useState<FolderOption[]>([]);
+  const [rootFolderId, setRootFolderId] = useState<string | null>(null);
+  const [showFolderModal, setShowFolderModal] = useState(false);
+  const [folderName, setFolderName] = useState("");
+  const [showMoveModal, setShowMoveModal] = useState(false);
+  const [moveTargetFile, setMoveTargetFile] = useState<DriveFile | null>(null);
+  const [moveFolderId, setMoveFolderId] = useState("");
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+  const [parentFolderId, setParentFolderId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const canUpload = true;
@@ -159,17 +172,36 @@ export function Storage({
     });
   }
 
-  async function load() {
+  async function load(folderId?: string | null) {
     setLoading(true);
     try {
       const status = await api("/storage/google/status", { headers });
       setLinked(Boolean(status.linked));
       setMode((status.mode || null) as "oauth" | "service_account" | null);
       if (status.linked) {
-        const rows = await api("/storage/google/files", { headers });
-        setFiles(rows || []);
+        const requestedFolder =
+          folderId === undefined ? currentFolderId : folderId;
+        const filesPayload = await api(
+          requestedFolder
+            ? `/storage/google/files?folderId=${encodeURIComponent(requestedFolder)}`
+            : "/storage/google/files",
+          { headers },
+        );
+        setFiles(filesPayload?.files || []);
+        setCurrentFolderId(filesPayload?.currentFolderId || null);
+        setParentFolderId(filesPayload?.parentFolderId || null);
+        setRootFolderId(filesPayload?.rootFolderId || null);
+        const folderPayload = await api("/storage/google/folders", { headers });
+        setFolders(folderPayload?.folders || []);
+        if (!filesPayload?.rootFolderId) {
+          setRootFolderId(folderPayload?.rootFolderId || null);
+        }
       } else {
         setFiles([]);
+        setFolders([]);
+        setRootFolderId(null);
+        setCurrentFolderId(null);
+        setParentFolderId(null);
       }
     } catch (e) {
       setMessage(toUserMessage(e));
@@ -265,6 +297,13 @@ export function Storage({
   }
 
   function openFile(file: DriveFile) {
+    if (String(file.mimeType || "") === "application/vnd.google-apps.folder") {
+      const folderId = String(file.id || "");
+      if (!folderId) return;
+      setPage(1);
+      void load(folderId);
+      return;
+    }
     if (supportsPreview(file)) {
       setPreviewFile(file);
       return;
@@ -297,13 +336,77 @@ export function Storage({
     }
   }
 
+  async function handleDisconnectAccount() {
+    if (confirmDisconnectText.trim().toUpperCase() !== "UNLINK") {
+      setMessage("Type UNLINK to confirm disconnecting your Google account.");
+      return;
+    }
+    try {
+      await api("/storage/google/disconnect", { method: "DELETE", headers });
+      setShowDisconnectWarning(false);
+      setConfirmDisconnectText("");
+      await load();
+      setMessage("Google account unlinked.");
+    } catch (e) {
+      setMessage(toUserMessage(e));
+    }
+  }
+
+  async function handleCreateFolderSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!folderName.trim()) {
+      setMessage("Please enter a folder name.");
+      return;
+    }
+    try {
+      await api("/storage/google/folders", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          name: folderName.trim(),
+          parentId: currentFolderId || rootFolderId || undefined,
+        }),
+      });
+      setFolderName("");
+      setShowFolderModal(false);
+      await load();
+      setMessage("Folder created.");
+    } catch (e) {
+      setMessage(toUserMessage(e));
+    }
+  }
+
+  function openMoveModal(file: DriveFile) {
+    setMoveTargetFile(file);
+    setMoveFolderId(rootFolderId || "");
+    setShowMoveModal(true);
+  }
+
+  async function handleMoveFile() {
+    const fileId = String(moveTargetFile?.id || "");
+    if (!fileId) return;
+    try {
+      await api(`/storage/google/files/${fileId}/move`, {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify({ folderId: moveFolderId || null }),
+      });
+      setShowMoveModal(false);
+      setMoveTargetFile(null);
+      await load();
+      setMessage("File moved.");
+    } catch (e) {
+      setMessage(toUserMessage(e));
+    }
+  }
+
   const previewUrl = previewFile?.webViewLink || previewFile?.webContentLink || "";
   const previewMime = String(previewFile?.mimeType || "");
   const previewName = String(previewFile?.name || "File");
 
   return (
     <section className="space-y-4">
-      <article className="rounded-md border border-slate-200 bg-white p-3">
+      <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4">
         {!linked && (
           <button
             onClick={async () => {
@@ -314,7 +417,7 @@ export function Storage({
                 setMessage(toUserMessage(e));
               }
             }}
-            className="rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white"
+            className="rounded-lg bg-primary px-4 py-2.5 font-label text-sm font-bold text-on-primary hover:opacity-90 transition-opacity"
           >
             Link Google Account
           </button>
@@ -322,17 +425,20 @@ export function Storage({
         {linked && mode === "oauth" && (
           <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={async () => {
-                await api("/storage/google/disconnect", { method: "DELETE", headers });
-                await load();
+              onClick={() => {
+                setConfirmDisconnectText("");
+                setShowDisconnectWarning(true);
               }}
-              className="rounded-md bg-slate-900 px-3 py-2 text-sm text-white"
+              className="rounded-lg border border-outline-variant/40 bg-surface-container px-4 py-2.5 font-label text-sm font-bold text-on-surface hover:bg-surface-container-high transition-colors"
             >
               Disconnect
             </button>
             <button
-              onClick={load}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              data-keep-action-text="true"
+              onClick={() => {
+                void load();
+              }}
+              className="rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-4 py-2.5 font-label text-sm hover:bg-surface-container transition-colors"
             >
               Refresh
             </button>
@@ -340,12 +446,15 @@ export function Storage({
         )}
         {linked && mode === "service_account" && (
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-md bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700">
+            <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-label font-bold text-emerald-700">
               Service Account Connected
             </span>
             <button
-              onClick={load}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              data-keep-action-text="true"
+              onClick={() => {
+                void load();
+              }}
+              className="rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-4 py-2.5 font-label text-sm hover:bg-surface-container transition-colors"
             >
               Refresh
             </button>
@@ -354,19 +463,21 @@ export function Storage({
       </article>
 
       {linked && (
-        <article className="rounded-md border border-slate-200 bg-white p-3">
+        <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4">
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setShowUploadModal(true)}
               disabled={!canUpload}
-              className="rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-lg bg-primary px-4 py-2.5 font-label text-sm font-bold text-on-primary hover:opacity-90 transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
             >
               Upload File
             </button>
             <button
-              disabled
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-500"
-              title="Folder support is planned for a future release."
+              onClick={() => {
+                setFolderName("");
+                setShowFolderModal(true);
+              }}
+              className="rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-4 py-2.5 font-label text-sm text-on-surface hover:bg-surface-container transition-colors"
             >
               Create Folder
             </button>
@@ -377,7 +488,7 @@ export function Storage({
                 setPage(1);
               }}
               placeholder="Search files"
-              className="h-9 min-w-[220px] rounded-md border border-slate-300 px-3 text-sm"
+              className="h-9 min-w-[180px] rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-3 font-body text-sm text-on-surface placeholder:text-on-surface-variant focus:ring-1 focus:ring-primary outline-none sm:min-w-[220px]"
             />
             <select
               value={sortMode}
@@ -385,7 +496,7 @@ export function Storage({
                 setSortMode(e.target.value as SortMode);
                 setPage(1);
               }}
-              className="h-9 rounded-md border border-slate-300 px-3 text-sm"
+              className="h-9 rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-3 font-body text-sm text-on-surface"
             >
               <option value="NEWEST">Sort: Newest</option>
               <option value="OLDEST">Sort: Oldest</option>
@@ -393,84 +504,107 @@ export function Storage({
               <option value="NAME_DESC">Sort: Name Z-A</option>
               <option value="SIZE_DESC">Sort: Largest</option>
             </select>
+            {currentFolderId && rootFolderId && currentFolderId !== rootFolderId && (
+              <button
+                onClick={() => {
+                  setPage(1);
+                  void load(parentFolderId || rootFolderId);
+                }}
+                className="h-9 rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-3 font-label text-sm text-on-surface hover:bg-surface-container transition-colors"
+              >
+                Back to Parent
+              </button>
+            )}
           </div>
         </article>
       )}
 
       {linked && (
-        <article className="overflow-hidden rounded-md border border-slate-200 bg-white">
-          <table className="min-w-full text-sm">
-            <thead className="bg-slate-50 text-slate-700">
-              <tr>
-                <th className="px-3 py-2 text-left">File</th>
-                <th className="px-3 py-2 text-left">Type</th>
-                <th className="px-3 py-2 text-left">Size</th>
-                <th className="px-3 py-2 text-left">Uploaded Date</th>
-                <th className="px-3 py-2 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pagedFiles.map((file) => {
-                const type = getFileTypeLabel(file);
-                return (
-                  <tr key={file.id || `${file.name}`} className="border-t border-slate-200">
-                    <td className="px-3 py-2">
-                      <div className="flex items-center gap-2 text-slate-900">
-                        <FileTypeIcon type={type} />
-                        <button
-                          onClick={() => openFile(file)}
-                          className="truncate text-left hover:underline"
-                          title={String(file.name || "")}
-                        >
-                          {file.name}
-                        </button>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 text-slate-600">{type}</td>
-                    <td className="px-3 py-2 text-slate-600">{formatSize(file.size)}</td>
-                    <td className="px-3 py-2 text-slate-600">
-                      {file.modifiedTime
-                        ? new Date(file.modifiedTime).toLocaleString()
-                        : "-"}
-                    </td>
-                    <td className="px-3 py-2">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => openFile(file)}
-                          className="rounded border border-slate-300 px-2 py-1 text-xs"
-                        >
-                          Open
-                        </button>
-                        <button
-                          onClick={() => downloadFile(file)}
-                          className="rounded border border-slate-300 px-2 py-1 text-xs"
-                        >
-                          Download
-                        </button>
-                        {canManage && (
+        <article className="overflow-hidden rounded-lg border border-outline-variant/20 bg-surface-container-lowest">
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm font-body">
+              <thead className="bg-surface-container text-on-surface-variant font-label">
+                <tr>
+                  <th className="px-4 py-3 text-left font-medium">File</th>
+                  <th className="px-4 py-3 text-left font-medium hidden sm:table-cell">Type</th>
+                  <th className="px-4 py-3 text-left font-medium hidden md:table-cell">Size</th>
+                  <th className="px-4 py-3 text-left font-medium hidden lg:table-cell">Uploaded Date</th>
+                  <th className="px-4 py-3 text-right font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pagedFiles.map((file) => {
+                  const type = getFileTypeLabel(file);
+                  return (
+                    <tr key={file.id || `${file.name}`} className="border-t border-outline-variant/20">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2 text-primary">
+                          <span className="flex-shrink-0 text-on-surface-variant">
+                            <FileTypeIcon type={type} />
+                          </span>
                           <button
-                            onClick={() => deleteFile(file)}
-                            className="rounded border border-rose-300 px-2 py-1 text-xs text-rose-700"
+                            onClick={() => openFile(file)}
+                            className="truncate text-left font-label font-medium hover:text-primary/80 transition-colors"
+                            title={String(file.name || "")}
                           >
-                            Delete
+                            {file.name}
                           </button>
-                        )}
-                      </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-on-surface-variant hidden sm:table-cell">{type}</td>
+                      <td className="px-4 py-3 text-on-surface-variant hidden md:table-cell">{formatSize(file.size)}</td>
+                      <td className="px-4 py-3 text-on-surface-variant hidden lg:table-cell">
+                        {file.modifiedTime
+                          ? new Date(file.modifiedTime).toLocaleString()
+                          : "-"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end gap-1.5">
+                          <button
+                            onClick={() => openFile(file)}
+                            className="rounded-lg border border-outline-variant/40 px-2.5 py-1.5 font-label text-xs hover:bg-surface-container transition-colors"
+                          >
+                            Open
+                          </button>
+                          <button
+                            onClick={() => downloadFile(file)}
+                            className="rounded-lg border border-outline-variant/40 px-2.5 py-1.5 font-label text-xs hover:bg-surface-container transition-colors"
+                          >
+                            Download
+                          </button>
+                          {canManage && (
+                            <button
+                              onClick={() => deleteFile(file)}
+                              className="rounded-lg border border-error-container px-2.5 py-1.5 font-label text-xs font-bold text-error hover:bg-error-container/30 transition-colors"
+                            >
+                              Delete
+                            </button>
+                          )}
+                          {canManage && (
+                            <button
+                              onClick={() => openMoveModal(file)}
+                              className="rounded-lg border border-outline-variant/40 px-2.5 py-1.5 font-label text-xs hover:bg-surface-container transition-colors"
+                            >
+                              Move
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {!filteredFiles.length && (
+                  <tr>
+                    <td colSpan={5} className="px-4 py-8 text-center font-body text-sm text-on-surface-variant">
+                      {loading ? "Loading files..." : "No files found."}
                     </td>
                   </tr>
-                );
-              })}
-              {!filteredFiles.length && (
-                <tr>
-                  <td colSpan={5} className="px-3 py-4 text-center text-slate-500">
-                    {loading ? "Loading files..." : "No files found."}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
           {!!filteredFiles.length && (
-            <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+            <div className="flex items-center justify-between border-t border-outline-variant/20 bg-surface-container px-4 py-2.5 font-label text-xs text-on-surface-variant">
               <p>
                 Showing {(safePage - 1) * pageSize + 1}-
                 {Math.min(safePage * pageSize, filteredFiles.length)} of{" "}
@@ -480,7 +614,7 @@ export function Storage({
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={safePage <= 1}
-                  className="rounded border border-slate-300 px-2 py-1 disabled:opacity-50"
+                  className="rounded-lg border border-outline-variant/40 px-2.5 py-1.5 disabled:opacity-50 hover:bg-surface-container-lowest transition-colors"
                 >
                   Prev
                 </button>
@@ -490,7 +624,7 @@ export function Storage({
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={safePage >= totalPages}
-                  className="rounded border border-slate-300 px-2 py-1 disabled:opacity-50"
+                  className="rounded-lg border border-outline-variant/40 px-2.5 py-1.5 disabled:opacity-50 hover:bg-surface-container-lowest transition-colors"
                 >
                   Next
                 </button>
@@ -501,28 +635,28 @@ export function Storage({
       )}
 
       {showUploadModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
           <form
             onSubmit={handleUploadSubmit}
-            className="w-full max-w-lg rounded-md bg-white p-4 shadow-lg"
+            className="w-full max-w-lg rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-xl md:p-5"
           >
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-base font-semibold text-slate-900">Upload Resource</h3>
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-headline text-base font-bold text-primary sm:text-lg">Upload Resource</h3>
               <button
                 type="button"
                 onClick={() => setShowUploadModal(false)}
-                className="rounded border border-slate-300 px-2 py-1 text-xs"
+                className="rounded-lg border border-outline-variant/40 px-3 py-1.5 font-label text-xs hover:bg-surface-container transition-colors"
               >
                 Close
               </button>
             </div>
 
-            <div className="mb-3 flex gap-2">
+            <div className="mb-4 flex gap-2">
               <button
                 type="button"
                 onClick={() => setUploadMode("file")}
-                className={`rounded px-3 py-1 text-sm ${
-                  uploadMode === "file" ? "bg-blue-700 text-white" : "bg-slate-100"
+                className={`rounded-lg px-4 py-2 font-label text-sm font-bold transition-colors ${
+                  uploadMode === "file" ? "bg-primary text-on-primary" : "border border-outline-variant/40 bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
                 }`}
               >
                 File Upload
@@ -530,8 +664,8 @@ export function Storage({
               <button
                 type="button"
                 onClick={() => setUploadMode("note")}
-                className={`rounded px-3 py-1 text-sm ${
-                  uploadMode === "note" ? "bg-blue-700 text-white" : "bg-slate-100"
+                className={`rounded-lg px-4 py-2 font-label text-sm font-bold transition-colors ${
+                  uploadMode === "note" ? "bg-primary text-on-primary" : "border border-outline-variant/40 bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
                 }`}
               >
                 Quick Note
@@ -540,17 +674,17 @@ export function Storage({
 
             {uploadMode === "file" ? (
               <>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
+                <label className="mb-2 block font-label text-sm font-medium text-on-surface">
                   Select file
                 </label>
                 <input
                   ref={fileInputRef}
                   type="file"
                   onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                  className="mb-2 w-full rounded border border-slate-300 p-2 text-sm"
+                  className="mb-2 w-full rounded-lg border border-outline-variant/40 bg-surface-container-lowest p-2.5 font-body text-sm text-on-surface"
                 />
                 {selectedFile && (
-                  <p className="mb-2 text-xs text-slate-600">
+                  <p className="mb-2 font-body text-xs text-on-surface-variant">
                     Selected: {selectedFile.name} ({Math.ceil(selectedFile.size / 1024)} KB)
                   </p>
                 )}
@@ -560,21 +694,21 @@ export function Storage({
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="mb-2 w-full rounded border border-slate-300 p-2 text-sm"
+                  className="mb-2 w-full rounded-lg border border-outline-variant/40 bg-surface-container-lowest p-2.5 font-body text-sm text-on-surface placeholder:text-on-surface-variant"
                   placeholder="Filename (e.g. notes.txt)"
                 />
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  className="mb-2 w-full rounded border border-slate-300 p-2 text-sm"
+                  className="mb-2 w-full rounded-lg border border-outline-variant/40 bg-surface-container-lowest p-2.5 font-body text-sm text-on-surface placeholder:text-on-surface-variant"
                   rows={5}
                   placeholder="Write your note"
                 />
               </>
             )}
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-2">
               <button
-                className="rounded bg-slate-900 px-3 py-2 text-sm text-white"
+                className="rounded-lg bg-primary px-4 py-2.5 font-label text-sm font-bold text-on-primary hover:opacity-90 transition-opacity"
                 data-keep-action-text="true"
               >
                 {uploadMode === "file" ? "Upload File" : "Upload Note"}
@@ -585,23 +719,23 @@ export function Storage({
       )}
 
       {previewFile && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-          <div className="w-full max-w-4xl rounded-md bg-white p-4 shadow-lg">
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="truncate text-base font-semibold text-slate-900">{previewName}</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-4xl rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-xl md:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="truncate font-headline text-base font-bold text-primary sm:text-lg">{previewName}</h3>
               <button
                 type="button"
                 onClick={() => setPreviewFile(null)}
-                className="rounded border border-slate-300 px-2 py-1 text-xs"
+                className="rounded-lg border border-outline-variant/40 px-3 py-1.5 font-label text-xs hover:bg-surface-container transition-colors"
               >
                 Close
               </button>
             </div>
             {!previewUrl && (
-              <p className="text-sm text-slate-500">Preview is not available for this file.</p>
+              <p className="font-body text-sm text-on-surface-variant">Preview is not available for this file.</p>
             )}
             {!!previewUrl && previewMime.startsWith("image/") && (
-              <div className="max-h-[70vh] overflow-auto rounded border border-slate-200 p-2">
+              <div className="max-h-[70vh] overflow-auto rounded-lg border border-outline-variant/20 bg-surface-container p-2">
                 <img src={previewUrl} alt={previewName} className="mx-auto max-h-[66vh] object-contain" />
               </div>
             )}
@@ -609,24 +743,145 @@ export function Storage({
               <iframe
                 title={previewName}
                 src={previewUrl}
-                className="h-[70vh] w-full rounded border border-slate-200"
+                className="h-[70vh] w-full rounded-lg border border-outline-variant/20"
               />
             )}
             {!!previewUrl && previewMime.startsWith("video/") && (
               <video
                 controls
                 src={previewUrl}
-                className="max-h-[70vh] w-full rounded border border-slate-200"
+                className="max-h-[70vh] w-full rounded-lg border border-outline-variant/20"
               />
             )}
             {!!previewUrl &&
               !previewMime.startsWith("image/") &&
               previewMime !== "application/pdf" &&
               !previewMime.startsWith("video/") && (
-                <div className="rounded border border-slate-200 p-3 text-sm text-slate-600">
+                <div className="rounded-lg border border-outline-variant/20 bg-surface-container p-4 font-body text-sm text-on-surface-variant">
                   Preview is not supported for this file type. Use Download.
                 </div>
               )}
+          </div>
+        </div>
+      )}
+
+      {showDisconnectWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-xl">
+            <h3 className="font-headline text-base font-bold text-error sm:text-lg">
+              Unlink Google Account?
+            </h3>
+            <p className="mt-2 font-body text-sm text-on-surface-variant">
+              You will lose access to Drive files from this app until you link again.
+              Existing files in your Google Drive will not be deleted.
+            </p>
+            <p className="mt-3 rounded-md border border-error-container bg-error-container/20 px-3 py-2 font-body text-xs text-error">
+              To continue, type <span className="font-bold">UNLINK</span> below.
+            </p>
+            <input
+              value={confirmDisconnectText}
+              onChange={(e) => setConfirmDisconnectText(e.target.value)}
+              className="mt-2 w-full rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 font-body text-sm text-on-surface placeholder:text-on-surface-variant focus:ring-1 focus:ring-primary outline-none"
+              placeholder="Type UNLINK"
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDisconnectWarning(false);
+                  setConfirmDisconnectText("");
+                }}
+                className="rounded-lg border border-outline-variant/40 px-3 py-2 font-label text-xs text-on-surface hover:bg-surface-container transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDisconnectAccount}
+                className="rounded-lg bg-error px-3 py-2 font-label text-xs font-bold text-on-error hover:opacity-90 transition-opacity"
+              >
+                Unlink Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showFolderModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <form
+            onSubmit={handleCreateFolderSubmit}
+            className="w-full max-w-md rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-xl"
+          >
+            <h3 className="font-headline text-base font-bold text-primary sm:text-lg">
+              Create Folder
+            </h3>
+            <input
+              value={folderName}
+              onChange={(e) => setFolderName(e.target.value)}
+              className="mt-3 w-full rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 font-body text-sm text-on-surface placeholder:text-on-surface-variant focus:ring-1 focus:ring-primary outline-none"
+              placeholder="Folder name"
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowFolderModal(false)}
+                className="rounded-lg border border-outline-variant/40 px-3 py-2 font-label text-xs text-on-surface hover:bg-surface-container transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="rounded-lg bg-primary px-3 py-2 font-label text-xs font-bold text-on-primary hover:opacity-90 transition-opacity"
+              >
+                Create
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {showMoveModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-xl">
+            <h3 className="font-headline text-base font-bold text-primary sm:text-lg">
+              Move File
+            </h3>
+            <p className="mt-2 truncate font-body text-sm text-on-surface-variant">
+              {moveTargetFile?.name || "Selected file"}
+            </p>
+            <select
+              data-keep-action-text="true"
+              value={moveFolderId}
+              onChange={(e) => setMoveFolderId(e.target.value)}
+              className="mt-3 w-full rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 font-body text-sm text-on-surface"
+            >
+              {rootFolderId && <option value={rootFolderId}>Main folder</option>}
+              {folders.map((folder) => (
+                <option key={folder.id} value={folder.id}>
+                  {folder.name}
+                </option>
+              ))}
+            </select>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowMoveModal(false);
+                  setMoveTargetFile(null);
+                }}
+                className="rounded-lg border border-outline-variant/40 px-3 py-2 font-label text-xs text-on-surface hover:bg-surface-container transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleMoveFile}
+                className="rounded-lg bg-primary px-3 py-2 font-label text-xs font-bold text-on-primary hover:opacity-90 transition-opacity"
+              >
+                Move
+              </button>
+            </div>
           </div>
         </div>
       )}
