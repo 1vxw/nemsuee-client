@@ -30,6 +30,7 @@ export function AuthScreen({
   const [guestSubmitting, setGuestSubmitting] = useState(false);
   const [showTestAccounts, setShowTestAccounts] = useState(false);
   const [showCampusNotice, setShowCampusNotice] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const passwordChecks = useMemo(
     () => ({
@@ -113,7 +114,7 @@ export function AuthScreen({
   return (
     <main className="min-h-screen flex flex-col bg-surface text-on-surface overflow-x-hidden">
       <nav
-        className={`fixed top-0 w-full z-50 h-14 flex justify-between items-center px-8 transition-all duration-300 ease-in-out backdrop-blur-lg ${isDark ? "border-b border-white/10 bg-slate-950/40" : "border-b border-black/10 bg-white/40"}`}
+        className={`fixed top-0 w-full z-50 h-14 flex justify-between items-center px-4 md:px-8 transition-all duration-300 ease-in-out backdrop-blur-lg relative ${isDark ? "border-b border-white/10 bg-slate-950/40" : "border-b border-black/10 bg-white/40"}`}
       >
         <div className="flex items-center gap-2">
           <img
@@ -155,9 +156,67 @@ export function AuthScreen({
             {guestSubmitting ? "Please wait..." : "Guest Access"}
           </button>
         </div>
-        <div className={`md:hidden ${isDark ? "text-white" : "text-primary"}`}>
-          <span className="material-symbols-outlined">menu</span>
-        </div>
+        <button
+          type="button"
+          onClick={() => setMobileMenuOpen((v) => !v)}
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          className={`md:hidden rounded-md p-2 transition-colors ${isDark ? "text-white hover:bg-white/10" : "text-primary hover:bg-black/5"}`}
+        >
+          <span className="material-symbols-outlined">
+            {mobileMenuOpen ? "close" : "menu"}
+          </span>
+        </button>
+
+        {mobileMenuOpen && (
+          <>
+            <button
+              type="button"
+              aria-label="Close menu overlay"
+              className="md:hidden fixed inset-0 top-14 z-40 bg-black/30"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <div
+              className={`md:hidden absolute left-0 right-0 top-14 z-50 border-b ${isDark ? "border-white/10 bg-slate-950/95" : "border-black/10 bg-white/95"} backdrop-blur-lg`}
+            >
+              <div className="px-4 py-4 space-y-2">
+                <a
+                  className={`block rounded-md px-3 py-2 font-label text-sm font-semibold transition-colors ${isDark ? "text-white hover:bg-white/10" : "text-on-surface-variant hover:bg-black/5 hover:text-primary"}`}
+                  href="#"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  About NEMSU
+                </a>
+                <a
+                  className={`block rounded-md px-3 py-2 font-label text-sm font-semibold transition-colors ${isDark ? "text-white hover:bg-white/10" : "text-on-surface-variant hover:bg-black/5 hover:text-primary"}`}
+                  href="#"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Academic Programs
+                </a>
+                <a
+                  className={`block rounded-md px-3 py-2 font-label text-sm font-semibold transition-colors ${isDark ? "text-white hover:bg-white/10" : "text-on-surface-variant hover:bg-black/5 hover:text-primary"}`}
+                  href="#"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Support
+                </a>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      void onGuestAccess();
+                    }}
+                    disabled={guestSubmitting}
+                    className={`w-full px-5 py-2.5 rounded-md font-label text-sm font-bold tracking-wide hover:opacity-90 transition-opacity ${isDark ? "bg-white text-slate-950" : "bg-primary text-on-primary"} disabled:opacity-60`}
+                  >
+                    {guestSubmitting ? "Please wait..." : "Guest Access"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </nav>
       <main className="flex-1 flex flex-col md:flex-row pt-14">
         <section
