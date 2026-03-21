@@ -176,16 +176,10 @@ export default function App() {
         user.role === "INSTRUCTOR"
           ? await api("/courses/teaching-blocks", { headers })
           : [];
-      const activeCourseIds = new Set(
-        (c as Course[]).map((course) => course.id),
-      );
-      const visibleBlocks = (blocks as TeachingBlock[]).filter((block) =>
-        activeCourseIds.has(block.courseId),
-      );
       setCourses(c);
       setAttempts(a);
       setArchivedCourses(archived);
-      setTeachingBlocks(visibleBlocks);
+      setTeachingBlocks(blocks as TeachingBlock[]);
       const currentSelected = selectedCourseIdRef.current;
       if (!currentSelected && c[0]) {
         setSelectedCourseId(c[0].id);
@@ -200,9 +194,7 @@ export default function App() {
       }
       setLastSync(new Date());
       await loadNotifications();
-    } catch (err) {
-      // Handle error silently or log if needed
-    }
+    } catch (err) {}
   }
 
   useEffect(() => {
@@ -321,9 +313,7 @@ export default function App() {
               onClick={async () => {
                 try {
                   await api("/auth/logout", { method: "POST", headers });
-                } catch {
-                  // best-effort
-                }
+                } catch {}
                 localStorage.removeItem("user");
                 setUser(null);
                 setMessage("");
@@ -341,9 +331,7 @@ export default function App() {
             onRequestLogin={async () => {
               try {
                 await api("/auth/logout", { method: "POST", headers });
-              } catch {
-                // best-effort
-              }
+              } catch {}
               localStorage.removeItem("user");
               setUser(null);
               navigate("/");
@@ -399,7 +387,7 @@ export default function App() {
                   <span className="material-symbols-outlined text-[1.5rem] sm:text-[1.625rem]">
                     notifications
                   </span>
-                 {!!notifications.filter((n) => !Boolean(n.isRead)).length && (
+                  {!!notifications.filter((n) => !Boolean(n.isRead)).length && (
                     <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-error" />
                   )}
                 </button>

@@ -37,6 +37,7 @@ type Props = {
     tab: "content" | "quizzes" | "assignments" | "activities",
   ) => void;
   regenerateEnrollmentKey: (courseId: number) => Promise<void>;
+  enrollmentKey: string;
   showAddSection: Record<number, boolean>;
   setShowAddSection: (v: any) => void;
   newSection: Record<number, string>;
@@ -159,6 +160,7 @@ export function SelectedCoursePanel(props: Props) {
     activeCourseTab,
     setActiveCourseTab,
     regenerateEnrollmentKey,
+    enrollmentKey,
     manualEmail,
     setManualEmail,
     setManualSection,
@@ -374,6 +376,7 @@ export function SelectedCoursePanel(props: Props) {
       <CourseHeaderPanel
         selectedCourse={selectedCourse}
         user={user}
+        enrollmentKey={enrollmentKey}
         regenerateEnrollmentKey={regenerateEnrollmentKey}
         loadRoster={loadRoster}
         setShowCourseInfo={setShowCourseInfo}

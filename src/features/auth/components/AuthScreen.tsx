@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import type { User } from "../../../shared/types/lms";
 import coverImage from "../../../assets/cover.png";
 import logoImage from "../../../assets/logo.png";
@@ -17,7 +18,18 @@ export function AuthScreen({
   theme: "light" | "dark";
 }) {
   const isDark = theme === "dark";
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const [mode, setMode] = useState<
+    "login" | "register" | "forgot" | "reset" | "verify"
+  >(() => {
+    const path = location.pathname;
+    if (path === "/forgot-password") return "forgot";
+    if (path === "/reset-password") return "reset";
+    if (path === "/verify-email") return "verify";
+    return "login";
+  });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -31,6 +43,7 @@ export function AuthScreen({
   const [showTestAccounts, setShowTestAccounts] = useState(false);
   const [showCampusNotice, setShowCampusNotice] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [verifyPending, setVerifyPending] = useState(false);
 
   const passwordChecks = useMemo(
     () => ({
@@ -49,11 +62,98 @@ export function AuthScreen({
     passwordChecks.number &&
     passwordChecks.special;
 
+  const looksLikeError = useMemo(() => {
+    const text = (message || "").toLowerCase();
+    if (!text) return false;
+    return (
+      text.includes("error") ||
+      text.includes("invalid") ||
+      text.includes("failed") ||
+      text.includes("forbidden") ||
+      text.includes("missing") ||
+      text.includes("required") ||
+      text.includes("rejected") ||
+      text.includes("not found") ||
+      text.includes("cannot") ||
+      text.includes("denied") ||
+      text.includes("expired")
+    );
+  }, [message]);
+
+  const urlToken = useMemo(() => {
+    const params = new URLSearchParams(location.search || "");
+    return params.get("token") || "";
+  }, [location.search]);
+
+  useEffect(() => {
+    const path = location.pathname;
+    if (path === "/forgot-password") setMode("forgot");
+    else if (path === "/reset-password") setMode("reset");
+    else if (path === "/verify-email") setMode("verify");
+    else setMode((prev) => (prev === "register" ? "register" : "login"));
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (mode !== "verify") return;
+    if (!urlToken) {
+      setMessage("Missing verification token.");
+      return;
+    }
+    setMessage("");
+    setVerifyPending(true);
+    api("/auth/verify-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: urlToken }),
+    })
+      .then(() => setMessage("Email verified. You can now sign in."))
+      .catch((err: any) => setMessage(err?.message || "Verification failed."))
+      .finally(() => setVerifyPending(false));
+  }, [mode, urlToken]);
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setMessage("");
     try {
       setIsSubmitting(true);
+      if (mode === "forgot") {
+        await api("/auth/forgot-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        setMessage(
+          "If an account exists for this email, you'll receive a password reset link shortly.",
+        );
+        return;
+      }
+
+      if (mode === "reset") {
+        if (!urlToken) {
+          setMessage("Missing reset token.");
+          return;
+        }
+        if (!passwordStrong) {
+          setMessage("Password must meet all security requirements.");
+          return;
+        }
+        if (password !== confirmPassword) {
+          setMessage("Password confirmation does not match.");
+          return;
+        }
+        await api("/auth/reset-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: urlToken, password }),
+        });
+        setPassword("");
+        setConfirmPassword("");
+        navigate("/");
+        setMode("login");
+        setMessage("Password updated. You can now sign in.");
+        return;
+      }
+
       if (mode === "register") {
         if (!passwordStrong) {
           setMessage("Password must meet all security requirements.");
@@ -74,13 +174,14 @@ export function AuthScreen({
             studentId: role === "STUDENT" ? studentId : undefined,
           }),
         });
+        navigate("/");
         setMode("login");
         setPassword("");
         setConfirmPassword("");
         setMessage(
           role === "INSTRUCTOR"
-            ? "Registration submitted. Your instructor account must be approved by admin before login."
-            : "Registration successful. You can now log in.",
+            ? "Registration submitted. Please verify your email. Instructor accounts also require admin approval before login."
+            : "Registration successful. Please verify your email before signing in.",
         );
         return;
       }
@@ -302,17 +403,37 @@ export function AuthScreen({
               </p>
             </div>
             {message && (
-              <div className="mb-6 flex items-start gap-3 rounded-lg border border-error/30 bg-error/5 px-4 py-3">
-                <span className="material-symbols-outlined text-error text-sm mt-0.5">
-                  error
+              <div
+                className={`mb-6 flex items-start gap-3 rounded-lg px-4 py-3 ${
+                  looksLikeError
+                    ? "border border-error/30 bg-error/5"
+                    : "border border-secondary/30 bg-secondary/10"
+                }`}
+              >
+                <span
+                  className={`material-symbols-outlined text-sm mt-0.5 ${
+                    looksLikeError ? "text-error" : "text-secondary"
+                  }`}
+                >
+                  {looksLikeError ? "error" : "info"}
                 </span>
                 <div className="flex-1">
-                  <p className="text-sm text-error font-medium">{message}</p>
+                  <p
+                    className={`text-sm font-medium ${
+                      looksLikeError ? "text-error" : "text-on-surface"
+                    }`}
+                  >
+                    {message}
+                  </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setMessage("")}
-                  className="text-error hover:text-error/80 transition-colors"
+                  className={`transition-colors ${
+                    looksLikeError
+                      ? "text-error hover:text-error/80"
+                      : "text-on-surface-variant hover:text-on-surface"
+                  }`}
                   aria-label="Dismiss error"
                 >
                   <span className="material-symbols-outlined text-sm">
@@ -321,26 +442,71 @@ export function AuthScreen({
                 </button>
               </div>
             )}
-            <div className="flex gap-2 mb-6 bg-surface-container-low rounded-lg p-1">
-              <button
-                type="button"
-                onClick={() => setMode("login")}
-                className={`flex-1 py-2.5 rounded font-label font-semibold text-sm transition-all ${mode === "login" ? "bg-primary text-on-primary" : "text-on-surface-variant hover:text-primary"}`}
-              >
-                Sign In
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode("register")}
-                className={`flex-1 py-2.5 rounded font-label font-semibold text-sm transition-all ${mode === "register" ? "bg-primary text-on-primary" : "text-on-surface-variant hover:text-primary"}`}
-              >
-                Register
-              </button>
-            </div>
+            {(mode === "login" || mode === "register") && (
+              <div className="flex gap-2 mb-6 bg-surface-container-low rounded-lg p-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigate("/");
+                    setMode("login");
+                  }}
+                  className={`flex-1 py-2.5 rounded font-label font-semibold text-sm transition-all ${mode === "login" ? "bg-primary text-on-primary" : "text-on-surface-variant hover:text-primary"}`}
+                >
+                  Sign In
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigate("/");
+                    setMode("register");
+                  }}
+                  className={`flex-1 py-2.5 rounded font-label font-semibold text-sm transition-all ${mode === "register" ? "bg-primary text-on-primary" : "text-on-surface-variant hover:text-primary"}`}
+                >
+                  Register
+                </button>
+              </div>
+            )}
+            {(mode === "forgot" || mode === "reset" || mode === "verify") && (
+              <div className="mb-6 flex items-center justify-between gap-3">
+                <h2 className="font-headline text-xl font-bold text-primary">
+                  {mode === "forgot"
+                    ? "Forgot Password"
+                    : mode === "reset"
+                      ? "Reset Password"
+                      : "Verify Email"}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigate("/");
+                    setMode("login");
+                  }}
+                  className="font-label text-xs font-semibold text-secondary hover:text-primary transition-colors"
+                >
+                  Back to Sign In
+                </button>
+              </div>
+            )}
             <form
               onSubmit={onSubmit}
               className="space-y-4 pt-4 border-t-2 border-secondary"
             >
+              {mode === "verify" && (
+                <div className="rounded-lg border border-outline-variant/20 bg-surface-container-low p-4">
+                  <div className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-secondary">
+                      {verifyPending ? "hourglass_top" : "verified"}
+                    </span>
+                    <div className="flex-1">
+                      <p className="font-label text-sm text-on-surface-variant">
+                        {verifyPending
+                          ? "Verifying your email…"
+                          : message || "Verification status updated."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
               {mode === "register" && (
                 <div className="relative">
                   <label className="block font-label text-sm font-medium text-on-surface-variant mb-1 ml-1">
@@ -356,34 +522,41 @@ export function AuthScreen({
                   />
                 </div>
               )}
-              <div className="relative">
-                <label className="block font-label text-sm font-medium text-on-surface-variant mb-1 ml-1">
-                  Username or Institutional Email
-                </label>
-                <input
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  name="email"
-                  type="email"
-                  required
-                  placeholder="e.g. s.doe@nemsu.edu.ph"
-                  className="w-full bg-transparent border-0 border-b-2 border-surface-variant focus:ring-0 focus:border-primary px-1 py-3 transition-all placeholder:text-outline-variant text-primary font-body"
-                />
-                <div className="absolute right-2 top-9 text-outline-variant">
-                  <span className="material-symbols-outlined text-lg">
-                    alternate_email
-                  </span>
+              {mode !== "reset" && mode !== "verify" && (
+                <div className="relative">
+                  <label className="block font-label text-sm font-medium text-on-surface-variant mb-1 ml-1">
+                    Username or Institutional Email
+                  </label>
+                  <input
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    name="email"
+                    type="email"
+                    required
+                    placeholder="e.g. s.doe@nemsu.edu.ph"
+                    className="w-full bg-transparent border-0 border-b-2 border-surface-variant focus:ring-0 focus:border-primary px-1 py-3 transition-all placeholder:text-outline-variant text-primary font-body"
+                  />
+                  <div className="absolute right-2 top-9 text-outline-variant">
+                    <span className="material-symbols-outlined text-lg">
+                      alternate_email
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
+              {(mode === "login" || mode === "register" || mode === "reset") && (
               <div className="relative">
                 <div className="flex justify-between items-end mb-1">
-                  <label className="block font-label text-sm font-medium text-on-surface-variant ml-1">
-                    Password
-                  </label>
+	                  <label className="block font-label text-sm font-medium text-on-surface-variant ml-1">
+	                    {mode === "reset" ? "New Password" : "Password"}
+	                  </label>
                   {mode === "login" && (
-                    <a className="font-label text-xs font-semibold text-secondary hover:text-primary transition-colors">
+                    <button
+                      type="button"
+                      onClick={() => navigate("/forgot-password")}
+                      className="font-label text-xs font-semibold text-secondary hover:text-primary transition-colors"
+                    >
                       Forgot Password?
-                    </a>
+                    </button>
                   )}
                 </div>
                 <input
@@ -405,7 +578,8 @@ export function AuthScreen({
                   </span>
                 </button>
               </div>
-              {mode === "register" && (
+              )}
+              {(mode === "register" || mode === "reset") && (
                 <>
                   <div className="relative">
                     <label className="block font-label text-sm font-medium text-on-surface-variant mb-1 ml-1">
@@ -430,49 +604,53 @@ export function AuthScreen({
                         {showConfirmPassword ? "visibility_off" : "visibility"}
                       </span>
                     </button>
-                  </div>
-                  <div className="relative">
-                    <label className="block font-label text-sm font-medium text-on-surface-variant mb-1 ml-1">
-                      Account Type
-                    </label>
-                    <select
-                      value={role}
-                      onChange={(e) => {
-                        const nextRole = e.target.value as
-                          | "STUDENT"
-                          | "INSTRUCTOR";
-                        setRole(nextRole);
-                        if (nextRole !== "STUDENT") setStudentId("");
-                      }}
-                      className="w-full bg-transparent border-0 border-b-2 border-surface-variant focus:ring-0 focus:border-primary px-1 py-3 transition-all font-body text-on-surface appearance-none cursor-pointer"
-                      style={{
-                        backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 20 20%22 fill=%22none%22 stroke=%22%23c3c6d1%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M6 8l4 4 4-4%22/></svg>')`,
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 0.5rem center",
-                        backgroundSize: "1rem 1rem",
-                        paddingRight: "2.2rem",
-                      }}
-                    >
-                      <option value="STUDENT">Student</option>
-                      <option value="INSTRUCTOR">
-                        Instructor (Admin approval required)
-                      </option>
-                    </select>
-                  </div>
-                  {role === "STUDENT" && (
-                    <div className="relative">
-                      <label className="block font-label text-sm font-medium text-on-surface-variant mb-1 ml-1">
-                        Student ID
-                      </label>
-                      <input
-                        value={studentId}
-                        onChange={(e) => setStudentId(e.target.value)}
-                        required
-                        placeholder="e.g. 2024-12345"
-                        className="w-full bg-transparent border-0 border-b-2 border-surface-variant focus:ring-0 focus:border-primary px-1 py-3 transition-all placeholder:text-outline-variant text-primary font-body"
-                      />
-                    </div>
-                  )}
+	                  </div>
+	                  {mode === "register" && (
+	                    <>
+	                      <div className="relative">
+	                        <label className="block font-label text-sm font-medium text-on-surface-variant mb-1 ml-1">
+	                          Account Type
+	                        </label>
+	                        <select
+	                          value={role}
+	                          onChange={(e) => {
+	                            const nextRole = e.target.value as
+	                              | "STUDENT"
+	                              | "INSTRUCTOR";
+	                            setRole(nextRole);
+	                            if (nextRole !== "STUDENT") setStudentId("");
+	                          }}
+	                          className="w-full bg-transparent border-0 border-b-2 border-surface-variant focus:ring-0 focus:border-primary px-1 py-3 transition-all font-body text-on-surface appearance-none cursor-pointer"
+	                          style={{
+	                            backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 20 20%22 fill=%22none%22 stroke=%22%23c3c6d1%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M6 8l4 4 4-4%22/></svg>')`,
+	                            backgroundRepeat: "no-repeat",
+	                            backgroundPosition: "right 0.5rem center",
+	                            backgroundSize: "1rem 1rem",
+	                            paddingRight: "2.2rem",
+	                          }}
+	                        >
+	                          <option value="STUDENT">Student</option>
+	                          <option value="INSTRUCTOR">
+	                            Instructor (Admin approval required)
+	                          </option>
+	                        </select>
+	                      </div>
+	                      {role === "STUDENT" && (
+	                        <div className="relative">
+	                          <label className="block font-label text-sm font-medium text-on-surface-variant mb-1 ml-1">
+	                            Student ID
+	                          </label>
+	                          <input
+	                            value={studentId}
+	                            onChange={(e) => setStudentId(e.target.value)}
+	                            required
+	                            placeholder="e.g. 2024-12345"
+	                            className="w-full bg-transparent border-0 border-b-2 border-surface-variant focus:ring-0 focus:border-primary px-1 py-3 transition-all placeholder:text-outline-variant text-primary font-body"
+	                          />
+	                        </div>
+	                      )}
+	                    </>
+	                  )}
                   <div className="bg-surface-container-low rounded-lg p-4 space-y-2">
                     <p className="font-label text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-3">
                       Password Requirements
@@ -557,33 +735,69 @@ export function AuthScreen({
                   </label>
                 </div>
               )}
-              <div className="pt-4">
-                <button
-                  disabled={
-                    isSubmitting || (mode === "register" && !passwordStrong)
-                  }
-                  type="submit"
-                  className="w-full py-4 bg-primary text-on-primary rounded-md font-label font-bold text-sm tracking-widest flex items-center justify-center gap-2 hover:bg-primary/95 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-primary/10 transition-all active:scale-[0.98]"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <span className="material-symbols-outlined animate-spin text-sm">
-                        sync
-                      </span>
-                      Please wait...
-                    </>
-                  ) : mode === "login" ? (
-                    <>
-                      SIGN IN TO PORTAL
-                      <span className="material-symbols-outlined text-sm">
-                        arrow_forward
-                      </span>
-                    </>
-                  ) : (
-                    <span className="uppercase">Create Account</span>
+              {mode !== "verify" && (
+                <div className="pt-4 space-y-3">
+                  <button
+                    disabled={
+                      isSubmitting ||
+                      ((mode === "register" || mode === "reset") &&
+                        !passwordStrong)
+                    }
+                    type="submit"
+                    className="w-full py-4 bg-primary text-on-primary rounded-md font-label font-bold text-sm tracking-widest flex items-center justify-center gap-2 hover:bg-primary/95 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-primary/10 transition-all active:scale-[0.98]"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <span className="material-symbols-outlined animate-spin text-sm">
+                          sync
+                        </span>
+                        Please wait...
+                      </>
+                    ) : mode === "login" ? (
+                      <>
+                        SIGN IN TO PORTAL
+                        <span className="material-symbols-outlined text-sm">
+                          arrow_forward
+                        </span>
+                      </>
+                    ) : mode === "forgot" ? (
+                      <span className="uppercase">Send reset link</span>
+                    ) : mode === "reset" ? (
+                      <span className="uppercase">Update password</span>
+                    ) : (
+                      <span className="uppercase">Create Account</span>
+                    )}
+                  </button>
+
+                  {mode === "login" && (
+                    <button
+                      type="button"
+                      disabled={!email.trim() || isSubmitting}
+                      onClick={async () => {
+                        setMessage("");
+                        try {
+                          setIsSubmitting(true);
+                          await api("/auth/resend-verification", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ email }),
+                          });
+                          setMessage(
+                            "If your account exists and is unverified, a new verification email has been sent.",
+                          );
+                        } catch (err) {
+                          setMessage((err as Error).message);
+                        } finally {
+                          setIsSubmitting(false);
+                        }
+                      }}
+                      className="w-full py-3 border border-outline-variant/30 rounded-md font-label font-bold text-xs tracking-widest text-secondary hover:text-primary hover:bg-surface-container transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      Resend verification email
+                    </button>
                   )}
-                </button>
-              </div>
+                </div>
+              )}
             </form>
             {mode === "login" && (
               <div className="mt-5 pt-4 border-t border-surface-container text-center">

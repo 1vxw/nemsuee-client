@@ -117,6 +117,7 @@ export function CourseAnnouncementsPanel({
 type CourseHeaderPanelProps = {
   selectedCourse: Course;
   user: User;
+  enrollmentKey: string;
   regenerateEnrollmentKey: (courseId: number) => Promise<void>;
   loadRoster: (courseId: number) => Promise<void>;
   setShowCourseInfo: (open: boolean) => void;
@@ -125,6 +126,7 @@ type CourseHeaderPanelProps = {
 export function CourseHeaderPanel({
   selectedCourse,
   user,
+  enrollmentKey,
   regenerateEnrollmentKey,
   loadRoster,
   setShowCourseInfo,
@@ -182,7 +184,7 @@ export function CourseHeaderPanel({
             <div className="flex items-center gap-2 text-sm font-label">
               <span className="text-on-surface-variant">Enrollment Key:</span>
               <code className="bg-surface-container px-2 py-1 rounded font-mono text-on-surface border border-outline-variant/30">
-                {selectedCourse.enrollmentKey}
+                {enrollmentKey || "Loading..."}
               </code>
               <button
                 onClick={() => regenerateEnrollmentKey(selectedCourse.id)}

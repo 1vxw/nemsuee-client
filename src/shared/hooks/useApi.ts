@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 function normalizeApiBase(raw: string) {
   const value = (raw || "").trim().replace(/\/+$/, "");
@@ -23,7 +23,7 @@ export function useApi() {
     [],
   );
 
-  async function api(path: string, options: RequestInit = {}) {
+  const api = useCallback(async (path: string, options: RequestInit = {}) => {
     if (!import.meta.env.DEV && !configuredApiBase && !API_BASE.startsWith("/")) {
       throw new Error("VITE_API_URL is not configured for production.");
     }
@@ -53,7 +53,7 @@ export function useApi() {
       }
       throw new Error("Unexpected request error.");
     }
-  }
+  }, []);
 
   return { api, headers };
 }

@@ -76,6 +76,9 @@ export function CoursesHub(props: {
   const [activeCourseTab, setActiveCourseTab] = useState<
     "content" | "quizzes" | "assignments" | "activities"
   >("content");
+  const [enrollmentKeys, setEnrollmentKeys] = useState<Record<number, string>>(
+    {},
+  );
 
   useEffect(() => {
     if (forcedCourseTab) setActiveCourseTab(forcedCourseTab);
@@ -369,10 +372,29 @@ export function CoursesHub(props: {
         method: "PATCH",
         headers,
       });
+      setEnrollmentKeys((prev) => ({
+        ...prev,
+        [courseId]: String(data?.enrollmentKey || ""),
+      }));
       await refreshCore();
       setMessage(`New enrollment key generated: ${data.enrollmentKey}`);
     } catch (e) {
       setMessage((e as Error).message);
+    }
+  }
+
+  async function loadEnrollmentKey(courseId: number) {
+    if (user.role !== "INSTRUCTOR" && user.role !== "ADMIN") return;
+    try {
+      const data = await api(`/courses/${courseId}/enrollment-key`, {
+        headers,
+      });
+      setEnrollmentKeys((prev) => ({
+        ...prev,
+        [courseId]: String(data?.enrollmentKey || ""),
+      }));
+    } catch {
+      // Keep UI usable if this endpoint is unavailable.
     }
   }
 
@@ -424,6 +446,9 @@ export function CoursesHub(props: {
     if (!selectedCourse) return;
     loadRoster(selectedCourse.id);
     if (user.role === "INSTRUCTOR") loadPending(selectedCourse.id);
+    if (user.role === "INSTRUCTOR" || user.role === "ADMIN") {
+      loadEnrollmentKey(selectedCourse.id);
+    }
   }, [selectedCourse?.id, user.role]);
 
   return (
@@ -437,6 +462,7 @@ export function CoursesHub(props: {
           activeCourseTab={activeCourseTab}
           setActiveCourseTab={setActiveCourseTab}
           regenerateEnrollmentKey={regenerateEnrollmentKey}
+          enrollmentKey={enrollmentKeys[selectedCourse?.id || 0] || ""}
           showAddSection={showAddSection}
           setShowAddSection={setShowAddSection}
           newSection={newSection}
