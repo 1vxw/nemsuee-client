@@ -363,10 +363,12 @@ export default function App() {
           <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => setSidebarOpen((v) => !v)}
-              className="rounded-lg p-2 text-on-surface transition-colors hover:bg-surface-container"
+              className="flex h-11 w-11 items-center justify-center rounded-lg text-on-surface transition-colors hover:bg-surface-container"
               aria-label="Toggle sidebar"
             >
-              <span className="material-symbols-outlined text-[1.25rem] sm:text-[1.375rem]">menu</span>
+              <span className="material-symbols-outlined text-[1.5rem] sm:text-[1.625rem]">
+                menu
+              </span>
             </button>
             <div className="flex items-center gap-2">
               <img
@@ -387,28 +389,30 @@ export default function App() {
             {preferences.notificationsEnabled && (
               <>
                 <button
-                  className="relative rounded-lg p-2 text-on-surface transition-colors hover:bg-surface-container"
+                  className="relative flex h-11 w-11 items-center justify-center rounded-lg text-on-surface transition-colors hover:bg-surface-container"
                   aria-label="Notifications"
                   onClick={() => {
                     setNotificationsOpen((v) => !v);
                     loadNotifications();
                   }}
                 >
-                  <span className="material-symbols-outlined text-[1.25rem] sm:text-[1.375rem]">notifications</span>
+                  <span className="material-symbols-outlined text-[1.5rem] sm:text-[1.625rem]">
+                    notifications
+                  </span>
                   {!!notifications.filter((n) => !Boolean(n.isRead)).length && (
-                    <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-error" />
+                    <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-error" />
                   )}
                 </button>
                 {notificationsOpen && (
-                  <div className="absolute right-0 top-12 z-50 w-80 rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-2 shadow-lg sm:right-12">
+                  <div className="fixed left-3 right-3 top-16 z-50 w-auto rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-2 shadow-lg sm:absolute sm:left-auto sm:right-12 sm:top-12 sm:w-80">
                     <div className="mb-1 flex items-center justify-between px-2">
-                      <p className="text-xs font-semibold text-on-surface-variant font-label">
+                      <p className="text-sm font-semibold text-on-surface-variant font-label sm:text-xs">
                         Notifications
                       </p>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => markAllAsRead()}
-                          className="text-[11px] font-medium text-primary hover:text-primary/80 disabled:cursor-not-allowed disabled:text-on-surface-variant font-label"
+                          className="text-xs font-medium text-primary hover:text-primary/80 disabled:cursor-not-allowed disabled:text-on-surface-variant font-label sm:text-[11px]"
                           disabled={
                             !notifications.some((n) => !Boolean(n.isRead))
                           }
@@ -417,7 +421,7 @@ export default function App() {
                         </button>
                         <button
                           onClick={() => clearNotifications()}
-                          className="text-[11px] font-medium text-on-surface-variant hover:text-on-surface font-label disabled:cursor-not-allowed disabled:text-outline"
+                          className="text-xs font-medium text-on-surface-variant hover:text-on-surface font-label disabled:cursor-not-allowed disabled:text-outline sm:text-[11px]"
                           disabled={!notifications.length}
                         >
                           Clear
@@ -450,10 +454,10 @@ export default function App() {
                                 : "bg-primary-fixed/40"
                             }`}
                           >
-                            <p className="line-clamp-2 text-xs text-on-surface font-body">
+                            <p className="line-clamp-2 text-sm text-on-surface font-body sm:text-xs">
                               {notification.message}
                             </p>
-                            <p className="mt-1 text-[11px] text-on-surface-variant font-label">
+                            <p className="mt-1 text-xs text-on-surface-variant font-label sm:text-[11px]">
                               {notification.createdAt
                                 ? new Date(
                                     notification.createdAt,
@@ -463,7 +467,7 @@ export default function App() {
                           </button>
                         ))
                       ) : (
-                        <p className="px-2 py-3 text-xs text-on-surface-variant font-label">
+                        <p className="px-2 py-3 text-sm text-on-surface-variant font-label sm:text-xs">
                           No notifications yet.
                         </p>
                       )}
@@ -473,14 +477,16 @@ export default function App() {
               </>
             )}
             <button
-              className="rounded-lg p-2 text-on-surface transition-colors hover:bg-surface-container"
+              className="flex h-11 w-11 items-center justify-center rounded-lg text-on-surface transition-colors hover:bg-surface-container"
               aria-label="Open profile menu"
               onClick={() => setProfileMenuOpen((v) => !v)}
             >
-              <span className="material-symbols-outlined text-[1.25rem] sm:text-[1.375rem]">account_circle</span>
+              <span className="material-symbols-outlined text-[1.5rem] sm:text-[1.625rem]">
+                account_circle
+              </span>
             </button>
             {profileMenuOpen && (
-              <div className="absolute right-0 top-12 z-50 w-44 rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-1 shadow-lg">
+              <div className="absolute right-0 top-12 z-50 w-48 rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-1 shadow-lg">
                 <button
                   onClick={() => {
                     setView("profile");
