@@ -12,6 +12,7 @@
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.8",
     "@tailwindcss/vite": "^4.2.1",
+    "@vercel/analytics": "^2.0.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.13.1",
