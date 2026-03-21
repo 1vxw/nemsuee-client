@@ -45,7 +45,7 @@ export function menu(
 
   const items: { key: ViewKey; label: string }[] = [
     { key: "dashboard", label: "Dashboard" },
-    { key: "courses", label: "My Blocks" },
+    { key: "courses", label: "Courses" },
     { key: "storage", label: "Files" },
     { key: "archives", label: "Archives" },
     { key: "settings", label: "Settings" },

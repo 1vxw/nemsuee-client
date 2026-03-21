@@ -41,6 +41,7 @@ export function Sidebar({
   hideLmsSisFeatures?: boolean;
 }) {
   const [coursesOpen, setCoursesOpen] = useState(true);
+  const [myBlocksOpen, setMyBlocksOpen] = useState(true);
   const items = menu(user.role, { hideLmsSisFeatures });
   const hideIdentity = hideLmsSisFeatures && (user.role === "INSTRUCTOR" || user.role === "STUDENT");
 
@@ -53,7 +54,7 @@ export function Sidebar({
         </div>
         <div>
           <h3 className="font-headline font-bold text-primary text-base leading-tight">The Athenaeum</h3>
-          <p className="text-xs text-on-surface-variant uppercase tracking-widest font-label">Academic Portal</p>
+          <p className="text-xs text-on-surface-variant uppercase tracking-widest font-label">E-Learning Environment</p>
         </div>
       </div>
 
@@ -167,21 +168,36 @@ export function Sidebar({
               {coursesOpen && (
                 <div className="mt-1 space-y-1 pl-4">
                   {user.role === "INSTRUCTOR" && teachingBlocks.length ? (
-                    teachingBlocks.map((block) => (
+                    <>
                       <button
-                        key={`${block.courseId}-${block.id}`}
-                        onClick={() => onOpenTeachingBlock?.(block.courseId, block.id)}
-                        className={`w-full rounded-md px-3 py-2 text-left text-xs transition-colors ${
-                          selectedCourseId === block.courseId
-                            ? "bg-surface-container text-primary"
-                            : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
-                        }`}
-                        title={`${block.courseTitle} - ${block.name}`}
+                        onClick={() => setMyBlocksOpen((v) => !v)}
+                        className="w-full flex items-center justify-between rounded-md px-3 py-2 text-left text-[11px] font-label uppercase tracking-wider text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
+                        title="Toggle My Blocks"
                       >
-                        <span className="block truncate font-body font-medium">{block.courseTitle}</span>
-                        <span className="block truncate text-[10px] text-on-surface-variant font-label">{block.name}</span>
+                        <span>My blocks ({teachingBlocks.length})</span>
+                        <span
+                          className="material-symbols-outlined text-sm transition-transform"
+                          style={{ transform: myBlocksOpen ? "rotate(90deg)" : "rotate(0deg)" }}
+                        >
+                          chevron_right
+                        </span>
                       </button>
-                    ))
+                      {myBlocksOpen && teachingBlocks.map((block) => (
+                        <button
+                          key={`${block.courseId}-${block.id}`}
+                          onClick={() => onOpenTeachingBlock?.(block.courseId, block.id)}
+                          className={`w-full rounded-md px-3 py-2 text-left text-xs transition-colors ${
+                            selectedCourseId === block.courseId
+                              ? "bg-surface-container text-primary"
+                              : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
+                          }`}
+                          title={`${block.courseTitle} - ${block.name}`}
+                        >
+                          <span className="block truncate font-body font-medium">{block.courseTitle}</span>
+                          <span className="block truncate text-[10px] text-on-surface-variant font-label">{block.name}</span>
+                        </button>
+                      ))}
+                    </>
                   ) : courses.length ? (
                     courses.map((course) => (
                       <button

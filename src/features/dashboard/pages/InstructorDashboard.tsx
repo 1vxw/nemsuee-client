@@ -203,7 +203,7 @@ export function InstructorDashboard(props: DashboardProps) {
 
   const firstName = user.fullName.split(" ")[0] || "Professor";
 
-  const activeCourses = courses.slice(0, 4);
+  const activeCourses = courses;
 
   return (
     <section className="space-y-4 sm:space-y-6 md:space-y-7">
