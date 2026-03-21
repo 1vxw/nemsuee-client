@@ -112,9 +112,9 @@ export function AuthScreen({
   }
 
   return (
-    <main className="min-h-screen flex flex-col bg-surface text-on-surface overflow-x-hidden">
+    <main className="min-h-screen flex flex-col bg-transparent text-on-surface overflow-x-hidden">
       <nav
-        className={`fixed top-0 w-full z-50 h-14 flex justify-between items-center px-4 md:px-8 transition-all duration-300 ease-in-out backdrop-blur-lg relative ${isDark ? "border-b border-white/10 bg-slate-950/40" : "border-b border-black/10 bg-white/40"}`}
+        className={`sticky top-0 w-full z-50 h-14 flex justify-between items-center px-4 md:px-8 transition-all duration-300 ease-in-out backdrop-blur-lg relative ${isDark ? "border-b border-white/10 bg-slate-950/40" : "border-b border-black/10 bg-white/40"}`}
       >
         <div className="flex items-center gap-2">
           <img
@@ -218,7 +218,7 @@ export function AuthScreen({
           </>
         )}
       </nav>
-      <main className="flex-1 flex flex-col md:flex-row pt-14">
+      <main className="flex-1 flex flex-col md:flex-row bg-transparent">
         <section
           className="relative w-full md:w-1/2 lg:w-3/5 overflow-hidden flex items-start justify-center p-8 pt-16 md:p-20 md:pt-24"
           style={{
