@@ -22,7 +22,8 @@ import { ScoresHub } from "./features/scores/pages/ScoresHub";
 import { Storage } from "./features/storage/components/Storage";
 import { GradeComputationHub } from "./features/grade-computation/pages/GradeComputationHub";
 import { RoleDashboard } from "./features/dashboard/pages/RoleDashboard";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 export default function App() {
   const defaultPreferences: UserPreferences = {
@@ -744,11 +745,11 @@ export default function App() {
               )}
             </section>
           )}
-          
         </main>
       </div>
-      
-    <Analytics />
+
+      <Analytics />
+      <SpeedInsights />
     </div>
   );
 }
