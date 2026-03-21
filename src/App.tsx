@@ -389,7 +389,7 @@ export default function App() {
             {preferences.notificationsEnabled && (
               <>
                 <button
-                  className="relative flex h-11 w-11 items-center justify-center rounded-lg text-on-surface transition-colors hover:bg-surface-container"
+                  className="relative flex h-10 w-10 items-center justify-center rounded-lg text-on-surface transition-colors hover:bg-surface-container"
                   aria-label="Notifications"
                   onClick={() => {
                     setNotificationsOpen((v) => !v);
@@ -399,7 +399,7 @@ export default function App() {
                   <span className="material-symbols-outlined text-[1.5rem] sm:text-[1.625rem]">
                     notifications
                   </span>
-                  {!!notifications.filter((n) => !Boolean(n.isRead)).length && (
+                 {!!notifications.filter((n) => !Boolean(n.isRead)).length && (
                     <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-error" />
                   )}
                 </button>

@@ -10,7 +10,7 @@ const menuIcons: Record<string, string> = {
   admin_blocks: "admin_panel_settings",
   archives: "archive",
   admin_settings: "admin_panel_settings",
-  storage: "cloud_sync",
+  storage: "cloud",
   notifications: "notifications",
   settings: "settings",
 };
@@ -223,4 +223,3 @@ export function Sidebar({
     </aside>
   );
 }
-

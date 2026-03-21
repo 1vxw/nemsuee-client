@@ -437,10 +437,11 @@ export function InstructorDashboard(props: DashboardProps) {
 
         {/* Submissions */}
         <section className="lg:col-span-4">
-          <h2 className="font-headline text-lg sm:text-xl font-bold text-primary mb-4">
-            Submissions
-          </h2>
-          <div className="space-y-2.5 sm:space-y-3">
+          <div className="bg-surface-container-lowest p-4 sm:p-5 min-h-[220px] sm:min-h-[260px] lg:min-h-[300px] flex flex-col rounded-lg border border-outline-variant/20">
+            <h2 className="font-headline text-lg sm:text-xl font-bold text-primary mb-4">
+              Submissions
+            </h2>
+            <div className="flex-1 space-y-2.5 sm:space-y-3 overflow-auto pr-1">
             {sortedSubmissions.length ? (
               sortedSubmissions.map((attempt, i) => {
                 const name = attempt.student?.fullName || "Student";
@@ -485,10 +486,11 @@ export function InstructorDashboard(props: DashboardProps) {
                 No submissions to review.
               </p>
             )}
+            </div>
             {!hideLmsSisFeatures && attempts.length > 0 && (
               <button
                 onClick={() => onNavigate("scores")}
-                className="w-full py-2.5 sm:py-3 border-2 border-outline-variant/20 text-[11px] font-bold uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all rounded-lg"
+                className="mt-4 w-full py-2.5 sm:py-3 border-2 border-outline-variant/20 text-[11px] font-bold uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all rounded-lg"
               >
                 Review All {attempts.length} Submission
                 {attempts.length === 1 ? "" : "s"}
