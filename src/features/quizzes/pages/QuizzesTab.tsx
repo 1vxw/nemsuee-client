@@ -481,11 +481,12 @@ export function QuizzesTab({
                               },
                             ]);
                           }}
-                          className="rounded-lg bg-primary p-2 text-on-primary hover:opacity-90 transition-opacity"
+                          className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-label font-bold text-on-primary hover:opacity-90 transition-opacity sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
                           title="Create quiz"
                           aria-label="Create quiz"
                         >
                           <span className="material-symbols-outlined text-[1.125rem]">add</span>
+                          <span>Create Quiz</span>
                         </button>
                         <button
                           onClick={() =>
@@ -1378,5 +1379,4 @@ export function QuizzesTab({
     </div>
   );
 }
-
 

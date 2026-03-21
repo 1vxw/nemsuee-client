@@ -501,13 +501,13 @@ export function AuthScreen({
                     </>
                   ) : mode === "login" ? (
                     <>
-                      <>SIGN IN TO PORTAL</>
+                      SIGN IN TO PORTAL
                       <span className="material-symbols-outlined text-sm">
                         arrow_forward
                       </span>
                     </>
                   ) : (
-                    "CREATE ACCOUNT"
+                    <span className="uppercase">Create Account</span>
                   )}
                 </button>
               </div>
