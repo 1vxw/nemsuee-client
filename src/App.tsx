@@ -106,7 +106,6 @@ export default function App() {
   });
   const [currentTermLabel, setCurrentTermLabel] = useState("Term: --");
   const [hideLmsSisFeatures, setHideLmsSisFeatures] = useState(false);
-  const [sessionResolved, setSessionResolved] = useState(false);
   const [forcedCourseTab, setForcedCourseTab] = useState<
     "content" | "quizzes" | "assignments" | "activities" | null
   >(null);
@@ -243,34 +242,23 @@ export default function App() {
   }
 
   useEffect(() => {
-    let mounted = true;
     (async () => {
       try {
         const me = await api("/auth/me", { headers });
-        if (!mounted) return;
         setUser(me);
         localStorage.setItem("user", JSON.stringify(me));
       } catch (e) {
-        if (!mounted) return;
         const status = (e as { status?: number })?.status;
         if (status === 401) {
           localStorage.removeItem("user");
           setUser(null);
-        } else {
-          setMessage((e as Error).message);
+          return;
         }
-      } finally {
-        if (mounted) setSessionResolved(true);
+        setMessage((e as Error).message);
+        if (!user) return;
       }
+      await refreshCore().catch((e) => setMessage((e as Error).message));
     })();
-    return () => {
-      mounted = false;
-    };
-  }, [api, headers]);
-
-  useEffect(() => {
-    if (!user || user.role === "GUEST") return;
-    refreshCore().catch((e) => setMessage((e as Error).message));
   }, [user?.role]);
 
   useEffect(() => {
@@ -331,18 +319,6 @@ export default function App() {
   if (legalSlug) {
     return (
       <LegalDocumentPage slug={legalSlug} isAuthenticated={Boolean(user)} />
-    );
-  }
-
-  if (!sessionResolved) {
-    return (
-      <div className="min-h-screen bg-surface text-on-surface">
-        <div className="mx-auto flex min-h-screen w-full max-w-[92rem] items-center justify-center px-4">
-          <p className="rounded-lg border border-outline-variant/30 bg-surface-container-lowest px-4 py-2 text-sm font-label text-on-surface-variant">
-            Preparing your workspace...
-          </p>
-        </div>
-      </div>
     );
   }
 
