@@ -83,55 +83,88 @@ export function useActionIconizer() {
       return svg;
     };
 
-    const iconizeActionButtons = () => {
-      const buttons = document.querySelectorAll("button");
-      buttons.forEach((button) => {
-        if (button.closest('[data-no-action-iconize="true"]')) return;
-        if (button.dataset.actionIconized === "true") return;
-        if (button.querySelector("svg, img")) return;
-        const onlyTextNodes = Array.from(button.childNodes).every(
-          (node) => node.nodeType === Node.TEXT_NODE,
-        );
-        if (!onlyTextNodes) return;
-        if (button.dataset.keepActionText === "true") return;
-        if (
-          button.type === "submit" &&
-          button.closest('form[data-auth-form="true"]')
-        ) {
-          return;
-        }
-        const label = button.textContent?.replace(/\s+/g, " ").trim() || "";
-        if (!label) return;
-        const iconKind = iconForAction(label);
-        if (!iconKind) return;
-        button.dataset.actionIconized = "true";
-        button.setAttribute(
-          "aria-label",
-          button.getAttribute("aria-label") || label,
-        );
-        button.setAttribute("title", button.getAttribute("title") || label);
-        button.classList.remove(
-          "w-full",
-          "text-left",
-          "px-3",
-          "py-2",
-          "text-sm",
-          "text-xs",
-          "font-medium",
-        );
-        button.classList.add("p-2");
-        button.textContent = "";
-        button.appendChild(makeIcon(iconKind));
+    const iconizeButton = (button: HTMLButtonElement) => {
+      if (button.closest('[data-no-action-iconize="true"]')) return;
+      if (button.dataset.actionIconized === "true") return;
+      if (button.querySelector("svg, img")) return;
+      if (button.dataset.keepActionText === "true") return;
+      if (
+        button.type === "submit" &&
+        button.closest('form[data-auth-form="true"]')
+      ) {
+        return;
+      }
+
+      const onlyTextNodes = Array.from(button.childNodes).every(
+        (node) => node.nodeType === Node.TEXT_NODE,
+      );
+      if (!onlyTextNodes) return;
+
+      const label = button.textContent?.replace(/\s+/g, " ").trim() || "";
+      if (!label) return;
+
+      const iconKind = iconForAction(label);
+      if (!iconKind) return;
+
+      button.dataset.actionIconized = "true";
+      button.setAttribute("aria-label", button.getAttribute("aria-label") || label);
+      button.setAttribute("title", button.getAttribute("title") || label);
+      button.classList.remove(
+        "w-full",
+        "text-left",
+        "px-3",
+        "py-2",
+        "text-sm",
+        "text-xs",
+        "font-medium",
+      );
+      button.classList.add("p-2");
+      button.textContent = "";
+      button.appendChild(makeIcon(iconKind));
+    };
+
+    const scanWithin = (root: ParentNode) => {
+      root.querySelectorAll("button").forEach((button) => {
+        iconizeButton(button as HTMLButtonElement);
       });
     };
 
-    iconizeActionButtons();
-    const observer = new MutationObserver(() => iconizeActionButtons());
+    const pendingRoots = new Set<ParentNode>();
+    let rafId = 0;
+
+    const scheduleScan = (root: ParentNode) => {
+      pendingRoots.add(root);
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = 0;
+        pendingRoots.forEach((pendingRoot) => scanWithin(pendingRoot));
+        pendingRoots.clear();
+      });
+    };
+
+    scanWithin(document);
+    const observer = new MutationObserver((records) => {
+      records.forEach((record) => {
+        record.addedNodes.forEach((node) => {
+          if (!(node instanceof Element)) return;
+          if (node.tagName === "BUTTON") {
+            iconizeButton(node as HTMLButtonElement);
+          }
+          scheduleScan(node);
+        });
+      });
+    });
+
     observer.observe(document.body, {
       childList: true,
       subtree: true,
-      characterData: true,
     });
-    return () => observer.disconnect();
+
+    return () => {
+      observer.disconnect();
+      if (rafId) {
+        window.cancelAnimationFrame(rafId);
+      }
+    };
   }, []);
 }

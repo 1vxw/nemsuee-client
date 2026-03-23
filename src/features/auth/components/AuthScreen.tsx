@@ -298,6 +298,8 @@ export function AuthScreen({
           <img
             src={logoImage}
             alt="NEMSUEE logo"
+            width={36}
+            height={36}
             className="h-9 w-9 rounded-sm object-contain"
           />
           <span 
@@ -397,16 +399,17 @@ export function AuthScreen({
         )}
       </nav>
       <main className="flex-1 flex flex-col md:flex-row bg-transparent">
-        <section
-          className="relative w-full md:w-1/2 lg:w-3/5 overflow-hidden flex items-start justify-center p-8 pt-16 md:p-20 md:pt-24"
-          style={{
-            backgroundImage: `linear-gradient(135deg, rgba(0, 29, 68, 0.99) 0%, rgba(0, 50, 107, 0.96) 50%, rgba(119, 90, 25, 0.8) 100%), url(${coverImage})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundAttachment: "fixed",
-          }}
-        >
-          <div className="absolute inset-0 z-0"></div>
+        <section className="relative w-full md:w-1/2 lg:w-3/5 overflow-hidden flex items-start justify-center p-8 pt-16 md:p-20 md:pt-24">
+          <img
+            src={coverImage}
+            alt=""
+            aria-hidden="true"
+            fetchPriority="high"
+            loading="eager"
+            decoding="async"
+            className="absolute inset-0 z-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 z-0 bg-[linear-gradient(135deg,rgba(0,29,68,0.99)_0%,rgba(0,50,107,0.96)_50%,rgba(119,90,25,0.8)_100%)]" />
           <div className="relative z-10 max-w-2xl">
             <h1 className="font-headline font-black text-white text-5xl lg:text-7xl leading-none mb-2">
               Enter the <br />
@@ -480,46 +483,48 @@ export function AuthScreen({
                   : "Please provide your institutional credentials to enter your learning space."}
               </p>
             </div>
-            {message && (
-              <div
-                className={`mb-6 flex items-start gap-3 rounded-lg px-4 py-3 ${
-                  looksLikeError
-                    ? "border border-error/30 bg-error/5"
-                    : "border border-secondary/30 bg-secondary/10"
-                }`}
-              >
-                <span
-                  className={`material-symbols-outlined text-sm mt-0.5 ${
-                    looksLikeError ? "text-error" : "text-secondary"
+            <div className="mb-6 min-h-16">
+              {message && (
+                <div
+                  className={`flex items-start gap-3 rounded-lg px-4 py-3 ${
+                    looksLikeError
+                      ? "border border-error/30 bg-error/5"
+                      : "border border-secondary/30 bg-secondary/10"
                   }`}
                 >
-                  {looksLikeError ? "error" : "info"}
-                </span>
-                <div className="flex-1">
-                  <p
-                    className={`text-sm font-medium ${
-                      looksLikeError ? "text-error" : "text-on-surface"
+                  <span
+                    className={`material-symbols-outlined text-sm mt-0.5 ${
+                      looksLikeError ? "text-error" : "text-secondary"
                     }`}
                   >
-                    {message}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setMessage("")}
-                  className={`transition-colors ${
-                    looksLikeError
-                      ? "text-error hover:text-error/80"
-                      : "text-on-surface-variant hover:text-on-surface"
-                  }`}
-                  aria-label="Dismiss error"
-                >
-                  <span className="material-symbols-outlined text-sm">
-                    close
+                    {looksLikeError ? "error" : "info"}
                   </span>
-                </button>
-              </div>
-            )}
+                  <div className="flex-1">
+                    <p
+                      className={`text-sm font-medium ${
+                        looksLikeError ? "text-error" : "text-on-surface"
+                      }`}
+                    >
+                      {message}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setMessage("")}
+                    className={`transition-colors ${
+                      looksLikeError
+                        ? "text-error hover:text-error/80"
+                        : "text-on-surface-variant hover:text-on-surface"
+                    }`}
+                    aria-label="Dismiss error"
+                  >
+                    <span className="material-symbols-outlined text-sm">
+                      close
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
             {(mode === "login" || mode === "register") && (
               <div className="grid grid-cols-2 gap-2 mb-6 bg-surface-container-low rounded-lg p-1">
                 <button
