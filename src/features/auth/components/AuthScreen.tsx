@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { User } from "../../../shared/types/lms";
-import coverImage from "../../../assets/cover.png";
-import logoImage from "../../../assets/logo.png";
+import coverImage from "../../../assets/cover-optimized.jpg";
+import logoImage from "../../../assets/logo-optimized.jpg";
 import { AccountActivationPanel } from "./AccountActivationPanel";
 import { EnrollmentInfoModal } from "./EnrollmentInfoModal";
 import type { ActivationStatus } from "./types";

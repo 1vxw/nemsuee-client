@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useApi } from "./shared/hooks/useApi";
 import { useActionIconizer } from "./shared/hooks/useActionIconizer";
@@ -10,20 +10,55 @@ import type {
   User,
   ViewKey,
 } from "./shared/types/lms";
-import logo from "./assets/logo.png";
-import { AdminBlocksHub } from "./features/admin/components/AdminBlocksHub";
+import logo from "./assets/logo-optimized.jpg";
 import { AuthScreen } from "./features/auth/components/AuthScreen";
-import { CourseCatalogPage } from "./features/courses/pages/CourseCatalogPage";
-import { CoursesHub } from "./features/courses/pages/CoursesHub";
-import { GuestCatalogPage } from "./features/courses/pages/GuestCatalogPage";
 import { Profile, SettingsPanel, Sidebar } from "./app/layout/Ui";
 import type { UserPreferences } from "./app/layout/Ui";
-import { ScoresHub } from "./features/scores/pages/ScoresHub";
-import { Storage } from "./features/storage/components/Storage";
-import { GradeComputationHub } from "./features/grade-computation/pages/GradeComputationHub";
-import { RoleDashboard } from "./features/dashboard/pages/RoleDashboard";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+
+const AdminBlocksHub = lazy(() =>
+  import("./features/admin/components/AdminBlocksHub").then((module) => ({
+    default: module.AdminBlocksHub,
+  })),
+);
+const CourseCatalogPage = lazy(() =>
+  import("./features/courses/pages/CourseCatalogPage").then((module) => ({
+    default: module.CourseCatalogPage,
+  })),
+);
+const CoursesHub = lazy(() =>
+  import("./features/courses/pages/CoursesHub").then((module) => ({
+    default: module.CoursesHub,
+  })),
+);
+const GuestCatalogPage = lazy(() =>
+  import("./features/courses/pages/GuestCatalogPage").then((module) => ({
+    default: module.GuestCatalogPage,
+  })),
+);
+const ScoresHub = lazy(() =>
+  import("./features/scores/pages/ScoresHub").then((module) => ({
+    default: module.ScoresHub,
+  })),
+);
+const Storage = lazy(() =>
+  import("./features/storage/components/Storage").then((module) => ({
+    default: module.Storage,
+  })),
+);
+const GradeComputationHub = lazy(() =>
+  import("./features/grade-computation/pages/GradeComputationHub").then(
+    (module) => ({
+      default: module.GradeComputationHub,
+    }),
+  ),
+);
+const RoleDashboard = lazy(() =>
+  import("./features/dashboard/pages/RoleDashboard").then((module) => ({
+    default: module.RoleDashboard,
+  })),
+);
 
 export default function App() {
   const defaultPreferences: UserPreferences = {
@@ -327,18 +362,22 @@ export default function App() {
           </div>
         </header>
         <main className="mx-auto w-full max-w-[92rem] px-4 pt-20 pb-10">
-          <GuestCatalogPage
-            api={api}
-            setMessage={setMessage}
-            onRequestLogin={async () => {
-              try {
-                await api("/auth/logout", { method: "POST", headers });
-              } catch {}
-              localStorage.removeItem("user");
-              setUser(null);
-              navigate("/");
-            }}
-          />
+          <Suspense
+            fallback={<p className="rounded border border-slate-200 p-3 text-sm">Loading...</p>}
+          >
+            <GuestCatalogPage
+              api={api}
+              setMessage={setMessage}
+              onRequestLogin={async () => {
+                try {
+                  await api("/auth/logout", { method: "POST", headers });
+                } catch {}
+                localStorage.removeItem("user");
+                setUser(null);
+                navigate("/");
+              }}
+            />
+          </Suspense>
         </main>
       </div>
     );
@@ -595,50 +634,54 @@ export default function App() {
             </p>
           )}
 
-          {view === "dashboard" && (
-            <RoleDashboard
-              user={user}
-              courses={courses}
-              archivedCourses={archivedCourses}
-              teachingBlocks={teachingBlocks}
-              attempts={attempts}
-              hideLmsSisFeatures={hideLmsSisFeatures}
-              lastSync={lastSync}
-              onNavigate={navigateToView}
-              onRefresh={() =>
-                refreshCore().catch((e) => setMessage((e as Error).message))
-              }
-              onOpenCourse={openCourse}
-              api={api}
-              headers={headers}
-            />
-          )}
-          {view === "course_catalog" && (
-            <CourseCatalogPage
-              user={user}
-              api={api}
-              headers={headers}
-              courses={courses}
-              attempts={attempts}
-              onOpenCourse={openCourse}
-              refreshCore={refreshCore}
-              setMessage={setMessage}
-            />
-          )}
-          {view === "courses" && selectedCourse && (
-            <CoursesHub
-              user={user}
-              api={api}
-              headers={headers}
-              courses={courses}
-              attempts={attempts}
-              selectedCourse={selectedCourse}
-              refreshCore={refreshCore}
-              setMessage={setMessage}
-              studentViewMode={user.role === "STUDENT" ? "my" : "all"}
-              forcedCourseTab={forcedCourseTab}
-            />
-          )}
+          <Suspense
+            fallback={<p className="rounded border border-slate-200 p-3 text-sm">Loading view...</p>}
+          >
+            {view === "dashboard" && (
+              <RoleDashboard
+                user={user}
+                courses={courses}
+                archivedCourses={archivedCourses}
+                teachingBlocks={teachingBlocks}
+                attempts={attempts}
+                hideLmsSisFeatures={hideLmsSisFeatures}
+                lastSync={lastSync}
+                onNavigate={navigateToView}
+                onRefresh={() =>
+                  refreshCore().catch((e) => setMessage((e as Error).message))
+                }
+                onOpenCourse={openCourse}
+                api={api}
+                headers={headers}
+              />
+            )}
+            {view === "course_catalog" && (
+              <CourseCatalogPage
+                user={user}
+                api={api}
+                headers={headers}
+                courses={courses}
+                attempts={attempts}
+                onOpenCourse={openCourse}
+                refreshCore={refreshCore}
+                setMessage={setMessage}
+              />
+            )}
+            {view === "courses" && selectedCourse && (
+              <CoursesHub
+                user={user}
+                api={api}
+                headers={headers}
+                courses={courses}
+                attempts={attempts}
+                selectedCourse={selectedCourse}
+                refreshCore={refreshCore}
+                setMessage={setMessage}
+                studentViewMode={user.role === "STUDENT" ? "my" : "all"}
+                forcedCourseTab={forcedCourseTab}
+              />
+            )}
+          </Suspense>
           {view === "courses" && !selectedCourse && (
             <section className="rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-12 text-center">
               <span className="material-symbols-outlined text-5xl text-outline-variant/30 block mb-4">
@@ -659,37 +702,41 @@ export default function App() {
               </button>
             </section>
           )}
-          {view === "scores" && !gradesHiddenForUi && (
-            <ScoresHub
-              user={user}
-              courses={courses}
-              attempts={attempts}
-              api={api}
-              headers={headers}
-              setMessage={setMessage}
-              selectedCourseId={selectedCourseId}
-              onSelectCourse={setSelectedCourseId}
-            />
-          )}
-          {view === "grade_computation" && !gradesHiddenForUi && (
-            <GradeComputationHub
-              user={user}
-              courses={courses}
-              api={api}
-              headers={headers}
-              setMessage={setMessage}
-              selectedCourseId={selectedCourseId}
-              onSelectCourse={setSelectedCourseId}
-            />
-          )}
-          {view === "storage" && (
-            <Storage
-              api={api}
-              headers={headers}
-              setMessage={setMessage}
-              userRole={user.role}
-            />
-          )}
+          <Suspense
+            fallback={<p className="rounded border border-slate-200 p-3 text-sm">Loading view...</p>}
+          >
+            {view === "scores" && !gradesHiddenForUi && (
+              <ScoresHub
+                user={user}
+                courses={courses}
+                attempts={attempts}
+                api={api}
+                headers={headers}
+                setMessage={setMessage}
+                selectedCourseId={selectedCourseId}
+                onSelectCourse={setSelectedCourseId}
+              />
+            )}
+            {view === "grade_computation" && !gradesHiddenForUi && (
+              <GradeComputationHub
+                user={user}
+                courses={courses}
+                api={api}
+                headers={headers}
+                setMessage={setMessage}
+                selectedCourseId={selectedCourseId}
+                onSelectCourse={setSelectedCourseId}
+              />
+            )}
+            {view === "storage" && (
+              <Storage
+                api={api}
+                headers={headers}
+                setMessage={setMessage}
+                userRole={user.role}
+              />
+            )}
+          </Suspense>
           {view === "profile" && <Profile user={user} />}
           {view === "settings" && (
             <SettingsPanel
@@ -698,16 +745,20 @@ export default function App() {
               onChange={setPreferences}
             />
           )}
-          {view === "admin_blocks" &&
-            (user.role === "ADMIN" || user.role === "REGISTRAR") && (
-              <AdminBlocksHub
-                api={api}
-                headers={headers}
-                courses={courses}
-                refreshCore={refreshCore}
-                setMessage={setMessage}
-              />
-            )}
+          <Suspense
+            fallback={<p className="rounded border border-slate-200 p-3 text-sm">Loading view...</p>}
+          >
+            {view === "admin_blocks" &&
+              (user.role === "ADMIN" || user.role === "REGISTRAR") && (
+                <AdminBlocksHub
+                  api={api}
+                  headers={headers}
+                  courses={courses}
+                  refreshCore={refreshCore}
+                  setMessage={setMessage}
+                />
+              )}
+          </Suspense>
           {view === "archives" && user.role === "INSTRUCTOR" && (
             <section className="space-y-3">
               <h3 className="text-lg font-semibold">Archived Courses</h3>
