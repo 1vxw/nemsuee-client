@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { User } from "../../../shared/types/lms";
 import coverImage from "../../../assets/cover-optimized.jpg";
-import logoImage from "../../../assets/logo-optimized.jpg";
+import logoImage from "../../../assets/logo-optimized.png";
 import { AccountActivationPanel } from "./AccountActivationPanel";
 import { EnrollmentInfoModal } from "./EnrollmentInfoModal";
 import type { ActivationStatus } from "./types";
@@ -144,9 +144,7 @@ export function AuthScreen({
       });
       setActivationEmail(targetEmail);
       setActivationStatus(result);
-      if (!result.found) {
-        setMessage("No account was found for that email.");
-      }
+      setMessage(result?.activationSummary || "");
     } catch (err) {
       setActivationStatus(null);
       if ((err as any).status === 404) {

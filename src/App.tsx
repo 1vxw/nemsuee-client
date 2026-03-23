@@ -10,7 +10,7 @@ import type {
   User,
   ViewKey,
 } from "./shared/types/lms";
-import logo from "./assets/logo-optimized.jpg";
+import logo from "./assets/logo-optimized.png";
 import { AuthScreen } from "./features/auth/components/AuthScreen";
 import { Profile, SettingsPanel, Sidebar } from "./app/layout/Ui";
 import type { UserPreferences } from "./app/layout/Ui";

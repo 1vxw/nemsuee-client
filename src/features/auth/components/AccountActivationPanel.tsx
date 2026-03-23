@@ -149,161 +149,63 @@ export function AccountActivationPanel({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="font-headline text-lg font-bold text-primary">
-                  {status.found ? status.fullName || status.email : "Account not found"}
+                  {status.email || email}
                 </p>
                 <p className="text-sm text-on-surface-variant">
                   {status.activationSummary}
                 </p>
               </div>
-              {status.found && (
-                <span
-                  className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider ${verificationTone.chip}`}
-                >
-                  <span className="material-symbols-outlined text-sm">
-                    {verificationTone.icon}
-                  </span>
-                  {verificationTone.label}
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider ${verificationTone.chip}`}
+              >
+                <span className="material-symbols-outlined text-sm">
+                  {verificationTone.icon}
                 </span>
-              )}
+                {verificationTone.label}
+              </span>
             </div>
 
-            {status.found && (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                  <div className="rounded-lg bg-surface p-3">
-                    <p className="font-label text-[11px] uppercase tracking-widest text-on-surface-variant">
-                      Account Type
-                    </p>
-                    <p className="mt-1 font-semibold text-on-surface">
-                      {status.role === "INSTRUCTOR" ? "Instructor" : "Student"}
-                    </p>
-                  </div>
-                  <div className="rounded-lg bg-surface p-3">
-                    <p className="font-label text-[11px] uppercase tracking-widest text-on-surface-variant">
-                      Registered On
-                    </p>
-                    <p className="mt-1 font-semibold text-on-surface">
-                      {status.createdAt
-                        ? formatDateTime(status.createdAt)
-                        : "Unavailable"}
-                    </p>
-                  </div>
-                  <div className="rounded-lg bg-surface p-3">
-                    <p className="font-label text-[11px] uppercase tracking-widest text-on-surface-variant">
-                      Last Verification Email
-                    </p>
-                    <p className="mt-1 font-semibold text-on-surface">
-                      {status.verification?.lastSentAt
-                        ? formatDateTime(status.verification.lastSentAt)
-                        : "No email recorded yet"}
-                    </p>
-                  </div>
-                  <div className="rounded-lg bg-surface p-3">
-                    <p className="font-label text-[11px] uppercase tracking-widest text-on-surface-variant">
-                      Email Verified At
-                    </p>
-                    <p className="mt-1 font-semibold text-on-surface">
-                      {status.emailVerifiedAt
-                        ? formatDateTime(status.emailVerifiedAt)
-                        : "Not yet verified"}
-                    </p>
-                  </div>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <div className="rounded-lg bg-surface p-3">
+                <p className="font-label text-[11px] uppercase tracking-widest text-on-surface-variant">
+                  Last Verification Email
+                </p>
+                <p className="mt-1 font-semibold text-on-surface">
+                  {status.verification?.lastSentAt
+                    ? formatDateTime(status.verification.lastSentAt)
+                    : "No email recorded yet"}
+                </p>
+              </div>
+              <div className="rounded-lg bg-surface p-3">
+                <p className="font-label text-[11px] uppercase tracking-widest text-on-surface-variant">
+                  Email Verified At
+                </p>
+                <p className="mt-1 font-semibold text-on-surface">
+                  {status.emailVerifiedAt
+                    ? formatDateTime(status.emailVerifiedAt)
+                    : "Not yet verified"}
+                </p>
+              </div>
+            </div>
 
-                {status.role === "STUDENT" && (
-                  <div className="rounded-xl border border-tertiary/20 bg-tertiary/5 p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="material-symbols-outlined text-tertiary">
-                        school
-                      </span>
-                      <p className="font-label text-sm font-bold text-on-surface">
-                        Student Activation Details
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <p className="font-label text-[11px] uppercase tracking-widest text-on-surface-variant">
-                          Student ID
-                        </p>
-                        <p className="mt-1 font-semibold text-on-surface">
-                          {status.student?.studentId || "Not available"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="font-label text-[11px] uppercase tracking-widest text-on-surface-variant">
-                          Portal Readiness
-                        </p>
-                        <p className="mt-1 font-semibold text-on-surface">
-                          {status.student?.enrollmentReadiness === "READY"
-                            ? "Ready to sign in"
-                            : "Waiting for email verification"}
-                        </p>
-                      </div>
-                    </div>
+            <div className="rounded-xl border border-outline-variant/20 bg-surface p-4">
+              <p className="font-label text-[11px] uppercase tracking-widest text-on-surface-variant mb-3">
+                Recommended Next Steps
+              </p>
+              <div className="space-y-2">
+                {status.nextSteps.map((step, index) => (
+                  <div
+                    key={`${step}-${index}`}
+                    className="flex items-start gap-2 text-sm text-on-surface"
+                  >
+                    <span className="material-symbols-outlined text-secondary text-base mt-0.5">
+                      task_alt
+                    </span>
+                    <span>{step}</span>
                   </div>
-                )}
-
-                {status.role === "INSTRUCTOR" && (
-                  <div className="rounded-xl border border-secondary/20 bg-secondary/5 p-4 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-secondary">
-                        badge
-                      </span>
-                      <p className="font-label text-sm font-bold text-on-surface">
-                        Instructor Approval Details
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <p className="font-label text-[11px] uppercase tracking-widest text-on-surface-variant">
-                          Approval Status
-                        </p>
-                        <p className="mt-1 font-semibold text-on-surface">
-                          {status.instructor?.approvalStatus || "Pending"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="font-label text-[11px] uppercase tracking-widest text-on-surface-variant">
-                          Reviewed At
-                        </p>
-                        <p className="mt-1 font-semibold text-on-surface">
-                          {status.instructor?.reviewedAt
-                            ? formatDateTime(status.instructor.reviewedAt)
-                            : "Awaiting review"}
-                        </p>
-                      </div>
-                    </div>
-                    {status.instructor?.note && (
-                      <div className="rounded-lg bg-surface px-3 py-3 text-sm text-on-surface">
-                        <p className="font-label text-[11px] uppercase tracking-widest text-on-surface-variant mb-1">
-                          Reviewer Note
-                        </p>
-                        {status.instructor.note}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <div className="rounded-xl border border-outline-variant/20 bg-surface p-4">
-                  <p className="font-label text-[11px] uppercase tracking-widest text-on-surface-variant mb-3">
-                    Recommended Next Steps
-                  </p>
-                  <div className="space-y-2">
-                    {status.nextSteps.map((step, index) => (
-                      <div
-                        key={`${step}-${index}`}
-                        className="flex items-start gap-2 text-sm text-on-surface"
-                      >
-                        <span className="material-symbols-outlined text-secondary text-base mt-0.5">
-                          task_alt
-                        </span>
-                        <span>{step}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}
