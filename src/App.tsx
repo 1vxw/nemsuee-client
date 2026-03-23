@@ -518,7 +518,7 @@ export default function App() {
 
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 lg:hidden">
-          <div className="h-full w-[280px] p-3">
+          <div className="h-full w-[280px] p-3 overflow-y-auto">
             <Sidebar
               user={user}
               view={view}

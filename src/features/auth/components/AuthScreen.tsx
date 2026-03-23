@@ -3,6 +3,17 @@ import { useLocation, useNavigate } from "react-router-dom";
 import type { User } from "../../../shared/types/lms";
 import coverImage from "../../../assets/cover.png";
 import logoImage from "../../../assets/logo.png";
+import { AccountActivationPanel } from "./AccountActivationPanel";
+import { EnrollmentInfoModal } from "./EnrollmentInfoModal";
+import type { ActivationStatus } from "./types";
+
+type AuthMode =
+  | "login"
+  | "register"
+  | "forgot"
+  | "reset"
+  | "verify"
+  | "activation";
 
 export function AuthScreen({
   api,
@@ -21,9 +32,7 @@ export function AuthScreen({
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [mode, setMode] = useState<
-    "login" | "register" | "forgot" | "reset" | "verify"
-  >(() => {
+  const [mode, setMode] = useState<AuthMode>(() => {
     const path = location.pathname;
     if (path === "/forgot-password") return "forgot";
     if (path === "/reset-password") return "reset";
@@ -41,9 +50,15 @@ export function AuthScreen({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [guestSubmitting, setGuestSubmitting] = useState(false);
   const [showTestAccounts, setShowTestAccounts] = useState(false);
+  const [showEnrollmentInfo, setShowEnrollmentInfo] = useState(false);
   const [showCampusNotice, setShowCampusNotice] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [verifyPending, setVerifyPending] = useState(false);
+  const [activationEmail, setActivationEmail] = useState("");
+  const [activationLoading, setActivationLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [activationStatus, setActivationStatus] =
+    useState<ActivationStatus | null>(null);
 
   const passwordChecks = useMemo(
     () => ({
@@ -90,7 +105,8 @@ export function AuthScreen({
     if (path === "/forgot-password") setMode("forgot");
     else if (path === "/reset-password") setMode("reset");
     else if (path === "/verify-email") setMode("verify");
-    else setMode((prev) => (prev === "register" ? "register" : "login"));
+    else
+      setMode((prev) => (prev === "register" || prev === "activation" ? prev : "login"));
   }, [location.pathname]);
 
   useEffect(() => {
@@ -110,6 +126,66 @@ export function AuthScreen({
       .catch((err: any) => setMessage(err?.message || "Verification failed."))
       .finally(() => setVerifyPending(false));
   }, [mode, urlToken]);
+
+  async function checkActivationStatus(prefillEmail?: string) {
+    const targetEmail = (prefillEmail ?? activationEmail).trim();
+    if (!targetEmail) {
+      setMessage("Please enter your registered email first.");
+      return;
+    }
+
+    setMessage("");
+    setActivationLoading(true);
+    try {
+      const result = await api("/auth/account-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: targetEmail }),
+      });
+      setActivationEmail(targetEmail);
+      setActivationStatus(result);
+      if (!result.found) {
+        setMessage("No account was found for that email.");
+      }
+    } catch (err) {
+      setActivationStatus(null);
+      if ((err as any).status === 404) {
+        setMessage(
+          "The account status service is currently unavailable. Please try again later.",
+        );
+      } else {
+        setMessage((err as Error).message);
+      }
+    } finally {
+      setActivationLoading(false);
+    }
+  }
+
+  async function resendVerification(targetEmail?: string) {
+    const emailToUse = (targetEmail ?? activationEmail).trim();
+    if (!emailToUse) {
+      setMessage("Enter your email first so we know where to send the verification link.");
+      return;
+    }
+
+    setMessage("");
+    setResendLoading(true);
+    try {
+      await api("/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: emailToUse }),
+      });
+      setMessage(
+        "If your account exists and is still unverified, a new verification email has been sent.",
+      );
+      await checkActivationStatus(emailToUse);
+    } catch (err) {
+      setMessage((err as Error).message);
+    } finally {
+      setResendLoading(false);
+    }
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -175,7 +251,9 @@ export function AuthScreen({
           }),
         });
         navigate("/");
-        setMode("login");
+        setActivationEmail(email.trim().toLowerCase());
+        setActivationStatus(null);
+        setMode("activation");
         setPassword("");
         setConfirmPassword("");
         setMessage(
@@ -183,6 +261,7 @@ export function AuthScreen({
             ? "Registration submitted. Please verify your email. Instructor accounts also require admin approval before login."
             : "Registration successful. Please verify your email before signing in.",
         );
+        await checkActivationStatus(email.trim().toLowerCase());
         return;
       }
 
@@ -395,11 +474,12 @@ export function AuthScreen({
           <div className="w-full max-w-md">
             <div className="mb-6">
               <h2 className="font-headline text-3xl font-bold text-primary mb-2">
-                Portal Access
+                {mode === "activation" ? "Account Activation" : "Portal Access"}
               </h2>
               <p className="text-on-surface-variant font-body">
-                Please provide your institutional credentials to enter your
-                learning space.
+                {mode === "activation"
+                  ? "Check verification progress, review your account status, and resend activation mail from one place."
+                  : "Please provide your institutional credentials to enter your learning space."}
               </p>
             </div>
             {message && (
@@ -443,7 +523,7 @@ export function AuthScreen({
               </div>
             )}
             {(mode === "login" || mode === "register") && (
-              <div className="flex gap-2 mb-6 bg-surface-container-low rounded-lg p-1">
+              <div className="grid grid-cols-2 gap-2 mb-6 bg-surface-container-low rounded-lg p-1">
                 <button
                   type="button"
                   onClick={() => {
@@ -466,14 +546,16 @@ export function AuthScreen({
                 </button>
               </div>
             )}
-            {(mode === "forgot" || mode === "reset" || mode === "verify") && (
+            {(mode === "forgot" || mode === "reset" || mode === "verify" || mode === "activation") && (
               <div className="mb-6 flex items-center justify-between gap-3">
                 <h2 className="font-headline text-xl font-bold text-primary">
                   {mode === "forgot"
                     ? "Forgot Password"
                     : mode === "reset"
                       ? "Reset Password"
-                      : "Verify Email"}
+                      : mode === "verify"
+                        ? "Verify Email"
+                        : "Activation Center"}
                 </h2>
                 <button
                   type="button"
@@ -487,10 +569,36 @@ export function AuthScreen({
                 </button>
               </div>
             )}
-            <form
-              onSubmit={onSubmit}
-              className="space-y-4 pt-4 border-t-2 border-secondary"
-            >
+            {mode === "activation" ? (
+              <AccountActivationPanel
+                email={activationEmail}
+                signInEmail={email}
+                status={activationStatus}
+                loading={activationLoading}
+                resendLoading={resendLoading}
+                onEmailChange={setActivationEmail}
+                onUseSignInEmail={() =>
+                  setActivationEmail(email.trim().toLowerCase())
+                }
+                onClear={() => {
+                  setActivationStatus(null);
+                  setMessage("");
+                  setActivationEmail("");
+                }}
+                onCheckStatus={() => {
+                  void checkActivationStatus();
+                }}
+                onResend={() => {
+                  void resendVerification();
+                }}
+              />
+            ) : (
+              <form
+                onSubmit={(e) => {
+                  void onSubmit(e);
+                }}
+                className="space-y-4 pt-4 border-t-2 border-secondary"
+              >
               {mode === "verify" && (
                 <div className="rounded-lg border border-outline-variant/20 bg-surface-container-low p-4">
                   <div className="flex items-start gap-3">
@@ -768,37 +876,10 @@ export function AuthScreen({
                       <span className="uppercase">Create Account</span>
                     )}
                   </button>
-
-                  {mode === "login" && (
-                    <button
-                      type="button"
-                      disabled={!email.trim() || isSubmitting}
-                      onClick={async () => {
-                        setMessage("");
-                        try {
-                          setIsSubmitting(true);
-                          await api("/auth/resend-verification", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ email }),
-                          });
-                          setMessage(
-                            "If your account exists and is unverified, a new verification email has been sent.",
-                          );
-                        } catch (err) {
-                          setMessage((err as Error).message);
-                        } finally {
-                          setIsSubmitting(false);
-                        }
-                      }}
-                      className="w-full py-3 border border-outline-variant/30 rounded-md font-label font-bold text-xs tracking-widest text-secondary hover:text-primary hover:bg-surface-container transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                    >
-                      Resend verification email
-                    </button>
-                  )}
                 </div>
               )}
-            </form>
+              </form>
+            )}
             {mode === "login" && (
               <div className="mt-5 pt-4 border-t border-surface-container text-center">
                 <button
@@ -817,12 +898,22 @@ export function AuthScreen({
               <div className="grid grid-cols-2 gap-3 text-center">
                 <a
                   href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/");
+                    setActivationEmail((prev) => prev || email.trim().toLowerCase());
+                    setMode("activation");
+                  }}
                   className="px-6 py-2 border border-outline-variant text-primary font-label text-xs font-extrabold tracking-tight rounded hover:bg-surface-container transition-colors"
                 >
                   ACCOUNT ACTIVATION
                 </a>
                 <a
                   href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowEnrollmentInfo(true);
+                  }}
                   className="px-6 py-2 bg-secondary-container text-on-secondary-container font-label text-xs font-extrabold tracking-tight rounded hover:opacity-90 transition-opacity"
                 >
                   ENROLLMENT INFO
@@ -876,6 +967,10 @@ export function AuthScreen({
           </div>
         </div>
       )}
+      <EnrollmentInfoModal
+        open={showEnrollmentInfo}
+        onClose={() => setShowEnrollmentInfo(false)}
+      />
     </main>
   );
 }

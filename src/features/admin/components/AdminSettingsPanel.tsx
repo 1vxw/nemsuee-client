@@ -10,6 +10,11 @@ export function AdminSettingsPanel(props: {
   const [loading, setLoading] = useState(false);
   const [activePeriod, setActivePeriod] = useState<"1" | "2">("1");
   const [hideLmsSisFeatures, setHideLmsSisFeatures] = useState(false);
+  const [securityEnabled, setSecurityEnabled] = useState(false);
+  const [hasApiKey, setHasApiKey] = useState(false);
+  const [apiKeyPreview, setApiKeyPreview] = useState<string | null>(null);
+  const [apiKeyRotatedAt, setApiKeyRotatedAt] = useState<string | null>(null);
+  const [newApiKey, setNewApiKey] = useState<string | null>(null);
 
   function extractSettings(payload: any) {
     if (payload && typeof payload === "object" && payload.settings && typeof payload.settings === "object") {
@@ -29,6 +34,17 @@ export function AdminSettingsPanel(props: {
       const settings = extractSettings(data);
       setActivePeriod(String(settings.active_period || "1") === "2" ? "2" : "1");
       setHideLmsSisFeatures(Boolean(settings.hide_lms_sis_features));
+      const apiSecurity = settings.api_security || {};
+      setSecurityEnabled(Boolean(apiSecurity.enabled));
+      setHasApiKey(Boolean(apiSecurity.has_key));
+      setApiKeyPreview(
+        typeof apiSecurity.key_preview === "string" ? apiSecurity.key_preview : null,
+      );
+      setApiKeyRotatedAt(
+        typeof apiSecurity.key_last_rotated_at === "string"
+          ? apiSecurity.key_last_rotated_at
+          : null,
+      );
     } catch (e) {
       setMessage((e as Error).message);
     } finally {
@@ -148,6 +164,119 @@ export function AdminSettingsPanel(props: {
             Hides Grades sections/tabs and identity UI for instructor/student.
           </span>
         </div>
+      </div>
+      <div className="mb-3 rounded-md border border-slate-200 bg-slate-50 p-3">
+        <p className="mb-2 text-sm font-semibold text-slate-900">
+          API Security Gate
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setSecurityEnabled((value) => !value)}
+            className={`rounded-md border px-3 py-2 text-sm font-medium ${
+              securityEnabled
+                ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                : "border-slate-300 bg-white text-slate-700"
+            }`}
+          >
+            {securityEnabled ? "Enabled" : "Disabled"}
+          </button>
+          <button
+            onClick={async () => {
+              try {
+                await api("/admin/settings/security", {
+                  method: "PATCH",
+                  headers,
+                  body: JSON.stringify({ enabled: securityEnabled }),
+                });
+                setMessage(
+                  securityEnabled
+                    ? "API security gate enabled."
+                    : "API security gate disabled.",
+                );
+                await loadSettings();
+              } catch (e) {
+                setMessage(`Failed to update API security gate: ${(e as Error).message}`);
+              }
+            }}
+            disabled={loading}
+            data-keep-action-text="true"
+            className="inline-flex items-center gap-1.5 rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+          >
+            <span className="material-symbols-outlined text-[1rem]">shield</span>
+            Apply Gate
+          </button>
+          <button
+            onClick={async () => {
+              try {
+                const payload = await api("/admin/settings/security/api-key/rotate", {
+                  method: "POST",
+                  headers,
+                });
+                setNewApiKey(
+                  payload && typeof payload.apiKey === "string" ? payload.apiKey : null,
+                );
+                setMessage(
+                  "New API key generated. Copy it now because it will not be shown again.",
+                );
+                await loadSettings();
+              } catch (e) {
+                setMessage(`Failed to rotate API key: ${(e as Error).message}`);
+              }
+            }}
+            disabled={loading}
+            data-keep-action-text="true"
+            className="inline-flex items-center gap-1.5 rounded-md bg-amber-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+          >
+            <span className="material-symbols-outlined text-[1rem]">key</span>
+            Rotate Key
+          </button>
+          <button
+            onClick={async () => {
+              if (!confirm("Revoke the current API key? Existing external clients will stop working.")) {
+                return;
+              }
+              try {
+                await api("/admin/settings/security/api-key/revoke", {
+                  method: "POST",
+                  headers,
+                });
+                setNewApiKey(null);
+                setMessage("API key revoked.");
+                await loadSettings();
+              } catch (e) {
+                setMessage(`Failed to revoke API key: ${(e as Error).message}`);
+              }
+            }}
+            disabled={loading || !hasApiKey}
+            data-keep-action-text="true"
+            className="inline-flex items-center gap-1.5 rounded-md bg-rose-700 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+          >
+            <span className="material-symbols-outlined text-[1rem]">block</span>
+            Revoke Key
+          </button>
+        </div>
+        <div className="mt-2 text-xs text-slate-500">
+          <p>
+            Current key: {hasApiKey ? apiKeyPreview || "Configured" : "Not configured"}
+          </p>
+          <p>
+            Last rotated: {apiKeyRotatedAt ? new Date(apiKeyRotatedAt).toLocaleString() : "--"}
+          </p>
+          <p>
+            Requests are allowed if they come from the trusted website origin or send a valid
+            <code className="ml-1 rounded bg-slate-200 px-1 py-0.5">x-api-key</code>.
+          </p>
+        </div>
+        {newApiKey && (
+          <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3">
+            <p className="mb-1 text-xs font-semibold text-amber-800">
+              New API key (shown once)
+            </p>
+            <code className="block break-all rounded bg-white px-2 py-1 text-[11px] text-slate-900">
+              {newApiKey}
+            </code>
+          </div>
+        )}
       </div>
       <textarea
         value={jsonValue}

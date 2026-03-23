@@ -42,8 +42,10 @@ export function Sidebar({
 }) {
   const [coursesOpen, setCoursesOpen] = useState(true);
   const [myBlocksOpen, setMyBlocksOpen] = useState(true);
+  const [showAllMyBlocks, setShowAllMyBlocks] = useState(false);
   const items = menu(user.role, { hideLmsSisFeatures });
   const hideIdentity = hideLmsSisFeatures && (user.role === "INSTRUCTOR" || user.role === "STUDENT");
+  const visibleBlocks = showAllMyBlocks ? teachingBlocks : teachingBlocks.slice(0, 5);
 
   return (
     <aside className="rounded-xl bg-surface-container-low p-6 shadow-sm border border-outline-variant/20">
@@ -161,9 +163,6 @@ export function Sidebar({
                   <span className="material-symbols-outlined text-lg">school</span>
                   {m.label}
                 </span>
-                <span className="material-symbols-outlined text-base transition-transform" style={{ transform: coursesOpen ? "rotate(90deg)" : "rotate(0deg)" }}>
-                  chevron_right
-                </span>
               </button>
               {coursesOpen && (
                 <div className="mt-1 space-y-1 pl-4">
@@ -182,7 +181,7 @@ export function Sidebar({
                           chevron_right
                         </span>
                       </button>
-                      {myBlocksOpen && teachingBlocks.map((block) => (
+                      {myBlocksOpen && visibleBlocks.map((block) => (
                         <button
                           key={`${block.courseId}-${block.id}`}
                           onClick={() => onOpenTeachingBlock?.(block.courseId, block.id)}
@@ -197,6 +196,14 @@ export function Sidebar({
                           <span className="block truncate text-[10px] text-on-surface-variant font-label">{block.name}</span>
                         </button>
                       ))}
+                      {myBlocksOpen && teachingBlocks.length > 5 && (
+                        <button
+                          onClick={() => setShowAllMyBlocks(!showAllMyBlocks)}
+                          className="w-full rounded-md px-3 py-2 text-left text-xs font-body transition-colors text-secondary hover:bg-surface-container"
+                        >
+                          {showAllMyBlocks ? "Show Less" : "Show More..."}
+                        </button>
+                      )}
                     </>
                   ) : courses.length ? (
                     courses.map((course) => (

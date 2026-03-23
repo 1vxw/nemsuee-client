@@ -201,9 +201,11 @@ export function InstructorDashboard(props: DashboardProps) {
       .slice(0, 6);
   }, [attempts]);
 
+  const [showAllCourses, setShowAllCourses] = useState(false);
   const firstName = user.fullName.split(" ")[0] || "Professor";
 
   const activeCourses = courses;
+  const visibleCourses = showAllCourses ? activeCourses : activeCourses.slice(0, 3);
 
   return (
     <section className="space-y-4 sm:space-y-6 md:space-y-7">
@@ -252,16 +254,20 @@ export function InstructorDashboard(props: DashboardProps) {
           <h2 className="font-headline text-lg sm:text-xl font-bold text-primary">
             Active Courses
           </h2>
-          <button
-            onClick={() => onNavigate("course_catalog")}
-            className="text-primary font-semibold flex items-center gap-1 hover:underline text-xs sm:text-sm"
-          >
-            View All Catalogs
-            <span className="material-symbols-outlined text-sm">chevron_right</span>
-          </button>
+          {activeCourses.length > 3 && (
+            <button
+              onClick={() => setShowAllCourses(!showAllCourses)}
+              className="text-primary font-semibold flex items-center gap-1 hover:underline text-xs sm:text-sm"
+            >
+              {showAllCourses ? "Show Less" : "Show More"}
+              <span className="material-symbols-outlined text-sm">
+                {showAllCourses ? "expand_less" : "expand_more"}
+              </span>
+            </button>
+          )}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
-          {activeCourses.map((course, idx) => {
+          {visibleCourses.map((course, idx) => {
             const stats = courseStats.get(course.id) || {
               enrolled: 0,
               avgGrade: 0,
