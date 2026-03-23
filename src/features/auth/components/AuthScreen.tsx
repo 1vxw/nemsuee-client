@@ -919,6 +919,20 @@ export function AuthScreen({
               </div>
             </div>
             <div className="mt-8 text-center">
+              <div className="mb-3 flex items-center justify-center gap-4">
+                <a
+                  href="/privacy-policy"
+                  className="font-label text-[11px] font-semibold text-on-surface-variant underline-offset-2 hover:text-primary hover:underline"
+                >
+                  Privacy Policy
+                </a>
+                <a
+                  href="/terms-of-service"
+                  className="font-label text-[11px] font-semibold text-on-surface-variant underline-offset-2 hover:text-primary hover:underline"
+                >
+                  Terms of Service
+                </a>
+              </div>
               <p className="font-label text-[10px] uppercase tracking-widest text-outline">
                 © {new Date().getFullYear()} North Eastern Mindanao State
                 University. All rights reserved.

@@ -12,6 +12,7 @@ import type {
 } from "./shared/types/lms";
 import logo from "./assets/logo-optimized.png";
 import { AuthScreen } from "./features/auth/components/AuthScreen";
+import { LegalDocumentPage } from "./features/legal/pages/LegalDocumentPage";
 import { Profile, SettingsPanel, Sidebar } from "./app/layout/Ui";
 import type { UserPreferences } from "./app/layout/Ui";
 import { Analytics } from "@vercel/analytics/react";
@@ -111,6 +112,12 @@ export default function App() {
   const { api, headers } = useApi();
   const location = useLocation();
   const navigate = useNavigate();
+  const legalSlug =
+    location.pathname === "/privacy-policy"
+      ? "privacy-policy"
+      : location.pathname === "/terms-of-service"
+        ? "terms-of-service"
+        : null;
   const selectedCourseIdRef = useRef<number | null>(selectedCourseId);
   const {
     notifications,
@@ -308,6 +315,12 @@ export default function App() {
       setSelectedCourseId(Number(courseMatch[1]));
     }
   }, [location.pathname, gradesHiddenForUi, navigate]);
+
+  if (legalSlug) {
+    return (
+      <LegalDocumentPage slug={legalSlug} isAuthenticated={Boolean(user)} />
+    );
+  }
 
   if (!user) {
     return (
