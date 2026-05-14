@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useApi } from "./shared/hooks/useApi";
 import { useActionIconizer } from "./shared/hooks/useActionIconizer";
 import { useNotifications } from "./shared/hooks/useNotifications";
+import type { UserPreferences } from "./app/layout/Ui";
 import type {
   Attempt,
   Course,
@@ -14,7 +15,6 @@ import logo from "./assets/logo-optimized.png";
 import { AuthScreen } from "./features/auth/components/AuthScreen";
 import { LegalDocumentPage } from "./features/legal/pages/LegalDocumentPage";
 import { Profile, SettingsPanel, Sidebar } from "./app/layout/Ui";
-import type { UserPreferences } from "./app/layout/Ui";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 

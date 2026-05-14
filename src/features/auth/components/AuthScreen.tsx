@@ -86,7 +86,6 @@ export function AuthScreen({
       text.includes("failed") ||
       text.includes("forbidden") ||
       text.includes("missing") ||
-      text.includes("required") ||
       text.includes("rejected") ||
       text.includes("not found") ||
       text.includes("cannot") ||

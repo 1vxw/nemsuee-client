@@ -11,6 +11,7 @@ import {
   CreateOfferingModal,
 } from "./management/OfferingModals";
 import { InstructorManagementSection } from "./management/InstructorManagementSection";
+import { RegisteredInstructorsSection } from "./management/RegisteredInstructorsSection";
 import { SummaryMetrics } from "./management/SummaryMetrics";
 import { CreateTermModal, EditTermModal } from "./management/TermModals";
 import { AcademicWorkflowTreeCard } from "../../academic/components/AcademicWorkflowTreeCard";
@@ -34,6 +35,7 @@ type AdminTabKey =
   | "terms"
   | "offerings"
   | "instructors"
+  | "registered_instructors"
   | "catalog"
   | "courseConfig"
   | "blocks"
@@ -608,6 +610,11 @@ export function AdminBlocksHub(props: {
             { key: "terms", label: "Terms", icon: "calendar_month" },
             { key: "offerings", label: "Offerings", icon: "library_books" },
             { key: "instructors", label: "Instructors", icon: "groups" },
+            {
+              key: "registered_instructors",
+              label: "Registered",
+              icon: "badge",
+            },
             { key: "catalog", label: "Catalog", icon: "menu_book" },
             { key: "courseConfig", label: "Course Config", icon: "tune" },
             { key: "blocks", label: "Blocks", icon: "view_module" },
@@ -702,6 +709,15 @@ export function AdminBlocksHub(props: {
             onRefresh={loadApplications}
             onApprove={(userId) => handleApplicationDecision(userId, "APPROVED")}
             onReject={(userId) => handleApplicationDecision(userId, "REJECTED")}
+          />
+        </article>
+      )}
+
+      {activeTab === "registered_instructors" && (
+        <article className="rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-4">
+          <RegisteredInstructorsSection
+            instructors={instructors}
+            onRefresh={loadInstructors}
           />
         </article>
       )}
